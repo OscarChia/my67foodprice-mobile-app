@@ -11,6 +11,12 @@ class TrendPage extends StatefulWidget {
 }
 
 class _TrendPageState extends State<TrendPage> {
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
+  static const Color lightGreen = Color(0xFFEAF4EF);
+  static const Color textColor = Color(0xFF1F2924);
+
   final supabase = Supabase.instance.client;
 
   bool isLoading = true;
@@ -37,18 +43,9 @@ class _TrendPageState extends State<TrendPage> {
     loadInitialData();
   }
 
-  // =========================================================
-  // INITIAL
-  // =========================================================
-
   Future<void> loadInitialData() async {
     await loadFoodItemsWithPrices();
   }
-
-  // =========================================================
-  // FOOD ITEMS
-  // Only food that has price records
-  // =========================================================
 
   Future<void> loadFoodItemsWithPrices() async {
     try {
@@ -70,7 +67,9 @@ class _TrendPageState extends State<TrendPage> {
           .toSet();
 
       if (itemCodeSet.isEmpty) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(() {
           foodItems = [];
@@ -85,25 +84,18 @@ class _TrendPageState extends State<TrendPage> {
 
       final itemCodes = itemCodeSet.toList();
 
-      final List<Map<String, dynamic>>
-      allFoodItems = [];
+      final List<Map<String, dynamic>> allFoodItems = [];
 
       const batchSize = 200;
 
       for (
-      int i = 0;
-      i < itemCodes.length;
-      i += batchSize
-      ) {
+      int i = 0; i < itemCodes.length; i += batchSize) {
         final end =
         i + batchSize < itemCodes.length
             ? i + batchSize
             : itemCodes.length;
 
-        final batch = itemCodes.sublist(
-          i,
-          end,
-        );
+        final batch = itemCodes.sublist(i, end,);
 
         final data = await supabase
             .from('food_items')
@@ -124,30 +116,24 @@ class _TrendPageState extends State<TrendPage> {
 
       allFoodItems.sort(
             (a, b) {
-          final nameA =
-              a['item']
-                  ?.toString()
-                  .toUpperCase() ??
-                  '';
+          final nameA = a['item']?.toString().toUpperCase() ?? '';
+          final nameB = b['item']?.toString().toUpperCase() ?? '';
 
-          final nameB =
-              b['item']
-                  ?.toString()
-                  .toUpperCase() ??
-                  '';
-
-          return nameA.compareTo(nameB);
+          return nameA.compareTo(
+            nameB,
+          );
         },
       );
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         foodItems = allFoodItems;
 
         if (foodItems.isNotEmpty) {
-          selectedItemCode =
-          foodItems.first['item_code'];
+          selectedItemCode = foodItems.first['item_code'];
         } else {
           selectedItemCode = null;
         }
@@ -162,7 +148,9 @@ class _TrendPageState extends State<TrendPage> {
         });
       }
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         isLoading = false;
@@ -173,10 +161,6 @@ class _TrendPageState extends State<TrendPage> {
       );
     }
   }
-
-  // =========================================================
-  // TREND
-  // =========================================================
 
   Future<void> loadTrendData() async {
     if (selectedItemCode == null) {
@@ -193,21 +177,24 @@ class _TrendPageState extends State<TrendPage> {
 
       if (selectedPeriod == 'Daily') {
         result = await loadDailyTrend();
-      } else if (selectedPeriod ==
-          'Weekly') {
+      } else if (selectedPeriod == 'Weekly') {
         result = await loadWeeklyTrend();
       } else {
         result = await loadMonthlyTrend();
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         trendData = result;
         isLoading = false;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         isLoading = false;
@@ -218,11 +205,6 @@ class _TrendPageState extends State<TrendPage> {
       );
     }
   }
-
-  // =========================================================
-  // DAILY
-  // Latest 15 available dates
-  // =========================================================
 
   Future<List<Map<String, dynamic>>>
   loadDailyTrend() async {
@@ -246,8 +228,7 @@ class _TrendPageState extends State<TrendPage> {
       data,
     ).reversed.toList();
 
-    final List<Map<String, dynamic>>
-    result = [];
+    final List<Map<String, dynamic>> result = [];
 
     for (final row in rows) {
       final date = DateTime.tryParse(
@@ -258,8 +239,7 @@ class _TrendPageState extends State<TrendPage> {
         row['avg_price'].toString(),
       );
 
-      if (date == null ||
-          price == null) {
+      if (date == null || price == null) {
         continue;
       }
 
@@ -273,20 +253,6 @@ class _TrendPageState extends State<TrendPage> {
 
     return result;
   }
-
-  // =========================================================
-  // WEEKLY
-  //
-  // Example:
-  // Jul 1–7
-  // Jul 8–14
-  // Jul 15–21
-  // Jul 22–28
-  // Jul 29–31
-  // Aug 1–7
-  // Aug 8–14
-  // Aug 15
-  // =========================================================
 
   Future<List<Map<String, dynamic>>>
   loadWeeklyTrend() async {
@@ -313,8 +279,7 @@ class _TrendPageState extends State<TrendPage> {
       data,
     );
 
-    final List<Map<String, dynamic>>
-    result = [];
+    final List<Map<String, dynamic>> result = [];
 
     for (final row in rows) {
       final startDate =
@@ -340,8 +305,7 @@ class _TrendPageState extends State<TrendPage> {
 
       String label;
 
-      if (startDate.day ==
-          endDate.day) {
+      if (startDate.day == endDate.day) {
         label =
         '${monthName(startDate.month)} ${startDate.day}';
       } else {
@@ -357,7 +321,6 @@ class _TrendPageState extends State<TrendPage> {
       });
     }
 
-    // Latest 8 weekly periods
     if (result.length > 8) {
       return result.sublist(
         result.length - 8,
@@ -366,13 +329,6 @@ class _TrendPageState extends State<TrendPage> {
 
     return result;
   }
-
-  // =========================================================
-  // MONTHLY
-  //
-  // Jul 2026
-  // Aug 2026
-  // =========================================================
 
   Future<List<Map<String, dynamic>>>
   loadMonthlyTrend() async {
@@ -395,21 +351,18 @@ class _TrendPageState extends State<TrendPage> {
       data,
     );
 
-    final List<Map<String, dynamic>>
-    result = [];
+    final List<Map<String, dynamic>> result = [];
 
     for (final row in rows) {
       final date = DateTime.tryParse(
         row['month'].toString(),
       );
 
-      final price =
-      double.tryParse(
+      final price = double.tryParse(
         row['avg_price'].toString(),
       );
 
-      if (date == null ||
-          price == null) {
+      if (date == null || price == null) {
         continue;
       }
 
@@ -424,23 +377,16 @@ class _TrendPageState extends State<TrendPage> {
     return result;
   }
 
-  // =========================================================
-  // ALL ITEMS THIS MONTH
-  //
-  // Latest month vs previous month
-  // Example:
-  // August vs July
-  // =========================================================
-
   Future<void> loadMonthlyItems() async {
     try {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         isMonthlyLoading = true;
       });
 
-      // Find latest month
       final latestData = await supabase
           .from('monthly_food_price_summary')
           .select('month')
@@ -451,7 +397,9 @@ class _TrendPageState extends State<TrendPage> {
           .limit(1);
 
       if (latestData.isEmpty) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(() {
           monthlyItems = [];
@@ -463,12 +411,13 @@ class _TrendPageState extends State<TrendPage> {
 
       final latestMonth =
       DateTime.tryParse(
-        latestData.first['month']
-            .toString(),
+        latestData.first['month'].toString(),
       );
 
       if (latestMonth == null) {
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(() {
           monthlyItems = [];
@@ -492,9 +441,8 @@ class _TrendPageState extends State<TrendPage> {
           '${previousMonth.year}-'
           '${two(previousMonth.month)}-01';
 
-      // Current month
       final currentData = await supabase
-        .from('monthly_food_price_summary')
+          .from('monthly_food_price_summary')
           .select(
         'item_code, avg_price',
       )
@@ -503,9 +451,8 @@ class _TrendPageState extends State<TrendPage> {
         latestMonthText,
       );
 
-      // Previous month
       final previousData = await supabase
-        .from('monthly_food_price_summary')
+          .from('monthly_food_price_summary')
           .select(
         'item_code, avg_price',
       )
@@ -524,11 +471,8 @@ class _TrendPageState extends State<TrendPage> {
         previousData,
       );
 
-      final Map<dynamic, double>
-      currentPrices = {};
-
-      final Map<dynamic, double>
-      previousPrices = {};
+      final Map<dynamic, double> currentPrices = {};
+      final Map<dynamic, double> previousPrices = {};
 
       for (final row in currentRows) {
         final code = row['item_code'];
@@ -538,10 +482,8 @@ class _TrendPageState extends State<TrendPage> {
           row['avg_price'].toString(),
         );
 
-        if (code != null &&
-            price != null) {
-          currentPrices[code] =
-              price;
+        if (code != null && price != null) {
+          currentPrices[code] = price;
         }
       }
 
@@ -553,17 +495,13 @@ class _TrendPageState extends State<TrendPage> {
           row['avg_price'].toString(),
         );
 
-        if (code != null &&
-            price != null) {
-          previousPrices[code] =
-              price;
+        if (code != null && price != null) {
+          previousPrices[code] = price;
         }
       }
 
-      final List<Map<String, dynamic>>
-      itemsToShow = [];
+      final List<Map<String, dynamic>> itemsToShow = [];
 
-      // Selected item first
       if (selectedItemCode != null) {
         for (final item in foodItems) {
           if (item['item_code'] ==
@@ -577,35 +515,28 @@ class _TrendPageState extends State<TrendPage> {
         }
       }
 
-      // Another items until total 8
       for (final item in foodItems) {
         if (itemsToShow.length >= 8) {
           break;
         }
 
-        final code =
-        item['item_code'];
+        final code = item['item_code'];
 
-        if (code ==
-            selectedItemCode) {
+        if (code == selectedItemCode) {
           continue;
         }
 
-        if (!currentPrices.containsKey(
-          code,
-        )) {
+        if (!currentPrices.containsKey(code)) {
           continue;
         }
 
         itemsToShow.add(item);
       }
 
-      final List<Map<String, dynamic>>
-      result = [];
+      final List<Map<String, dynamic>> result = [];
 
       for (final item in itemsToShow) {
-        final code =
-        item['item_code'];
+        final code = item['item_code'];
 
         final current =
         currentPrices[code];
@@ -636,14 +567,18 @@ class _TrendPageState extends State<TrendPage> {
         });
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         monthlyItems = result;
         isMonthlyLoading = false;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         isMonthlyLoading = false;
@@ -655,14 +590,8 @@ class _TrendPageState extends State<TrendPage> {
     }
   }
 
-  // =========================================================
-  // HELPER
-  // =========================================================
-
   String two(int value) {
-    return value
-        .toString()
-        .padLeft(
+    return value.toString().padLeft(
       2,
       '0',
     );
@@ -722,10 +651,6 @@ class _TrendPageState extends State<TrendPage> {
     return '';
   }
 
-  // =========================================================
-  // CALCULATIONS
-  // =========================================================
-
   double getCurrentPrice() {
     if (trendData.isEmpty) {
       return 0;
@@ -782,8 +707,7 @@ class _TrendPageState extends State<TrendPage> {
       item['price'] as double;
     }
 
-    return total /
-        trendData.length;
+    return total / trendData.length;
   }
 
   double getNetChange() {
@@ -792,15 +716,13 @@ class _TrendPageState extends State<TrendPage> {
   }
 
   double getPercentageChange() {
-    final start =
-    getStartPrice();
+    final start = getStartPrice();
 
     if (start == 0) {
       return 0;
     }
 
-    return (getNetChange() /
-        start) *
+    return (getNetChange() / start) *
         100;
   }
 
@@ -828,21 +750,31 @@ class _TrendPageState extends State<TrendPage> {
     return 'First Month Avg';
   }
 
-  // =========================================================
-  // HEADER
-  // =========================================================
-
   Widget buildHeader() {
     return Container(
       width: double.infinity,
-      padding:
-      const EdgeInsets.fromLTRB(
-        14,
-        15,
-        14,
-        13,
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        18,
+        20,
+        22,
       ),
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primaryGreen,
+            darkGreen,
+          ],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft:
+          Radius.circular(28),
+          bottomRight:
+          Radius.circular(28),
+        ),
+      ),
       child: const Column(
         crossAxisAlignment:
         CrossAxisAlignment.start,
@@ -851,34 +783,28 @@ class _TrendPageState extends State<TrendPage> {
             children: [
               Icon(
                 Icons.show_chart,
-                color: Colors.teal,
-                size: 22,
+                color: Colors.white,
+                size: 25,
               ),
-              SizedBox(width: 7),
+              SizedBox(width: 9),
               Text(
                 'Price Trends',
                 style: TextStyle(
-                  color:
-                  Color(0xFF202424),
-                  fontSize: 20,
+                  color: Colors.white,
+                  fontSize: 23,
                   fontWeight:
                   FontWeight.bold,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 3),
-          Padding(
-            padding:
-            EdgeInsets.only(
-              left: 29,
-            ),
-            child: Text(
-              'Track how food prices change over time',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 10,
-              ),
+          SizedBox(height: 6),
+          Text(
+            'Track and analyse food price changes over time',
+            style: TextStyle(
+              color:
+              Color(0xFFDCEDE6),
+              fontSize: 11,
             ),
           ),
         ],
@@ -886,121 +812,160 @@ class _TrendPageState extends State<TrendPage> {
     );
   }
 
-  // =========================================================
-  // FOOD SELECTOR
-  // =========================================================
-
   Widget buildFoodSelector() {
     return Container(
-      margin:
-      const EdgeInsets.fromLTRB(
-        14,
-        14,
-        14,
+      margin: const EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
         0,
       ),
-      padding:
-      const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(16),
-      ),
-      child:
-      DropdownButtonFormField<int>(
-        value: selectedItemCode,
-        isExpanded: true,
-        menuMaxHeight: 350,
-        decoration: InputDecoration(
-          labelText: 'Food Item',
-          prefixIcon:
-          const Icon(
-            Icons.restaurant_menu,
-            color: Colors.teal,
-            size: 20,
-          ),
-          filled: true,
-          fillColor:
-          const Color(
-            0xFFF4F7F6,
-          ),
-          contentPadding:
-          const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 13,
-          ),
-          border:
-          OutlineInputBorder(
-            borderRadius:
-            BorderRadius.circular(
-              14,
-            ),
-            borderSide:
-            BorderSide.none,
-          ),
+        BorderRadius.circular(18),
+        border: Border.all(
+          color:
+          const Color(0xFFE3E9E6),
         ),
-        items:
-        foodItems.map(
-              (item) {
-            return DropdownMenuItem<int>(
-              value:
-              item['item_code'],
-              child: Text(
-                '${item['item'] ?? ''} '
-                    '(${item['unit'] ?? ''})',
-                maxLines: 1,
-                overflow:
-                TextOverflow.ellipsis,
-                style:
-                const TextStyle(
-                  fontSize: 11,
+      ),
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Select Food Item',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight:
+              FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 10),
+          DropdownButtonFormField<int>(
+            initialValue:
+            selectedItemCode,
+            isExpanded: true,
+            menuMaxHeight: 350,
+            decoration:
+            InputDecoration(
+              prefixIcon:
+              const Icon(
+                Icons.restaurant_menu,
+                color:
+                primaryGreen,
+                size: 20,
+              ),
+              filled: true,
+              fillColor:
+              backgroundColor,
+              contentPadding:
+              const EdgeInsets
+                  .symmetric(
+                horizontal: 12,
+                vertical: 14,
+              ),
+              border:
+              OutlineInputBorder(
+                borderRadius:
+                BorderRadius
+                    .circular(14),
+                borderSide:
+                const BorderSide(
+                  color: Color(
+                    0xFFE3E9E6,
+                  ),
                 ),
               ),
-            );
-          },
-        ).toList(),
-        onChanged:
-            (value) async {
-          if (value == null) {
-            return;
-          }
+              enabledBorder:
+              OutlineInputBorder(
+                borderRadius:
+                BorderRadius
+                    .circular(14),
+                borderSide:
+                const BorderSide(
+                  color: Color(
+                    0xFFE3E9E6,
+                  ),
+                ),
+              ),
+              focusedBorder:
+              OutlineInputBorder(
+                borderRadius:
+                BorderRadius
+                    .circular(14),
+                borderSide:
+                const BorderSide(
+                  color:
+                  primaryGreen,
+                ),
+              ),
+            ),
+            items: foodItems.map(
+                  (item) {
+                return DropdownMenuItem<
+                    int>(
+                  value:
+                  item['item_code'],
+                  child: Text(
+                    '${item['item'] ?? ''} '
+                        '(${item['unit'] ?? ''})',
+                    maxLines: 1,
+                    overflow:
+                    TextOverflow
+                        .ellipsis,
+                    style:
+                    const TextStyle(
+                      fontSize: 11,
+                    ),
+                  ),
+                );
+              },
+            ).toList(),
+            onChanged:
+                (value) async {
+              if (value == null) {
+                return;
+              }
 
-          setState(() {
-            selectedItemCode = value;
-            selectedPointIndex = null;
-          });
+              setState(() {
+                selectedItemCode =
+                    value;
+                selectedPointIndex =
+                null;
+              });
 
-          await loadTrendData();
-
-          await loadMonthlyItems();
-        },
+              await loadTrendData();
+              await loadMonthlyItems();
+            },
+          ),
+        ],
       ),
     );
   }
 
-  // =========================================================
-  // PERIOD SELECTOR
-  // =========================================================
-
   Widget buildPeriodSelector() {
     return Container(
-      margin:
-      const EdgeInsets.fromLTRB(
-        14,
+      margin: const EdgeInsets.fromLTRB(
+        16,
         12,
-        14,
+        16,
         0,
       ),
-      padding:
-      const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(14),
+        BorderRadius.circular(16),
+        border: Border.all(
+          color:
+          const Color(0xFFE3E9E6),
+        ),
       ),
       child: Row(
-        children:
-        periods.map(
+        children: periods.map(
               (period) {
             final selected =
                 selectedPeriod ==
@@ -1016,7 +981,6 @@ class _TrendPageState extends State<TrendPage> {
                   setState(() {
                     selectedPeriod =
                         period;
-
                     selectedPointIndex =
                     null;
                   });
@@ -1024,22 +988,24 @@ class _TrendPageState extends State<TrendPage> {
                   loadTrendData();
                 },
                 borderRadius:
-                BorderRadius.circular(
-                  11,
-                ),
+                BorderRadius
+                    .circular(12),
                 child: Container(
                   padding:
-                  const EdgeInsets.symmetric(
-                    vertical: 9,
+                  const EdgeInsets
+                      .symmetric(
+                    vertical: 10,
                   ),
                   decoration:
                   BoxDecoration(
                     color: selected
-                        ? Colors.teal
-                        : Colors.transparent,
+                        ? primaryGreen
+                        : Colors
+                        .transparent,
                     borderRadius:
-                    BorderRadius.circular(
-                      11,
+                    BorderRadius
+                        .circular(
+                      12,
                     ),
                   ),
                   alignment:
@@ -1049,10 +1015,12 @@ class _TrendPageState extends State<TrendPage> {
                     style: TextStyle(
                       color: selected
                           ? Colors.white
-                          : Colors.grey[700],
+                          : Colors
+                          .black54,
                       fontSize: 11,
                       fontWeight:
-                      FontWeight.w600,
+                      FontWeight
+                          .w600,
                     ),
                   ),
                 ),
@@ -1064,10 +1032,6 @@ class _TrendPageState extends State<TrendPage> {
     );
   }
 
-  // =========================================================
-  // TREND CARD
-  // =========================================================
-
   Widget buildTrendCard() {
     final current =
     getCurrentPrice();
@@ -1078,28 +1042,29 @@ class _TrendPageState extends State<TrendPage> {
     final percentage =
     getPercentageChange();
 
-    final isUp =
-        change > 0;
-
-    final isDown =
-        change < 0;
+    final isUp = change > 0;
+    final isDown = change < 0;
 
     return Container(
-      margin:
-      const EdgeInsets.fromLTRB(
-        14,
+      margin: const EdgeInsets.fromLTRB(
+        16,
         12,
-        14,
+        16,
         0,
       ),
-      padding:
-      const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(16),
+        BorderRadius.circular(18),
+        border: Border.all(
+          color:
+          const Color(0xFFE3E9E6),
+        ),
       ),
       child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment:
@@ -1108,98 +1073,148 @@ class _TrendPageState extends State<TrendPage> {
               Expanded(
                 child: Column(
                   crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  CrossAxisAlignment
+                      .start,
                   children: [
                     Text(
                       getSelectedFoodName(),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow:
-                      TextOverflow.ellipsis,
+                      TextOverflow
+                          .ellipsis,
                       style:
                       const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 10,
+                        fontSize: 12,
+                        fontWeight:
+                        FontWeight
+                            .w600,
+                        color:
+                        textColor,
                       ),
                     ),
+
                     const SizedBox(
-                      height: 3,
-                    ),
+                        height: 6),
+
                     Text(
                       'RM ${current.toStringAsFixed(2)}',
                       style:
                       const TextStyle(
                         color:
-                        Color(
-                          0xFF202424,
-                        ),
-                        fontSize: 23,
+                        textColor,
+                        fontSize: 26,
                         fontWeight:
-                        FontWeight.bold,
+                        FontWeight
+                            .bold,
                       ),
                     ),
+
+                    const SizedBox(
+                        height: 2),
+
                     Text(
                       getSelectedFoodUnit(),
                       style:
                       const TextStyle(
-                        color: Colors.grey,
+                        color: Colors
+                            .black45,
                         fontSize: 9,
                       ),
                     ),
                   ],
                 ),
               ),
+
               Column(
                 crossAxisAlignment:
                 CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    '${isUp ? '↗' : isDown ? '↘' : '→'} '
-                        '${percentage > 0 ? '+' : ''}'
-                        '${percentage.toStringAsFixed(1)}%',
-                    style: TextStyle(
+                  Container(
+                    padding:
+                    const EdgeInsets
+                        .symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
+                    decoration:
+                    BoxDecoration(
                       color: isUp
-                          ? Colors.redAccent
+                          ? const Color(
+                        0xFFFFEEEE,
+                      )
                           : isDown
-                          ? Colors.teal
-                          : Colors.grey,
-                      fontSize: 15,
-                      fontWeight:
-                      FontWeight.bold,
+                          ? lightGreen
+                          : backgroundColor,
+                      borderRadius:
+                      BorderRadius
+                          .circular(
+                        12,
+                      ),
+                    ),
+                    child: Text(
+                      '${isUp ? '↗' : isDown ? '↘' : '→'} '
+                          '${percentage > 0 ? '+' : ''}'
+                          '${percentage.toStringAsFixed(1)}%',
+                      style: TextStyle(
+                        color: isUp
+                            ? Colors.red
+                            : isDown
+                            ? primaryGreen
+                            : Colors
+                            .grey,
+                        fontSize: 12,
+                        fontWeight:
+                        FontWeight
+                            .bold,
+                      ),
                     ),
                   ),
+
                   const SizedBox(
-                    height: 3,
-                  ),
+                      height: 5),
+
                   Text(
                     '${change > 0 ? '+' : change < 0 ? '-' : ''}'
                         'RM ${change.abs().toStringAsFixed(2)}',
                     style: TextStyle(
                       color: isUp
-                          ? Colors.redAccent
+                          ? Colors.red
                           : isDown
-                          ? Colors.teal
+                          ? primaryGreen
                           : Colors.grey,
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight:
-                      FontWeight.bold,
+                      FontWeight
+                          .w600,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(
-            height: 12,
+
+          const SizedBox(height: 12),
+
+          Text(
+            '$selectedPeriod Price Trend',
+            style: const TextStyle(
+              fontSize: 10,
+              color: Colors.black45,
+            ),
           ),
+
+          const SizedBox(height: 10),
+
           SizedBox(
-            height: 190,
+            height: 200,
             width: double.infinity,
             child: trendData.isEmpty
                 ? const Center(
               child: Text(
                 'No trend data available',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color:
+                  Colors.grey,
                 ),
               ),
             )
@@ -1216,71 +1231,144 @@ class _TrendPageState extends State<TrendPage> {
               },
             ),
           ),
+
+          if (selectedPointIndex != null &&
+              selectedPointIndex! <
+                  trendData.length)
+            Container(
+              width: double.infinity,
+              margin:
+              const EdgeInsets.only(
+                top: 10,
+              ),
+              padding:
+              const EdgeInsets.all(
+                10,
+              ),
+              decoration: BoxDecoration(
+                color: lightGreen,
+                borderRadius:
+                BorderRadius.circular(
+                  12,
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons
+                        .touch_app_outlined,
+                    color:
+                    primaryGreen,
+                    size: 17,
+                  ),
+
+                  const SizedBox(width: 7),
+
+                  Expanded(
+                    child: Text(
+                      trendData[
+                      selectedPointIndex!]
+                      ['label']
+                          .toString(),
+                      style:
+                      const TextStyle(
+                        fontSize: 10,
+                        fontWeight:
+                        FontWeight
+                            .w600,
+                      ),
+                    ),
+                  ),
+
+                  Text(
+                    'RM ${(trendData[selectedPointIndex!]['price'] as double).toStringAsFixed(2)}',
+                    style:
+                    const TextStyle(
+                      fontSize: 11,
+                      color:
+                      primaryGreen,
+                      fontWeight:
+                      FontWeight
+                          .bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  // =========================================================
-  // SUMMARY
-  // =========================================================
-
   Widget buildSummaryCards() {
     return Padding(
-      padding:
-      const EdgeInsets.fromLTRB(
-        14,
+      padding: const EdgeInsets.fromLTRB(
+        16,
         12,
-        14,
+        16,
         0,
       ),
-      child: GridView.count(
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        physics:
-        const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.8,
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
-          buildSummaryCard(
-            getCurrentLabel(),
-            'RM ${getCurrentPrice().toStringAsFixed(2)}',
-            const Color(
-              0xFF202424,
+          const Text(
+            'Price Summary',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight:
+              FontWeight.w700,
+              color: textColor,
             ),
           ),
-          buildSummaryCard(
-            getStartLabel(),
-            'RM ${getStartPrice().toStringAsFixed(2)}',
-            const Color(
-              0xFF202424,
-            ),
-          ),
-          buildSummaryCard(
-            'Period Low',
-            'RM ${getLowPrice().toStringAsFixed(2)}',
-            Colors.teal,
-          ),
-          buildSummaryCard(
-            'Period High',
-            'RM ${getHighPrice().toStringAsFixed(2)}',
-            Colors.redAccent,
-          ),
-          buildSummaryCard(
-            'Avg (National)',
-            'RM ${getAveragePrice().toStringAsFixed(2)}',
-            Colors.blue,
-          ),
-          buildSummaryCard(
-            'Net Change',
-            '${getNetChange() > 0 ? '+' : getNetChange() < 0 ? '-' : ''}'
-                'RM ${getNetChange().abs().toStringAsFixed(2)}',
-            getNetChange() > 0
-                ? Colors.redAccent
-                : getNetChange() < 0
-                ? Colors.teal
-                : Colors.grey,
+
+          const SizedBox(height: 10),
+
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics:
+            const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 1.8,
+            children: [
+              buildSummaryCard(
+                getCurrentLabel(),
+                'RM ${getCurrentPrice().toStringAsFixed(2)}',
+                textColor,
+              ),
+              buildSummaryCard(
+                getStartLabel(),
+                'RM ${getStartPrice().toStringAsFixed(2)}',
+                textColor,
+              ),
+              buildSummaryCard(
+                'Period Low',
+                'RM ${getLowPrice().toStringAsFixed(2)}',
+                primaryGreen,
+              ),
+              buildSummaryCard(
+                'Period High',
+                'RM ${getHighPrice().toStringAsFixed(2)}',
+                Colors.red,
+              ),
+              buildSummaryCard(
+                'Average Price',
+                'RM ${getAveragePrice().toStringAsFixed(2)}',
+                textColor,
+              ),
+              buildSummaryCard(
+                'Net Change',
+                '${getNetChange() > 0 ? '+' : getNetChange() < 0 ? '-' : ''}'
+                    'RM ${getNetChange().abs().toStringAsFixed(2)}',
+                getNetChange() > 0
+                    ? Colors.red
+                    : getNetChange() < 0
+                    ? primaryGreen
+                    : Colors.grey,
+              ),
+            ],
           ),
         ],
       ),
@@ -1293,12 +1381,15 @@ class _TrendPageState extends State<TrendPage> {
       Color valueColor,
       ) {
     return Container(
-      padding:
-      const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(15),
+        BorderRadius.circular(16),
+        border: Border.all(
+          color:
+          const Color(0xFFE3E9E6),
+        ),
       ),
       child: Column(
         mainAxisAlignment:
@@ -1308,15 +1399,14 @@ class _TrendPageState extends State<TrendPage> {
         children: [
           Text(
             title,
-            style:
-            const TextStyle(
-              color: Colors.grey,
+            style: const TextStyle(
+              color: Colors.black45,
               fontSize: 9,
             ),
           ),
-          const SizedBox(
-            height: 5,
-          ),
+
+          const SizedBox(height: 6),
+
           Text(
             value,
             style: TextStyle(
@@ -1331,25 +1421,23 @@ class _TrendPageState extends State<TrendPage> {
     );
   }
 
-  // =========================================================
-  // ALL ITEMS THIS MONTH UI
-  // =========================================================
-
   Widget buildMonthlyItems() {
     return Container(
-      margin:
-      const EdgeInsets.fromLTRB(
-        14,
+      margin: const EdgeInsets.fromLTRB(
+        16,
         12,
-        14,
+        16,
         20,
       ),
-      padding:
-      const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(16),
+        BorderRadius.circular(18),
+        border: Border.all(
+          color:
+          const Color(0xFFE3E9E6),
+        ),
       ),
       child: Column(
         crossAxisAlignment:
@@ -1359,37 +1447,34 @@ class _TrendPageState extends State<TrendPage> {
             children: [
               Icon(
                 Icons.trending_up,
-                color: Colors.teal,
-                size: 17,
+                color:
+                primaryGreen,
+                size: 18,
               ),
-              SizedBox(width: 6),
+              SizedBox(width: 7),
               Text(
-                'All Items This Month',
+                'Monthly Food Price Changes',
                 style: TextStyle(
-                  color:
-                  Color(
-                    0xFF202424,
-                  ),
-                  fontSize: 13,
+                  color: textColor,
+                  fontSize: 16,
                   fontWeight:
-                  FontWeight.bold,
+                  FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(
-            height: 3,
-          ),
+
+          const SizedBox(height: 4),
+
           const Text(
-            'Compared with previous month',
+            'Latest month compared with previous month',
             style: TextStyle(
-              color: Colors.grey,
-              fontSize: 8,
+              color: Colors.black45,
+              fontSize: 9,
             ),
           ),
-          const SizedBox(
-            height: 12,
-          ),
+
+          const SizedBox(height: 13),
 
           if (isMonthlyLoading)
             const Padding(
@@ -1400,7 +1485,8 @@ class _TrendPageState extends State<TrendPage> {
               child: Center(
                 child:
                 CircularProgressIndicator(
-                  color: Colors.teal,
+                  color:
+                  primaryGreen,
                   strokeWidth: 2,
                 ),
               ),
@@ -1417,7 +1503,8 @@ class _TrendPageState extends State<TrendPage> {
                 child: Text(
                   'No monthly item data available',
                   style: TextStyle(
-                    color: Colors.grey,
+                    color:
+                    Colors.grey,
                     fontSize: 10,
                   ),
                 ),
@@ -1443,41 +1530,43 @@ class _TrendPageState extends State<TrendPage> {
 
                 return Padding(
                   padding:
-                  const EdgeInsets.only(
-                    bottom: 10,
+                  const EdgeInsets
+                      .only(
+                    bottom: 11,
                   ),
                   child: Row(
                     children: [
                       Container(
-                        width: 34,
-                        height: 34,
+                        width: 38,
+                        height: 38,
                         decoration:
                         BoxDecoration(
                           color:
-                          const Color(
-                            0xFFE8F7F3,
-                          ),
+                          lightGreen,
                           borderRadius:
-                          BorderRadius.circular(
-                            10,
+                          BorderRadius
+                              .circular(
+                            11,
                           ),
                         ),
                         child:
                         const Icon(
-                          Icons.restaurant_menu,
-                          color: Colors.teal,
-                          size: 17,
+                          Icons
+                              .restaurant_menu,
+                          color:
+                          primaryGreen,
+                          size: 18,
                         ),
                       ),
 
                       const SizedBox(
-                        width: 9,
-                      ),
+                          width: 10),
 
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          CrossAxisAlignment
+                              .start,
                           children: [
                             Text(
                               item['item']
@@ -1485,25 +1574,30 @@ class _TrendPageState extends State<TrendPage> {
                                   '',
                               maxLines: 1,
                               overflow:
-                              TextOverflow.ellipsis,
+                              TextOverflow
+                                  .ellipsis,
                               style:
                               const TextStyle(
                                 color:
-                                Color(
-                                  0xFF202424,
-                                ),
+                                textColor,
                                 fontSize: 10,
                                 fontWeight:
-                                FontWeight.w600,
+                                FontWeight
+                                    .w600,
                               ),
                             ),
+
+                            const SizedBox(
+                                height: 2),
+
                             Text(
                               item['unit']
                                   ?.toString() ??
                                   '',
                               style:
                               const TextStyle(
-                                color: Colors.grey,
+                                color: Colors
+                                    .black45,
                                 fontSize: 8,
                               ),
                             ),
@@ -1517,22 +1611,22 @@ class _TrendPageState extends State<TrendPage> {
                             '${change.toStringAsFixed(1)}%',
                         style: TextStyle(
                           color: isUp
-                              ? Colors.redAccent
+                              ? Colors.red
                               : isDown
-                              ? Colors.teal
+                              ? primaryGreen
                               : Colors.grey,
                           fontSize: 9,
                           fontWeight:
-                          FontWeight.bold,
+                          FontWeight
+                              .bold,
                         ),
                       ),
 
                       const SizedBox(
-                        width: 10,
-                      ),
+                          width: 10),
 
                       SizedBox(
-                        width: 58,
+                        width: 60,
                         child: Text(
                           'RM ${price.toStringAsFixed(2)}',
                           textAlign:
@@ -1540,12 +1634,11 @@ class _TrendPageState extends State<TrendPage> {
                           style:
                           const TextStyle(
                             color:
-                            Color(
-                              0xFF202424,
-                            ),
+                            textColor,
                             fontSize: 9,
                             fontWeight:
-                            FontWeight.w600,
+                            FontWeight
+                                .w600,
                           ),
                         ),
                       ),
@@ -1558,10 +1651,6 @@ class _TrendPageState extends State<TrendPage> {
       ),
     );
   }
-
-  // =========================================================
-  // MESSAGE
-  // =========================================================
 
   void showMessage(
       String message,
@@ -1576,19 +1665,13 @@ class _TrendPageState extends State<TrendPage> {
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        content:
-        Text(message),
-        duration:
-        const Duration(
+        content: Text(message),
+        duration: const Duration(
           seconds: 2,
         ),
       ),
     );
   }
-
-  // =========================================================
-  // BUILD
-  // =========================================================
 
   @override
   Widget build(
@@ -1596,9 +1679,7 @@ class _TrendPageState extends State<TrendPage> {
       ) {
     return Scaffold(
       backgroundColor:
-      const Color(
-        0xFFF6F8F8,
-      ),
+      backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -1610,18 +1691,35 @@ class _TrendPageState extends State<TrendPage> {
                 child:
                 CircularProgressIndicator(
                   color:
-                  Colors.teal,
+                  primaryGreen,
                 ),
               )
-                  : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    buildFoodSelector(),
-                    buildPeriodSelector(),
-                    buildTrendCard(),
-                    buildSummaryCards(),
-                    buildMonthlyItems(),
-                  ],
+                  : foodItems.isEmpty
+                  ? const Center(
+                child: Text(
+                  'No trend data available',
+                ),
+              )
+                  : RefreshIndicator(
+                color:
+                primaryGreen,
+                onRefresh: () async {
+                  await loadTrendData();
+                  await loadMonthlyItems();
+                },
+                child:
+                SingleChildScrollView(
+                  physics:
+                  const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      buildFoodSelector(),
+                      buildPeriodSelector(),
+                      buildTrendCard(),
+                      buildSummaryCards(),
+                      buildMonthlyItems(),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1632,18 +1730,10 @@ class _TrendPageState extends State<TrendPage> {
   }
 }
 
-// =============================================================
-// TREND CHART
-// =============================================================
-
 class TrendChart extends StatelessWidget {
-  final List<Map<String, dynamic>>
-  data;
-
+  final List<Map<String, dynamic>> data;
   final int? selectedIndex;
-
-  final ValueChanged<int>
-  onPointSelected;
+  final ValueChanged<int> onPointSelected;
 
   const TrendChart({
     super.key,
@@ -1667,11 +1757,8 @@ class TrendChart extends StatelessWidget {
               return;
             }
 
-            const leftPadding =
-            42.0;
-
-            const rightPadding =
-            12.0;
+            const leftPadding = 42.0;
+            const rightPadding = 12.0;
 
             final width =
                 constraints.maxWidth -
@@ -1704,12 +1791,14 @@ class TrendChart extends StatelessWidget {
               data.length - 1,
             );
 
-            onPointSelected(index);
+            onPointSelected(
+              index,
+            );
           },
           child: CustomPaint(
             size: Size(
               constraints.maxWidth,
-              190,
+              200,
             ),
             painter:
             TrendChartPainter(
@@ -1724,15 +1813,9 @@ class TrendChart extends StatelessWidget {
   }
 }
 
-// =============================================================
-// CHART PAINTER
-// =============================================================
-
 class TrendChartPainter
     extends CustomPainter {
-  final List<Map<String, dynamic>>
-  data;
-
+  final List<Map<String, dynamic>> data;
   final int? selectedIndex;
 
   TrendChartPainter({
@@ -1815,7 +1898,10 @@ class TrendChartPainter
 
       drawDashedLine(
         canvas,
-        Offset(left, y),
+        Offset(
+          left,
+          y,
+        ),
         Offset(
           left + chartWidth,
           y,
@@ -1838,7 +1924,8 @@ class TrendChartPainter
           ),
           style:
           const TextStyle(
-            color: Colors.grey,
+            color:
+            Colors.grey,
             fontSize: 7,
           ),
         ),
@@ -1877,7 +1964,8 @@ class TrendChartPainter
           : left +
           chartWidth *
               i /
-              (data.length - 1);
+              (data.length -
+                  1);
 
       final normalized =
           (price - minimum) /
@@ -1889,16 +1977,18 @@ class TrendChartPainter
                   (1 - normalized);
 
       points.add(
-        Offset(x, y),
+        Offset(
+          x,
+          y,
+        ),
       );
     }
 
-    final linePaint =
-    Paint()
+    final linePaint = Paint()
       ..color =
-          Colors.teal
-      ..strokeWidth =
-      2.5
+          _TrendPageState
+              .primaryGreen
+      ..strokeWidth = 2.5
       ..style =
           PaintingStyle.stroke;
 
@@ -1937,10 +2027,10 @@ class TrendChartPainter
         points[i],
         selected ? 5 : 3.5,
         Paint()
-          ..color =
-          selected
+          ..color = selected
               ? Colors.white
-              : Colors.teal,
+              : _TrendPageState
+              .primaryGreen,
       );
 
       if (selected) {
@@ -1949,7 +2039,8 @@ class TrendChartPainter
           3.5,
           Paint()
             ..color =
-                Colors.teal,
+                _TrendPageState
+                    .primaryGreen,
         );
       }
 
@@ -1960,8 +2051,6 @@ class TrendChartPainter
 
       bool showLabel = true;
 
-      // Daily 15 points:
-      // show 1,3,5,7... to prevent crowding
       if (data.length > 8) {
         showLabel =
             i == 0 ||
@@ -1977,7 +2066,8 @@ class TrendChartPainter
             text: label,
             style:
             const TextStyle(
-              color: Colors.grey,
+              color:
+              Colors.grey,
               fontSize: 7,
             ),
           ),
@@ -1989,7 +2079,8 @@ class TrendChartPainter
           canvas,
           Offset(
             points[i].dx -
-                labelText.width / 2,
+                labelText.width /
+                    2,
             top +
                 chartHeight +
                 9,
@@ -2005,7 +2096,8 @@ class TrendChartPainter
       drawTooltip(
         canvas,
         size,
-        points[selectedIndex!],
+        points[
+        selectedIndex!],
         data[selectedIndex!],
       );
     }
@@ -2075,7 +2167,9 @@ class TrendChartPainter
     canvas.drawRRect(
       rectangle,
       Paint()
-        ..color = Colors.teal
+        ..color =
+            _TrendPageState
+                .primaryGreen
         ..style =
             PaintingStyle.stroke
         ..strokeWidth = 1,
@@ -2088,9 +2182,8 @@ class TrendChartPainter
         style:
         const TextStyle(
           color:
-          Color(
-            0xFF202424,
-          ),
+          _TrendPageState
+              .textColor,
           fontSize: 9,
           fontWeight:
           FontWeight.bold,
@@ -2115,7 +2208,9 @@ class TrendChartPainter
         'RM ${price.toStringAsFixed(2)}',
         style:
         const TextStyle(
-          color: Colors.teal,
+          color:
+          _TrendPageState
+              .primaryGreen,
           fontSize: 9,
           fontWeight:
           FontWeight.w600,
@@ -2159,9 +2254,7 @@ class TrendChartPainter
     double drawn = 0;
 
     while (drawn < distance) {
-      final from =
-          start +
-              direction * drawn;
+      final from = start + direction * drawn;
 
       final nextDistance =
       min(
@@ -2169,30 +2262,17 @@ class TrendChartPainter
         distance,
       );
 
-      final to =
-          start +
-              direction *
-                  nextDistance;
-
-      canvas.drawLine(
-        from,
-        to,
-        paint,
-      );
-
-      drawn +=
-          dashWidth +
-              dashSpace;
+      final to = start + direction * nextDistance;
+      canvas.drawLine(from, to, paint,);
+      drawn += dashWidth + dashSpace;
     }
   }
 
   @override
   bool shouldRepaint(
-      covariant TrendChartPainter
-      oldDelegate,
+      covariant TrendChartPainter oldDelegate,
       ) {
-    return oldDelegate.data !=
-        data ||
+    return oldDelegate.data != data ||
         oldDelegate.selectedIndex !=
             selectedIndex;
   }

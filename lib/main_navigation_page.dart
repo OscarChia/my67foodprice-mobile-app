@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '/screens/home_page.dart';
 import '/screens/food_price_page.dart';
 import '/screens/map_page.dart';
-import 'screens/trend_page.dart';
+import '/screens/trend_page.dart';
+import '/screens/saved_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -13,16 +14,21 @@ class MainNavigationPage extends StatefulWidget {
   });
 
   @override
-  State<MainNavigationPage> createState() =>
-      _MainNavigationPageState();
+  State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
-class _MainNavigationPageState
-    extends State<MainNavigationPage> {
+class _MainNavigationPageState extends State<MainNavigationPage> {
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
 
   late int selectedIndex;
 
   String? selectedFoodCategory;
+
+  int searchRefreshKey = 0;
+
+  final GlobalKey<FoodPricePageState>foodPriceKey = GlobalKey<FoodPricePageState>();
+  final GlobalKey<SavedPageState>savedPageKey = GlobalKey<SavedPageState>();
 
   @override
   void initState() {
@@ -33,14 +39,26 @@ class _MainNavigationPageState
 
   void changePage(int index) {
     setState(() {
-      if (index == 1) {
-        selectedFoodCategory = null;
-      }
-
       selectedIndex = index;
     });
+
+    if (index == 1) {
+      foodPriceKey.currentState?.refreshSavedItems();
+    }
+
+    if (index == 4) {
+      savedPageKey.currentState?.loadSavedItems();
+    }
   }
 
+  void openNotifications() {
+    setState(() {
+      selectedIndex = 4;
+    });
+
+    savedPageKey.currentState
+        ?.openNotifications();
+  }
   void openSearch(String? category) {
     setState(() {
       selectedFoodCategory = category;
@@ -55,84 +73,142 @@ class _MainNavigationPageState
         onSearchTap: (category) {
           openSearch(category);
         },
-
         onNavigationTap: (index) {
           changePage(index);
+        },
+        onNotificationTap: () {
+          openNotifications();
         },
       ),
 
       FoodPricePage(
-        key: ValueKey(
-          selectedFoodCategory,
-        ),
-        initialCategory:
-        selectedFoodCategory,
+        key: foodPriceKey,
+        initialCategory: selectedFoodCategory,
       ),
 
       const MapPage(),
       const TrendPage(),
-      const SavedPlaceholderPage(),
+
+      SavedPage(
+        key: savedPageKey,
+      ),
+
       const ProfilePlaceholderPage(),
     ];
 
     return Scaffold(
-      body: pages[selectedIndex],
+      backgroundColor: backgroundColor,
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: selectedIndex,
-        type: BottomNavigationBarType.fixed,
-
-        onTap: (index) {
-          changePage(index);
-        },
-
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.show_chart),
-            label: 'Trend',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Saved',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      body: IndexedStack(
+        index: selectedIndex,
+        children: pages,
       ),
-    );
-  }
-}
 
-class SavedPlaceholderPage extends StatelessWidget {
-  const SavedPlaceholderPage({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Saved',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: 0.08,
+              ),
+              blurRadius: 15,
+              offset: const Offset(0, -3),
+            ),
+          ],
         ),
-      ),
-      body: const Center(
-        child: Text(
-          'Favourite items will be displayed here',
+        child: SafeArea(
+          top: false,
+          child: BottomNavigationBar(
+            currentIndex: selectedIndex,
+            type: BottomNavigationBarType.fixed,
+
+            backgroundColor: Colors.white,
+
+            selectedItemColor: primaryGreen,
+
+            unselectedItemColor: Colors.grey,
+
+            selectedFontSize: 11,
+
+            unselectedFontSize: 10,
+
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+
+            elevation: 0,
+
+            onTap: (index) {
+              changePage(index);
+            },
+
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.home_outlined,
+                ),
+                activeIcon: Icon(
+                  Icons.home_rounded,
+                ),
+                label: 'Home',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.search_outlined,
+                ),
+                activeIcon: Icon(
+                  Icons.search_rounded,
+                ),
+                label: 'Search',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.map_outlined,
+                ),
+                activeIcon: Icon(
+                  Icons.map_rounded,
+                ),
+                label: 'Map',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.show_chart_outlined,
+                ),
+                activeIcon: Icon(
+                  Icons.show_chart_rounded,
+                ),
+                label: 'Trend',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.favorite_border,
+                ),
+                activeIcon: Icon(
+                  Icons.favorite,
+                ),
+                label: 'Saved',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.person_outline,
+                ),
+                activeIcon: Icon(
+                  Icons.person,
+                ),
+                label: 'Profile',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -146,15 +222,13 @@ class ProfilePlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'User profile will be displayed here',
+    return const Scaffold(
+      backgroundColor: Color(0xFFF6F8F5),
+      body: SafeArea(
+        child: Center(
+          child: Text(
+            'User profile will be displayed here',
+          ),
         ),
       ),
     );

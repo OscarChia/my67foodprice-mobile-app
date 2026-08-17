@@ -11,6 +11,12 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
+  static const Color lightGreen = Color(0xFFEAF4EF);
+  static const Color textColor = Color(0xFF1F2924);
+
   final MapController mapController = MapController();
 
   bool isLoading = true;
@@ -43,14 +49,18 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> loadStates() async {
     try {
-      final data = await Supabase.instance.client
+      final data =
+      await Supabase.instance.client
           .from('premises')
           .select('state');
 
       final stateSet = data
           .map(
             (row) =>
-        row['state']?.toString().trim() ?? '',
+        row['state']
+            ?.toString()
+            .trim() ??
+            '',
       )
           .where(
             (state) => state.isNotEmpty,
@@ -85,12 +95,17 @@ class _MapPageState extends State<MapPage> {
 
       final priceData =
       await Supabase.instance.client
-          .from('monthly_food_price_summary')
-          .select('item_code');
+          .from(
+        'monthly_food_price_summary',
+      )
+          .select(
+        'item_code',
+      );
 
       final itemCodeSet = priceData
           .map(
-            (row) => row['item_code'],
+            (row) =>
+        row['item_code'],
       )
           .where(
             (code) => code != null,
@@ -251,7 +266,9 @@ class _MapPageState extends State<MapPage> {
         return;
       }
 
-      final Map<dynamic, Map<String, dynamic>>
+      final Map<
+          dynamic,
+          Map<String, dynamic>>
       latestPrices = {};
 
       for (final price in priceData) {
@@ -563,9 +580,11 @@ class _MapPageState extends State<MapPage> {
   List<Marker> buildMarkers() {
     final List<Marker> markers = [];
 
-    for (int i = 0;
+    for (
+    int i = 0;
     i < storeList.length;
-    i++) {
+    i++
+    ) {
       final store =
       storeList[i];
 
@@ -639,7 +658,7 @@ class _MapPageState extends State<MapPage> {
                   ? Colors.orange
                   : isSelected
                   ? Colors.red
-                  : Colors.teal,
+                  : primaryGreen,
             ),
           ),
         ),
@@ -651,60 +670,76 @@ class _MapPageState extends State<MapPage> {
 
   Widget buildFoodDropdown() {
     return DropdownButtonFormField<int>(
-      value: selectedItemCode,
+      initialValue: selectedItemCode,
       isExpanded: true,
       menuMaxHeight: 350,
+
       decoration: InputDecoration(
-        labelText: 'Select Food',
         prefixIcon: const Icon(
           Icons.restaurant_menu,
-          color: Colors.teal,
+          color: primaryGreen,
           size: 20,
         ),
-        filled: true,
-        fillColor: const Color(
-          0xFFF4F7F6,
+
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 45,
+          minHeight: 45,
         ),
+
+        filled: true,
+        fillColor: Colors.white,
+        isDense: true,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 15,
+        ),
+
         border: OutlineInputBorder(
-          borderRadius:
-          BorderRadius.circular(
-            14,
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFFE3E9E6),
           ),
-          borderSide:
-          BorderSide.none,
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: primaryGreen,
+            width: 1.5,
+          ),
         ),
       ),
+
       items: foodItems.map(
             (food) {
           return DropdownMenuItem<int>(
-            value:
-            food['item_code'],
+            value: food['item_code'],
             child: Text(
-              food['item']
-                  ?.toString() ??
-                  '',
+              food['item']?.toString() ?? '',
               maxLines: 1,
-              overflow:
-              TextOverflow.ellipsis,
-              style:
-              const TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
+                color: textColor,
               ),
             ),
           );
         },
       ).toList(),
+
       onChanged: (value) {
         if (value == null) {
           return;
         }
 
         setState(() {
-          selectedItemCode =
-              value;
-
-          selectedStore =
-          null;
+          selectedItemCode = value;
+          selectedStore = null;
         });
 
         loadStores();
@@ -714,29 +749,52 @@ class _MapPageState extends State<MapPage> {
 
   Widget buildStateDropdown() {
     return DropdownButtonFormField<String>(
-      value: selectedState,
+      initialValue: selectedState,
       isExpanded: true,
       menuMaxHeight: 350,
+
       decoration: InputDecoration(
-        labelText: 'State',
         prefixIcon: const Icon(
           Icons.location_on_outlined,
-          color: Colors.teal,
+          color: primaryGreen,
           size: 20,
         ),
-        filled: true,
-        fillColor: const Color(
-          0xFFF4F7F6,
+
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 45,
+          minHeight: 45,
         ),
+
+        filled: true,
+        fillColor: Colors.white,
+        isDense: true,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 15,
+        ),
+
         border: OutlineInputBorder(
-          borderRadius:
-          BorderRadius.circular(
-            14,
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: Color(0xFFE3E9E6),
           ),
-          borderSide:
-          BorderSide.none,
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: primaryGreen,
+            width: 1.5,
+          ),
         ),
       ),
+
       items: states.map(
             (state) {
           return DropdownMenuItem<String>(
@@ -744,27 +802,23 @@ class _MapPageState extends State<MapPage> {
             child: Text(
               state,
               maxLines: 1,
-              overflow:
-              TextOverflow.ellipsis,
-              style:
-              const TextStyle(
-                fontSize: 11,
+              style: const TextStyle(
+                fontSize: 12,
+                color: textColor,
               ),
             ),
           );
         },
       ).toList(),
+
       onChanged: (value) {
         if (value == null) {
           return;
         }
 
         setState(() {
-          selectedState =
-              value;
-
-          selectedStore =
-          null;
+          selectedState = value;
+          selectedStore = null;
         });
 
         loadStores();
@@ -805,11 +859,12 @@ class _MapPageState extends State<MapPage> {
           ),
           boxShadow: const [
             BoxShadow(
-              color:
-              Colors.black12,
+              color: Colors.black12,
               blurRadius: 8,
-              offset:
-              Offset(0, 2),
+              offset: Offset(
+                0,
+                2,
+              ),
             ),
           ],
         ),
@@ -826,9 +881,11 @@ class _MapPageState extends State<MapPage> {
                 FontWeight.bold,
               ),
             ),
+
             const SizedBox(
               height: 2,
             ),
+
             Text(
               cheapest['premise']
                   ?.toString() ??
@@ -838,17 +895,18 @@ class _MapPageState extends State<MapPage> {
               TextOverflow.ellipsis,
               style:
               const TextStyle(
-                color: Colors.teal,
+                color: primaryGreen,
                 fontSize: 11,
                 fontWeight:
                 FontWeight.bold,
               ),
             ),
+
             Text(
               'RM ${price.toStringAsFixed(2)}',
               style:
               const TextStyle(
-                color: Colors.teal,
+                color: primaryGreen,
                 fontSize: 14,
                 fontWeight:
                 FontWeight.bold,
@@ -898,19 +956,19 @@ class _MapPageState extends State<MapPage> {
       ),
       padding:
       const EdgeInsets.all(
-        12,
+        13,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
         BorderRadius.circular(
-          16,
+          17,
         ),
         border: Border.all(
           color: isVerified
-              ? Colors.teal
+              ? primaryGreen
               : Colors.orange,
-          width: 2,
+          width: 1.5,
         ),
       ),
       child: Column(
@@ -923,18 +981,17 @@ class _MapPageState extends State<MapPage> {
                 decoration:
                 BoxDecoration(
                   color: isVerified
-                      ? Colors.teal
+                      ? primaryGreen
                       : Colors.orange,
                   borderRadius:
-                  BorderRadius.circular(
+                  BorderRadius
+                      .circular(
                     12,
                   ),
                 ),
-                child:
-                const Icon(
+                child: const Icon(
                   Icons.store,
-                  color:
-                  Colors.white,
+                  color: Colors.white,
                 ),
               ),
 
@@ -960,8 +1017,11 @@ class _MapPageState extends State<MapPage> {
                       style:
                       const TextStyle(
                         fontWeight:
-                        FontWeight.bold,
+                        FontWeight
+                            .bold,
                         fontSize: 13,
+                        color:
+                        textColor,
                       ),
                     ),
 
@@ -970,7 +1030,8 @@ class _MapPageState extends State<MapPage> {
                     ),
 
                     Text(
-                      '${selectedStore!['district'] ?? ''}, ${selectedStore!['state'] ?? ''}',
+                      '${selectedStore!['district'] ?? ''}, '
+                          '${selectedStore!['state'] ?? ''}',
                       style:
                       const TextStyle(
                         color:
@@ -1009,14 +1070,14 @@ class _MapPageState extends State<MapPage> {
                       isVerified
                           ? 'Verified location'
                           : 'Location not verified yet',
-                      style:
-                      TextStyle(
+                      style: TextStyle(
                         color: isVerified
-                            ? Colors.teal
+                            ? primaryGreen
                             : Colors.orange,
                         fontSize: 9,
                         fontWeight:
-                        FontWeight.w600,
+                        FontWeight
+                            .w600,
                       ),
                     ),
                   ],
@@ -1037,9 +1098,10 @@ class _MapPageState extends State<MapPage> {
                     style:
                     const TextStyle(
                       color:
-                      Colors.teal,
+                      primaryGreen,
                       fontWeight:
-                      FontWeight.bold,
+                      FontWeight
+                          .bold,
                       fontSize: 16,
                     ),
                   ),
@@ -1050,13 +1112,12 @@ class _MapPageState extends State<MapPage> {
                         selectedStore!,
                       );
                     },
-                    icon:
-                    const Icon(
+                    icon: const Icon(
                       Icons.navigation,
                       size: 20,
                     ),
                     color: isVerified
-                        ? Colors.teal
+                        ? primaryGreen
                         : Colors.orange,
                   ),
                 ],
@@ -1069,32 +1130,33 @@ class _MapPageState extends State<MapPage> {
               width:
               double.infinity,
               margin:
-              const EdgeInsets.only(
+              const EdgeInsets
+                  .only(
                 top: 9,
               ),
               padding:
-              const EdgeInsets.symmetric(
+              const EdgeInsets
+                  .symmetric(
                 vertical: 7,
               ),
               decoration:
               BoxDecoration(
-                color:
-                const Color(
-                  0xFFE8F8F3,
-                ),
+                color: lightGreen,
                 borderRadius:
-                BorderRadius.circular(
+                BorderRadius
+                    .circular(
                   9,
                 ),
               ),
               child: Text(
-                'Best price for ${getSelectedFoodName()}',
+                'Best price for '
+                    '${getSelectedFoodName()}',
                 textAlign:
                 TextAlign.center,
                 style:
                 const TextStyle(
                   color:
-                  Colors.teal,
+                  primaryGreen,
                   fontSize: 10,
                   fontWeight:
                   FontWeight.bold,
@@ -1136,8 +1198,7 @@ class _MapPageState extends State<MapPage> {
     return InkWell(
       onTap: () {
         setState(() {
-          selectedStore =
-              store;
+          selectedStore = store;
         });
       },
       borderRadius:
@@ -1153,7 +1214,8 @@ class _MapPageState extends State<MapPage> {
         const EdgeInsets.all(
           11,
         ),
-        decoration: BoxDecoration(
+        decoration:
+        BoxDecoration(
           color: Colors.white,
           borderRadius:
           BorderRadius.circular(
@@ -1161,13 +1223,12 @@ class _MapPageState extends State<MapPage> {
           ),
           border: Border.all(
             color: isSelected
-                ? Colors.teal
+                ? primaryGreen
                 : const Color(
               0xFFE7EBEA,
             ),
-            width: isSelected
-                ? 2
-                : 1,
+            width:
+            isSelected ? 2 : 1,
           ),
         ),
         child: Row(
@@ -1180,20 +1241,17 @@ class _MapPageState extends State<MapPage> {
               decoration:
               BoxDecoration(
                 color: isCheapest
-                    ? Colors.teal
-                    : const Color(
-                  0xFFF0F3F2,
-                ),
+                    ? primaryGreen
+                    : lightGreen,
                 shape:
                 BoxShape.circle,
               ),
               child: Text(
                 '${index + 1}',
-                style:
-                TextStyle(
+                style: TextStyle(
                   color: isCheapest
                       ? Colors.white
-                      : Colors.grey[700],
+                      : primaryGreen,
                   fontWeight:
                   FontWeight.bold,
                   fontSize: 11,
@@ -1219,10 +1277,12 @@ class _MapPageState extends State<MapPage> {
                         decoration:
                         BoxDecoration(
                           color: isVerified
-                              ? Colors.teal
-                              : Colors.orange,
+                              ? primaryGreen
+                              : Colors
+                              .orange,
                           shape:
-                          BoxShape.circle,
+                          BoxShape
+                              .circle,
                         ),
                       ),
 
@@ -1243,7 +1303,10 @@ class _MapPageState extends State<MapPage> {
                           const TextStyle(
                             fontSize: 12,
                             fontWeight:
-                            FontWeight.bold,
+                            FontWeight
+                                .bold,
+                            color:
+                            textColor,
                           ),
                         ),
                       ),
@@ -1251,22 +1314,23 @@ class _MapPageState extends State<MapPage> {
                       if (isCheapest)
                         Container(
                           margin:
-                          const EdgeInsets.only(
+                          const EdgeInsets
+                              .only(
                             left: 5,
                           ),
                           padding:
-                          const EdgeInsets.symmetric(
+                          const EdgeInsets
+                              .symmetric(
                             horizontal: 6,
                             vertical: 2,
                           ),
                           decoration:
                           BoxDecoration(
                             color:
-                            const Color(
-                              0xFFE2F6EF,
-                            ),
+                            lightGreen,
                             borderRadius:
-                            BorderRadius.circular(
+                            BorderRadius
+                                .circular(
                               10,
                             ),
                           ),
@@ -1276,10 +1340,11 @@ class _MapPageState extends State<MapPage> {
                             style:
                             TextStyle(
                               color:
-                              Colors.teal,
+                              primaryGreen,
                               fontSize: 8,
                               fontWeight:
-                              FontWeight.bold,
+                              FontWeight
+                                  .bold,
                             ),
                           ),
                         ),
@@ -1291,7 +1356,8 @@ class _MapPageState extends State<MapPage> {
                   ),
 
                   Text(
-                    '${store['district'] ?? ''}, ${store['state'] ?? ''}',
+                    '${store['district'] ?? ''}, '
+                        '${store['state'] ?? ''}',
                     style:
                     const TextStyle(
                       color:
@@ -1329,10 +1395,9 @@ class _MapPageState extends State<MapPage> {
                     isVerified
                         ? 'Verified location'
                         : 'Location not verified yet',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       color: isVerified
-                          ? Colors.teal
+                          ? primaryGreen
                           : Colors.orange,
                       fontSize: 8,
                     ),
@@ -1357,6 +1422,8 @@ class _MapPageState extends State<MapPage> {
                     fontWeight:
                     FontWeight.bold,
                     fontSize: 13,
+                    color:
+                    primaryGreen,
                   ),
                 ),
 
@@ -1371,7 +1438,8 @@ class _MapPageState extends State<MapPage> {
                     );
                   },
                   borderRadius:
-                  BorderRadius.circular(
+                  BorderRadius
+                      .circular(
                     30,
                   ),
                   child: Container(
@@ -1380,9 +1448,7 @@ class _MapPageState extends State<MapPage> {
                     decoration:
                     BoxDecoration(
                       color: isVerified
-                          ? const Color(
-                        0xFFE8F8F3,
-                      )
+                          ? lightGreen
                           : const Color(
                         0xFFFFF3E0,
                       ),
@@ -1393,7 +1459,7 @@ class _MapPageState extends State<MapPage> {
                       Icons.navigation,
                       size: 18,
                       color: isVerified
-                          ? Colors.teal
+                          ? primaryGreen
                           : Colors.orange,
                     ),
                   ),
@@ -1436,73 +1502,72 @@ class _MapPageState extends State<MapPage> {
       ) {
     return Scaffold(
       backgroundColor:
-      const Color(
-        0xFFF6F8F8,
-      ),
-
+      backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             Container(
-              color:
-              Colors.white,
-
-              padding:
-              const EdgeInsets.fromLTRB(
-                14,
-                14,
-                14,
-                12,
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
+                20, 14, 20, 16,
               ),
-
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    primaryGreen, darkGreen,
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(25),
+                  bottomRight: Radius.circular(25),
+                ),
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(
                     children: [
                       Icon(
-                        Icons
-                            .location_on,
-                        color:
-                        Colors.teal,
+                        Icons.location_on,
+                        color: Colors.white,
                         size: 22,
                       ),
-
-                      SizedBox(
-                        width: 6,
-                      ),
-
+                      SizedBox(width: 7),
                       Text(
                         'Store Map',
-                        style:
-                        TextStyle(
-                          fontSize: 19,
-                          fontWeight:
-                          FontWeight.bold,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(
-                    height: 12,
+                  const SizedBox(height: 3),
+
+                  const Text(
+                    'Find stores and compare the latest food prices',
+                    style: TextStyle(
+                      color: Color(0xFFDCEDE6),
+                      fontSize: 10,
+                    ),
                   ),
+
+                  const SizedBox(height: 12),
 
                   Row(
                     children: [
                       Expanded(
-                        flex: 3,
-                        child:
-                        buildFoodDropdown(),
+                        flex: 3, child: buildFoodDropdown(),
                       ),
 
-                      const SizedBox(
-                        width: 8,
-                      ),
+                      const SizedBox(width: 10),
 
                       Expanded(
-                        flex: 2,
-                        child:
-                        buildStateDropdown(),
+                        flex: 2, child: buildStateDropdown(),
                       ),
                     ],
                   ),
@@ -1516,59 +1581,83 @@ class _MapPageState extends State<MapPage> {
                 child:
                 CircularProgressIndicator(
                   color:
-                  Colors.teal,
+                  primaryGreen,
                 ),
               )
                   : SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 300,
-
-                      child: Stack(
-                        children: [
-                          FlutterMap(
-                            mapController:
-                            mapController,
-
-                            options:
-                            const MapOptions(
-                              initialCenter:
-                              LatLng(
-                                4.2105,
-                                101.9758,
+                    Padding(
+                      padding:
+                      const EdgeInsets
+                          .fromLTRB(
+                        14,
+                        14,
+                        14,
+                        0,
+                      ),
+                      child: Container(
+                        height: 300,
+                        decoration:
+                        BoxDecoration(
+                          color:
+                          Colors.white,
+                          borderRadius:
+                          BorderRadius
+                              .circular(
+                            18,
+                          ),
+                          border:
+                          Border.all(
+                            color:
+                            const Color(
+                              0xFFE3E9E6,
+                            ),
+                          ),
+                        ),
+                        clipBehavior:
+                        Clip.antiAlias,
+                        child: Stack(
+                          children: [
+                            FlutterMap(
+                              mapController:
+                              mapController,
+                              options:
+                              const MapOptions(
+                                initialCenter:
+                                LatLng(
+                                  4.2105,
+                                  101.9758,
+                                ),
+                                initialZoom:
+                                5.5,
                               ),
+                              children: [
+                                TileLayer(
+                                  urlTemplate:
+                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  userAgentPackageName:
+                                  'com.example.my67food_price',
+                                ),
 
-                              initialZoom:
-                              5.5,
+                                MarkerLayer(
+                                  markers:
+                                  buildMarkers(),
+                                ),
+
+                                const RichAttributionWidget(
+                                  attributions: [
+                                    TextSourceAttribution(
+                                      'OpenStreetMap contributors',
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
 
-                            children: [
-                              TileLayer(
-                                urlTemplate:
-                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-                                userAgentPackageName:
-                                'com.example.my67food_price',
-                              ),
-
-                              MarkerLayer(
-                                markers:
-                                buildMarkers(),
-                              ),
-
-                              const RichAttributionWidget(
-                                attributions: [
-                                  TextSourceAttribution(
-                                    'OpenStreetMap contributors',
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          buildCheapestBadge(),
-                        ],
+                            buildCheapestBadge(),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -1576,56 +1665,90 @@ class _MapPageState extends State<MapPage> {
 
                     Padding(
                       padding:
-                      const EdgeInsets.fromLTRB(
-                        14,
-                        15,
-                        14,
-                        8,
+                      const EdgeInsets
+                          .fromLTRB(
+                        16,
+                        18,
+                        16,
+                        9,
                       ),
-
                       child: Row(
                         children: [
                           Expanded(
                             child:
-                            Text(
-                              'TOP 10 STORES — ${getSelectedFoodName()}',
+                            Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment
+                                  .start,
+                              children: [
+                                const Text(
+                                  'Cheapest Stores',
+                                  style:
+                                  TextStyle(
+                                    fontSize:
+                                    18,
+                                    fontWeight:
+                                    FontWeight
+                                        .w700,
+                                    color:
+                                    textColor,
+                                  ),
+                                ),
 
-                              maxLines:
-                              1,
+                                const SizedBox(
+                                  height:
+                                  3,
+                                ),
 
-                              overflow:
-                              TextOverflow
-                                  .ellipsis,
-
-                              style:
-                              const TextStyle(
-                                color:
-                                Colors.grey,
-
-                                fontSize:
-                                10,
-
-                                fontWeight:
-                                FontWeight
-                                    .bold,
-                              ),
+                                Text(
+                                  getSelectedFoodName(),
+                                  maxLines:
+                                  1,
+                                  overflow:
+                                  TextOverflow
+                                      .ellipsis,
+                                  style:
+                                  const TextStyle(
+                                    fontSize:
+                                    9,
+                                    color: Colors
+                                        .black45,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
-                          Text(
-                            '${storeList.length}/10',
-
-                            style:
-                            const TextStyle(
+                          Container(
+                            padding:
+                            const EdgeInsets
+                                .symmetric(
+                              horizontal:
+                              9,
+                              vertical: 5,
+                            ),
+                            decoration:
+                            BoxDecoration(
                               color:
-                              Colors.teal,
-
-                              fontSize:
-                              10,
-
-                              fontWeight:
-                              FontWeight
-                                  .bold,
+                              lightGreen,
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                20,
+                              ),
+                            ),
+                            child: Text(
+                              '${storeList.length}/10 stores',
+                              style:
+                              const TextStyle(
+                                color:
+                                primaryGreen,
+                                fontSize:
+                                9,
+                                fontWeight:
+                                FontWeight
+                                    .w600,
+                              ),
                             ),
                           ),
                         ],
@@ -1633,24 +1756,47 @@ class _MapPageState extends State<MapPage> {
                     ),
 
                     if (storeList.isEmpty)
-                      const Padding(
-                        padding:
-                        EdgeInsets.symmetric(
-                          vertical:
-                          60,
+                      Container(
+                        margin:
+                        const EdgeInsets
+                            .symmetric(
+                          horizontal:
+                          16,
                         ),
-
-                        child: Column(
+                        width:
+                        double.infinity,
+                        padding:
+                        const EdgeInsets
+                            .symmetric(
+                          vertical:
+                          45,
+                        ),
+                        decoration:
+                        BoxDecoration(
+                          color:
+                          Colors.white,
+                          borderRadius:
+                          BorderRadius
+                              .circular(
+                            18,
+                          ),
+                          border:
+                          Border.all(
+                            color:
+                            const Color(
+                              0xFFE3E9E6,
+                            ),
+                          ),
+                        ),
+                        child:
+                        const Column(
                           children: [
                             Icon(
                               Icons
                                   .store_mall_directory_outlined,
-
-                              size:
-                              50,
-
-                              color:
-                              Colors.grey,
+                              size: 48,
+                              color: Colors
+                                  .black26,
                             ),
 
                             SizedBox(
@@ -1660,12 +1806,11 @@ class _MapPageState extends State<MapPage> {
 
                             Text(
                               'No store price data found',
-
                               style:
                               TextStyle(
                                 fontWeight:
                                 FontWeight
-                                    .bold,
+                                    .w600,
                               ),
                             ),
 
@@ -1675,15 +1820,13 @@ class _MapPageState extends State<MapPage> {
                             ),
 
                             Text(
-                              'Try another food or state.',
-
+                              'Try another food item or state.',
                               style:
                               TextStyle(
                                 color:
-                                Colors.grey,
-
+                                Colors.black45,
                                 fontSize:
-                                11,
+                                10,
                               ),
                             ),
                           ],
@@ -1693,22 +1836,20 @@ class _MapPageState extends State<MapPage> {
                     if (storeList.isNotEmpty)
                       Padding(
                         padding:
-                        const EdgeInsets.symmetric(
+                        const EdgeInsets
+                            .symmetric(
                           horizontal:
                           14,
                         ),
-
                         child:
                         ListView.builder(
                           shrinkWrap:
                           true,
-
                           physics:
                           const NeverScrollableScrollPhysics(),
-
                           itemCount:
-                          storeList.length,
-
+                          storeList
+                              .length,
                           itemBuilder:
                               (
                               context,
@@ -1717,7 +1858,6 @@ class _MapPageState extends State<MapPage> {
                             return buildStoreCard(
                               storeList[
                               index],
-
                               index,
                             );
                           },
@@ -1725,7 +1865,7 @@ class _MapPageState extends State<MapPage> {
                       ),
 
                     const SizedBox(
-                      height: 20,
+                      height: 25,
                     ),
                   ],
                 ),
@@ -1740,7 +1880,6 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     mapController.dispose();
-
     super.dispose();
   }
 }
