@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/database_service.dart';
 import 'food_details_page.dart';
 
 class FoodPricePage extends StatefulWidget {
@@ -21,20 +21,32 @@ class FoodPricePageState extends State<FoodPricePage> {
   static const Color lightGreen = Color(0xFFEAF4EF);
   static const Color textColor = Color(0xFF1F2924);
 
+  final DatabaseService databaseService = DatabaseService();
+
   List<Map<String, dynamic>> foodPriceList = [];
-
+  List<Map<String, dynamic>> allFoodItems = [];
   Set<int> savedItemCodes = {};
-
   bool isLoading = true;
   bool showFilters = false;
-
   int? savingItemCode;
+  Set<String> shoppingItemKeys = {};
+  String? addingCartItemKey;
 
   final searchController = TextEditingController();
 
   String selectedCategory = 'All Categories';
   String selectedState = 'All States';
   String selectedSort = 'Default';
+
+  String getShoppingKey(
+      dynamic itemCode,
+      dynamic premiseCode,
+      ) {
+    return [
+      itemCode,
+      premiseCode,
+    ].join('_');
+  }
 
   final List<String> categories = [
     'All Categories',
@@ -86,73 +98,125 @@ class FoodPricePageState extends State<FoodPricePage> {
   @override
   void initState() {
     super.initState();
-
     selectedCategory =
         widget.initialCategory ?? 'All Categories';
-
     loadInitialData();
   }
 
   Future<void> loadInitialData() async {
-    await Future.wait([
-      loadStates(),
-      loadSavedItems(),
-    ]);
+    setState(() {
+      isLoading = true;
+    });
 
-    await fetchFoodPrices();
+    try {
+      allFoodItems =
+      await databaseService.getFoodItems();
+
+      setState(() {
+        foodPriceList = [];
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+
+      showMessage(
+        'Unable to load food data.',
+      );
+    }
+
+    loadStates();
+    loadSavedItems();
+    loadShoppingItems();
+  }
+
+  Future<void> loadStates() async {
+    try {
+      final stateList =
+      await databaseService.getStates();
+
+      setState(() {
+        states = stateList;
+      });
+    } catch (e) {
+      setState(() {
+        states = [
+          'All States',
+        ];
+      });
+    }
   }
 
   Future<void> loadSavedItems() async {
-    final user =
-        Supabase.instance.client.auth.currentUser;
-
-    if (user == null) {
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        savedItemCodes = {};
-      });
-
-      return;
-    }
-
     try {
-      final data =
-      await Supabase.instance.client
-          .from('saved_items')
-          .select('item_code')
-          .eq(
-        'user_id',
-        user.id,
-      );
-
-      final codes = data
-          .map<int?>(
-            (row) => int.tryParse(
-          row['item_code'].toString(),
-        ),
-      )
-          .whereType<int>()
-          .toSet();
-
-      if (!mounted) {
-        return;
-      }
+      final codes =
+      await databaseService.getSavedItemCodes();
 
       setState(() {
         savedItemCodes = codes;
       });
     } catch (e) {
-      debugPrint(
-        'Error loading saved items: $e',
-      );
+      setState(() {
+        savedItemCodes = {};
+      });
+    }
+  }
+
+  Future<void> loadShoppingItems() async {
+    try {
+      final data =
+      await databaseService.getShoppingList();
+
+      final keys = data
+          .map<String?>(
+            (row) {
+          final itemCode =
+          row['item_code'];
+          final premiseCode =
+          row['premise_code'];
+
+          if (itemCode == null ||
+              premiseCode == null) {
+            return null;
+          }
+
+          return getShoppingKey(
+            itemCode,
+            premiseCode,
+          );
+        },
+      )
+          .whereType<String>()
+          .toSet();
+
+      setState(() {
+        shoppingItemKeys = keys;
+      });
+    } catch (e) {
+      setState(() {
+        shoppingItemKeys = {};
+      });
     }
   }
 
   Future<void> refreshSavedItems() async {
     await loadSavedItems();
+    await loadShoppingItems();
+  }
+
+  void filterByCategory(
+      String? category,
+      ) {
+    setState(() {
+      selectedCategory =
+          category ?? 'All Categories';
+      selectedState = 'All States';
+      selectedSort = 'Default';
+      searchController.clear();
+    });
+
+    fetchFoodPrices();
   }
 
   Future<void> toggleSavedItem(
@@ -163,40 +227,30 @@ class FoodPricePageState extends State<FoodPricePage> {
     }
 
     final user =
-        Supabase.instance.client.auth.currentUser;
+    databaseService.getCurrentUser();
 
     if (user == null) {
       showMessage(
         'Please login first.',
       );
-
       return;
     }
 
     final isAlreadySaved =
-    savedItemCodes.contains(itemCode);
+    savedItemCodes.contains(
+      itemCode,
+    );
+
+    setState(() {
+      savingItemCode = itemCode;
+    });
 
     try {
-      setState(() {
-        savingItemCode = itemCode;
-      });
-
       if (isAlreadySaved) {
-        await Supabase.instance.client
-            .from('saved_items')
-            .delete()
-            .eq(
-          'user_id',
-          user.id,
-        )
-            .eq(
-          'item_code',
+        await databaseService
+            .removeSavedItemByCode(
           itemCode,
         );
-
-        if (!mounted) {
-          return;
-        }
 
         setState(() {
           savedItemCodes.remove(
@@ -208,17 +262,14 @@ class FoodPricePageState extends State<FoodPricePage> {
           'Removed from favourites.',
         );
       } else {
-        await Supabase.instance.client
-            .from('saved_items')
-            .insert({
-          'user_id': user.id,
-          'item_code': itemCode,
-          'alert_enabled': true,
-        });
+        final defaultAlert =
+        await databaseService
+            .getDefaultSavedItemAlert();
 
-        if (!mounted) {
-          return;
-        }
+        await databaseService.addSavedItem(
+          itemCode,
+          defaultAlert,
+        );
 
         setState(() {
           savedItemCodes.add(
@@ -231,129 +282,173 @@ class FoodPricePageState extends State<FoodPricePage> {
         );
       }
     } catch (e) {
-      debugPrint(
-        'Favourite error: $e',
-      );
-
       showMessage(
         'Unable to update favourite.',
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          savingItemCode = null;
-        });
-      }
+      setState(() {
+        savingItemCode = null;
+      });
     }
   }
 
-  Future<void> loadStates() async {
-    try {
-      final premiseData =
-      await Supabase.instance.client
-          .from('premises')
-          .select('state');
+  Future<void> toggleShoppingItem(
+      Map<String, dynamic> food,
+      ) async {
+    final itemCode = int.tryParse(
+      food['item_code'].toString(),
+    );
 
-      final stateSet = premiseData
-          .map(
-            (premise) =>
-            premise['state'].toString(),
-      )
-          .where(
-            (state) => state.isNotEmpty,
-      )
-          .toSet()
-          .toList();
+    final premiseCode =
+    food['premise_code'];
 
-      stateSet.sort();
+    if (itemCode == null ||
+        premiseCode == null) {
+      return;
+    }
 
-      if (!mounted) {
-        return;
-      }
+    final shoppingKey =
+    getShoppingKey(
+      itemCode,
+      premiseCode,
+    );
 
-      setState(() {
-        states = [
-          'All States',
-          ...stateSet,
-        ];
-      });
-    } catch (e) {
-      if (!mounted) {
-        return;
-      }
+    if (addingCartItemKey != null) {
+      return;
+    }
 
+    final user =
+    databaseService.getCurrentUser();
+
+    if (user == null) {
       showMessage(
-        'Error loading states: $e',
+        'Please login first.',
       );
+      return;
+    }
+
+    final isAlreadyAdded =
+    shoppingItemKeys.contains(
+      shoppingKey,
+    );
+
+    setState(() {
+      addingCartItemKey = shoppingKey;
+    });
+
+    try {
+      if (isAlreadyAdded) {
+        await databaseService
+            .removeFromShoppingList(
+          itemCode,
+          premiseCode,
+        );
+
+        setState(() {
+          shoppingItemKeys.remove(
+            shoppingKey,
+          );
+        });
+
+        showMessage(
+          'Removed from shopping list.',
+        );
+      } else {
+        await databaseService
+            .addToShoppingList(
+          itemCode,
+          premiseCode,
+        );
+
+        setState(() {
+          shoppingItemKeys.add(
+            shoppingKey,
+          );
+        });
+
+        showMessage(
+          'Added to shopping list.',
+        );
+      }
+    } catch (e) {
+      showMessage(
+        'Unable to update shopping list.',
+      );
+    } finally {
+      setState(() {
+        addingCartItemKey = null;
+      });
     }
   }
 
   Future<void> fetchFoodPrices() async {
+    final searchText =
+    searchController.text
+        .trim()
+        .toLowerCase();
+
+    if (searchText.isEmpty) {
+      setState(() {
+        foodPriceList = [];
+        isLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
 
     try {
-      final searchText =
-      searchController.text
-          .trim()
-          .toLowerCase();
-
-      final itemData =
-      await Supabase.instance.client
-          .from('food_items')
-          .select();
-
       List<Map<String, dynamic>>
       matchingItems =
-      List<Map<String, dynamic>>.from(
-        itemData,
-      );
+      allFoodItems.where(
+            (item) {
+          final category =
+              item['item_category']
+                  ?.toString() ??
+                  '';
 
-      matchingItems =
-          matchingItems.where((item) {
-            final category =
-            item['item_category'].toString();
-
-            return categories.contains(
-              category,
-            );
-          }).toList();
+          return categories.contains(
+            category,
+          );
+        },
+      ).toList();
 
       if (selectedCategory !=
           'All Categories') {
         matchingItems =
-            matchingItems.where((item) {
-              return item['item_category']
-                  .toString() ==
-                  selectedCategory;
-            }).toList();
+            matchingItems.where(
+                  (item) {
+                return item['item_category']
+                    ?.toString() ==
+                    selectedCategory;
+              },
+            ).toList();
       }
 
       if (searchText.isNotEmpty) {
         matchingItems =
-            matchingItems.where((item) {
-              final itemName =
-              item['item']
-                  .toString()
-                  .toLowerCase();
+            matchingItems.where(
+                  (item) {
+                final itemName =
+                    item['item']
+                        ?.toString()
+                        .toLowerCase() ??
+                        '';
 
-              return itemName.contains(
-                searchText,
-              );
-            }).toList();
+                return itemName.contains(
+                  searchText,
+                );
+              },
+            ).toList();
       }
 
       if (matchingItems.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
           foodPriceList = [];
           isLoading = false;
         });
-
         return;
       }
 
@@ -362,6 +457,9 @@ class FoodPricePageState extends State<FoodPricePage> {
           .map(
             (item) =>
         item['item_code'],
+      )
+          .where(
+            (code) => code != null,
       )
           .toList();
 
@@ -372,31 +470,17 @@ class FoodPricePageState extends State<FoodPricePage> {
 
       if (selectedState !=
           'All States') {
-        final premiseData =
-        await Supabase.instance.client
-            .from('premises')
-            .select()
-            .eq(
-          'state',
+        selectedPremises =
+        await databaseService
+            .getPremisesByState(
           selectedState,
         );
 
-        selectedPremises =
-        List<Map<String, dynamic>>
-            .from(
-          premiseData,
-        );
-
         if (selectedPremises.isEmpty) {
-          if (!mounted) {
-            return;
-          }
-
           setState(() {
             foodPriceList = [];
             isLoading = false;
           });
-
           return;
         }
 
@@ -404,58 +488,32 @@ class FoodPricePageState extends State<FoodPricePage> {
             selectedPremises
                 .map(
                   (premise) =>
-              premise['premise_code'],
+              premise[
+              'premise_code'],
+            )
+                .where(
+                  (code) =>
+              code != null,
             )
                 .toList();
       }
 
-      List<dynamic> priceData;
-
-      if (selectedState ==
-          'All States') {
-        priceData =
-        await Supabase.instance.client
-            .from('food_prices')
-            .select()
-            .inFilter(
-          'item_code',
-          itemCodes,
-        )
-            .order(
-          'date',
-          ascending: false,
-        )
-            .limit(100);
-      } else {
-        priceData =
-        await Supabase.instance.client
-            .from('food_prices')
-            .select()
-            .inFilter(
-          'item_code',
-          itemCodes,
-        )
-            .inFilter(
-          'premise_code',
-          premiseCodes,
-        )
-            .order(
-          'date',
-          ascending: false,
-        )
-            .limit(100);
-      }
+      final priceData =
+      await databaseService
+          .getFoodPrices(
+        itemCodes: itemCodes,
+        premiseCodes:
+        selectedState ==
+            'All States'
+            ? null
+            : premiseCodes,
+      );
 
       if (priceData.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
           foodPriceList = [];
           isLoading = false;
         });
-
         return;
       }
 
@@ -463,7 +521,11 @@ class FoodPricePageState extends State<FoodPricePage> {
       priceData
           .map(
             (price) =>
-        price['premise_code'],
+        price[
+        'premise_code'],
+      )
+          .where(
+            (code) => code != null,
       )
           .toSet()
           .toList();
@@ -473,48 +535,55 @@ class FoodPricePageState extends State<FoodPricePage> {
 
       if (selectedState ==
           'All States') {
-        final premiseData =
-        await Supabase.instance.client
-            .from('premises')
-            .select()
-            .inFilter(
-          'premise_code',
-          usedPremiseCodes,
-        );
-
         premiseList =
-        List<Map<String, dynamic>>
-            .from(
-          premiseData,
+        await databaseService
+            .getPremisesByCodes(
+          usedPremiseCodes,
         );
       } else {
         premiseList =
             selectedPremises;
       }
 
+      final Map<dynamic,
+          Map<String, dynamic>>
+      itemMap = {};
+
+      for (final item
+      in matchingItems) {
+        itemMap[item['item_code']] =
+            item;
+      }
+
+      final Map<dynamic,
+          Map<String, dynamic>>
+      premiseMap = {};
+
+      for (final premise
+      in premiseList) {
+        premiseMap[
+        premise[
+        'premise_code']] =
+            premise;
+      }
+
       List<Map<String, dynamic>>
       combinedList = [];
 
-      for (final price in priceData) {
+      for (final price
+      in priceData) {
         final item =
-        matchingItems.firstWhere(
-              (item) =>
-          item['item_code'] ==
-              price['item_code'],
-        );
+        itemMap[
+        price['item_code']];
+
+        if (item == null) {
+          continue;
+        }
 
         final premise =
-        premiseList.firstWhere(
-              (premise) =>
-          premise['premise_code'] ==
-              price['premise_code'],
-          orElse: () => {
-            'premise':
-            'Unknown Premise',
-            'state': '',
-            'district': '',
-          },
-        );
+        premiseMap[
+        price[
+        'premise_code']];
 
         combinedList.add({
           'date': price['date'],
@@ -528,77 +597,86 @@ class FoodPricePageState extends State<FoodPricePage> {
           'category':
           item['item_category'],
           'premise':
-          premise['premise'],
+          premise?['premise'] ??
+              'Unknown Premise',
           'state':
-          premise['state'],
+          premise?['state'] ?? '',
           'district':
-          premise['district'],
+          premise?['district'] ??
+              '',
         });
       }
 
-      if (selectedSort ==
-          'Price: Low to High') {
-        combinedList.sort(
-              (a, b) {
-            final priceA =
-            double.parse(
-              a['price'].toString(),
-            );
-
-            final priceB =
-            double.parse(
-              b['price'].toString(),
-            );
-
-            return priceA.compareTo(
-              priceB,
-            );
-          },
-        );
-      }
-
-      if (selectedSort ==
-          'Price: High to Low') {
-        combinedList.sort(
-              (a, b) {
-            final priceA =
-            double.parse(
-              a['price'].toString(),
-            );
-
-            final priceB =
-            double.parse(
-              b['price'].toString(),
-            );
-
-            return priceB.compareTo(
-              priceA,
-            );
-          },
-        );
-      }
-
-      if (!mounted) {
-        return;
-      }
+      sortFoodPrices(
+        combinedList,
+      );
 
       setState(() {
         foodPriceList =
             combinedList;
-
         isLoading = false;
       });
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
 
       showMessage(
-        'Error: $e',
+        'Unable to load food prices.',
+      );
+    }
+  }
+
+  void sortFoodPrices(
+      List<Map<String, dynamic>> list,
+      ) {
+    if (selectedSort ==
+        'Price: Low to High') {
+      list.sort(
+            (a, b) {
+          final priceA =
+              double.tryParse(
+                a['price']
+                    .toString(),
+              ) ??
+                  0;
+
+          final priceB =
+              double.tryParse(
+                b['price']
+                    .toString(),
+              ) ??
+                  0;
+
+          return priceA.compareTo(
+            priceB,
+          );
+        },
+      );
+    }
+
+    if (selectedSort ==
+        'Price: High to Low') {
+      list.sort(
+            (a, b) {
+          final priceA =
+              double.tryParse(
+                a['price']
+                    .toString(),
+              ) ??
+                  0;
+
+          final priceB =
+              double.tryParse(
+                b['price']
+                    .toString(),
+              ) ??
+                  0;
+
+          return priceB.compareTo(
+            priceA,
+          );
+        },
       );
     }
   }
@@ -606,18 +684,17 @@ class FoodPricePageState extends State<FoodPricePage> {
   void showMessage(
       String message,
       ) {
-    if (!mounted) {
-      return;
-    }
-
     ScaffoldMessenger.of(context)
         .hideCurrentSnackBar();
 
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        content: Text(message),
-        duration: const Duration(
+        content: Text(
+          message,
+        ),
+        duration:
+        const Duration(
           seconds: 2,
         ),
       ),
@@ -644,23 +721,35 @@ class FoodPricePageState extends State<FoodPricePage> {
       ),
       border: OutlineInputBorder(
         borderRadius:
-        BorderRadius.circular(14),
+        BorderRadius.circular(
+          14,
+        ),
         borderSide:
         const BorderSide(
-          color: Color(0xFFE2E8E5),
+          color: Color(
+            0xFFE2E8E5,
+          ),
         ),
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder:
+      OutlineInputBorder(
         borderRadius:
-        BorderRadius.circular(14),
+        BorderRadius.circular(
+          14,
+        ),
         borderSide:
         const BorderSide(
-          color: Color(0xFFE2E8E5),
+          color: Color(
+            0xFFE2E8E5,
+          ),
         ),
       ),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder:
+      OutlineInputBorder(
         borderRadius:
-        BorderRadius.circular(14),
+        BorderRadius.circular(
+          14,
+        ),
         borderSide:
         const BorderSide(
           color: primaryGreen,
@@ -672,17 +761,24 @@ class FoodPricePageState extends State<FoodPricePage> {
 
   Widget buildFilterArea() {
     return Container(
-      margin: const EdgeInsets.only(
+      margin:
+      const EdgeInsets.only(
         top: 12,
       ),
-      padding: const EdgeInsets.all(16),
+      padding:
+      const EdgeInsets.all(
+        16,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(
+          18,
+        ),
         border: Border.all(
-          color:
-          const Color(0xFFE2E8E5),
+          color: const Color(
+            0xFFE2E8E5,
+          ),
         ),
       ),
       child: Column(
@@ -696,7 +792,9 @@ class FoodPricePageState extends State<FoodPricePage> {
                 size: 20,
                 color: primaryGreen,
               ),
-              SizedBox(width: 7),
+              SizedBox(
+                width: 7,
+              ),
               Text(
                 'Filter Food Prices',
                 style: TextStyle(
@@ -708,10 +806,11 @@ class FoodPricePageState extends State<FoodPricePage> {
               ),
             ],
           ),
-
-          const SizedBox(height: 15),
-
-          DropdownButtonFormField<String>(
+          const SizedBox(
+            height: 15,
+          ),
+          DropdownButtonFormField<
+              String>(
             initialValue:
             selectedCategory,
             isExpanded: true,
@@ -721,7 +820,8 @@ class FoodPricePageState extends State<FoodPricePage> {
               icon:
               Icons.category_outlined,
             ),
-            items: categories.map(
+            items:
+            categories.map(
                   (category) {
                 return DropdownMenuItem<
                     String>(
@@ -746,14 +846,20 @@ class FoodPricePageState extends State<FoodPricePage> {
                       value;
                 });
 
-                fetchFoodPrices();
+                if (searchController
+                    .text
+                    .trim()
+                    .isNotEmpty) {
+                  fetchFoodPrices();
+                }
               }
             },
           ),
-
-          const SizedBox(height: 12),
-
-          DropdownButtonFormField<String>(
+          const SizedBox(
+            height: 12,
+          ),
+          DropdownButtonFormField<
+              String>(
             initialValue:
             selectedState,
             isExpanded: true,
@@ -763,7 +869,8 @@ class FoodPricePageState extends State<FoodPricePage> {
               icon: Icons
                   .location_on_outlined,
             ),
-            items: states.map(
+            items:
+            states.map(
                   (state) {
                 return DropdownMenuItem<
                     String>(
@@ -792,10 +899,11 @@ class FoodPricePageState extends State<FoodPricePage> {
               }
             },
           ),
-
-          const SizedBox(height: 12),
-
-          DropdownButtonFormField<String>(
+          const SizedBox(
+            height: 12,
+          ),
+          DropdownButtonFormField<
+              String>(
             initialValue:
             selectedSort,
             isExpanded: true,
@@ -804,7 +912,8 @@ class FoodPricePageState extends State<FoodPricePage> {
               label: 'Sort Price',
               icon: Icons.sort,
             ),
-            items: sortOptions.map(
+            items:
+            sortOptions.map(
                   (sort) {
                 return DropdownMenuItem<
                     String>(
@@ -824,52 +933,59 @@ class FoodPricePageState extends State<FoodPricePage> {
                 setState(() {
                   selectedSort =
                       value;
-                });
 
-                fetchFoodPrices();
+                  sortFoodPrices(
+                    foodPriceList,
+                  );
+                });
               }
             },
           ),
-
-          const SizedBox(height: 14),
-
+          const SizedBox(
+            height: 14,
+          ),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton.icon(
+            child:
+            OutlinedButton.icon(
               onPressed: () {
                 setState(() {
                   selectedCategory =
                   'All Categories';
-
                   selectedState =
                   'All States';
-
                   selectedSort =
                   'Default';
-
-                  searchController.clear();
+                  searchController
+                      .clear();
+                  foodPriceList = [];
+                  isLoading = false;
                 });
-
-                fetchFoodPrices();
               },
-              icon: const Icon(
+              icon:
+              const Icon(
                 Icons.refresh,
                 size: 18,
               ),
-              label: const Text(
+              label:
+              const Text(
                 'Reset Filters',
               ),
               style:
-              OutlinedButton.styleFrom(
+              OutlinedButton
+                  .styleFrom(
                 foregroundColor:
                 primaryGreen,
-                side: const BorderSide(
-                  color: primaryGreen,
+                side:
+                const BorderSide(
+                  color:
+                  primaryGreen,
                 ),
                 shape:
                 RoundedRectangleBorder(
                   borderRadius:
-                  BorderRadius.circular(
+                  BorderRadius
+                      .circular(
                     14,
                   ),
                 ),
@@ -898,6 +1014,29 @@ class FoodPricePageState extends State<FoodPricePage> {
     final isSaving =
         savingItemCode == itemCode;
 
+    final premiseCode =
+    food['premise_code'];
+
+    final shoppingKey =
+    itemCode != null &&
+        premiseCode != null
+        ? getShoppingKey(
+      itemCode,
+      premiseCode,
+    )
+        : null;
+
+    final isInShoppingList =
+        shoppingKey != null &&
+            shoppingItemKeys.contains(
+              shoppingKey,
+            );
+
+    final isAddingCart =
+        shoppingKey != null &&
+            addingCartItemKey ==
+                shoppingKey;
+
     final price =
         double.tryParse(
           food['price'].toString(),
@@ -905,21 +1044,32 @@ class FoodPricePageState extends State<FoodPricePage> {
             0;
 
     return Container(
-      margin: const EdgeInsets.only(
+      margin:
+      const EdgeInsets.only(
         bottom: 11,
       ),
-      decoration: BoxDecoration(
+      clipBehavior:
+      Clip.antiAlias,
+      decoration:
+      BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
-        border: Border.all(
+        BorderRadius.circular(
+          18,
+        ),
+        border:
+        Border.all(
           color:
-          const Color(0xFFE3E9E6),
+          const Color(
+            0xFFE3E9E6,
+          ),
         ),
       ),
       child: InkWell(
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(
+          18,
+        ),
         onTap: () {
           Navigator.push(
             context,
@@ -930,18 +1080,20 @@ class FoodPricePageState extends State<FoodPricePage> {
                     food['item_code'],
                     itemName:
                     food['item'],
-                    unit:
-                    food['unit'],
+                    unit: food['unit'],
                   ),
             ),
           );
         },
         child: Padding(
           padding:
-          const EdgeInsets.all(13),
+          const EdgeInsets.all(
+            13,
+          ),
           child: Row(
             crossAxisAlignment:
-            CrossAxisAlignment.center,
+            CrossAxisAlignment
+                .center,
             children: [
               Container(
                 width: 55,
@@ -951,17 +1103,20 @@ class FoodPricePageState extends State<FoodPricePage> {
                   color: lightGreen,
                   borderRadius:
                   BorderRadius
-                      .circular(15),
+                      .circular(
+                    15,
+                  ),
                 ),
-                child: const Icon(
+                child:
+                const Icon(
                   Icons.restaurant_menu,
                   color: primaryGreen,
                   size: 27,
                 ),
               ),
-
-              const SizedBox(width: 12),
-
+              const SizedBox(
+                width: 12,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment:
@@ -979,14 +1134,15 @@ class FoodPricePageState extends State<FoodPricePage> {
                       const TextStyle(
                         fontSize: 13,
                         fontWeight:
-                        FontWeight.w700,
-                        color: textColor,
+                        FontWeight
+                            .w700,
+                        color:
+                        textColor,
                       ),
                     ),
-
                     const SizedBox(
-                        height: 5),
-
+                      height: 5,
+                    ),
                     Row(
                       children: [
                         const Icon(
@@ -994,12 +1150,12 @@ class FoodPricePageState extends State<FoodPricePage> {
                               .category_outlined,
                           size: 13,
                           color:
-                          Colors.black45,
+                          Colors
+                              .black45,
                         ),
-
                         const SizedBox(
-                            width: 4),
-
+                          width: 4,
+                        ),
                         Expanded(
                           child: Text(
                             '${food['category']} • ${food['unit']}',
@@ -1010,29 +1166,30 @@ class FoodPricePageState extends State<FoodPricePage> {
                             style:
                             const TextStyle(
                               fontSize: 9,
-                              color: Colors
+                              color:
+                              Colors
                                   .black54,
                             ),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(
-                        height: 4),
-
+                      height: 4,
+                    ),
                     Row(
                       children: [
                         const Icon(
-                          Icons.store_outlined,
+                          Icons
+                              .store_outlined,
                           size: 13,
                           color:
-                          Colors.black45,
+                          Colors
+                              .black45,
                         ),
-
                         const SizedBox(
-                            width: 4),
-
+                          width: 4,
+                        ),
                         Expanded(
                           child: Text(
                             food['premise']
@@ -1044,17 +1201,17 @@ class FoodPricePageState extends State<FoodPricePage> {
                             style:
                             const TextStyle(
                               fontSize: 9,
-                              color: Colors
+                              color:
+                              Colors
                                   .black54,
                             ),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(
-                        height: 4),
-
+                      height: 4,
+                    ),
                     Row(
                       children: [
                         const Icon(
@@ -1062,12 +1219,12 @@ class FoodPricePageState extends State<FoodPricePage> {
                               .location_on_outlined,
                           size: 13,
                           color:
-                          Colors.black45,
+                          Colors
+                              .black45,
                         ),
-
                         const SizedBox(
-                            width: 4),
-
+                          width: 4,
+                        ),
                         Expanded(
                           child: Text(
                             '${food['district']}, ${food['state']}',
@@ -1078,17 +1235,17 @@ class FoodPricePageState extends State<FoodPricePage> {
                             style:
                             const TextStyle(
                               fontSize: 9,
-                              color: Colors
+                              color:
+                              Colors
                                   .black45,
                             ),
                           ),
                         ),
                       ],
                     ),
-
                     const SizedBox(
-                        height: 4),
-
+                      height: 4,
+                    ),
                     Text(
                       'Updated: ${food['date']}',
                       style:
@@ -1101,15 +1258,14 @@ class FoodPricePageState extends State<FoodPricePage> {
                   ],
                 ),
               ),
-
-              const SizedBox(width: 8),
-
+              const SizedBox(
+                width: 8,
+              ),
               Column(
-                mainAxisSize:
-                MainAxisSize.min,
                 crossAxisAlignment:
-                CrossAxisAlignment
-                    .end,
+                CrossAxisAlignment.end,
+                mainAxisAlignment:
+                MainAxisAlignment.center,
                 children: [
                   Text(
                     'RM ${price.toStringAsFixed(2)}',
@@ -1122,10 +1278,9 @@ class FoodPricePageState extends State<FoodPricePage> {
                       primaryGreen,
                     ),
                   ),
-
                   const SizedBox(
-                      height: 2),
-
+                    height: 2,
+                  ),
                   Text(
                     'per ${food['unit']}',
                     style:
@@ -1135,43 +1290,142 @@ class FoodPricePageState extends State<FoodPricePage> {
                       Colors.black45,
                     ),
                   ),
-
-                  const SizedBox(
-                      height: 8),
-
-                  if (isSaving)
-                    const SizedBox(
-                      width: 27,
-                      height: 27,
-                      child:
-                      CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color:
-                        primaryGreen,
-                      ),
-                    )
-                  else
-                    IconButton(
-                      onPressed:
-                      itemCode == null
-                          ? null
-                          : () {
-                        toggleSavedItem(
-                          itemCode,
-                        );
-                      },
-                      icon: Icon(
-                        isSaved
-                            ? Icons.favorite
-                            : Icons
-                            .favorite_border,
-                      ),
-                      color: isSaved
-                          ? Colors.red
-                          : Colors.grey,
-                      iconSize: 22,
-                    ),
                 ],
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Container(
+                width: 1,
+                height: 72,
+                color:
+                const Color(
+                  0xFFE3E9E6,
+                ),
+              ),
+              const SizedBox(
+                width: 6,
+              ),
+              SizedBox(
+                width: 36,
+                child: Column(
+                  mainAxisSize:
+                  MainAxisSize.min,
+                  children: [
+                    if (isSaving)
+                      const SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Padding(
+                          padding:
+                          EdgeInsets.all(
+                            7,
+                          ),
+                          child:
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color:
+                            primaryGreen,
+                          ),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child:
+                        IconButton(
+                          padding:
+                          EdgeInsets.zero,
+                          constraints:
+                          const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          visualDensity:
+                          VisualDensity
+                              .compact,
+                          onPressed:
+                          itemCode == null
+                              ? null
+                              : () {
+                            toggleSavedItem(
+                              itemCode,
+                            );
+                          },
+                          icon: Icon(
+                            isSaved
+                                ? Icons.favorite
+                                : Icons
+                                .favorite_border,
+                          ),
+                          color:
+                          isSaved
+                              ? Colors.red
+                              : Colors.grey,
+                          iconSize: 21,
+                        ),
+                      ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    if (isAddingCart)
+                      const SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Padding(
+                          padding:
+                          EdgeInsets.all(
+                            7,
+                          ),
+                          child:
+                          CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color:
+                            primaryGreen,
+                          ),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child:
+                        IconButton(
+                          padding:
+                          EdgeInsets.zero,
+                          constraints:
+                          const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          visualDensity:
+                          VisualDensity
+                              .compact,
+                          onPressed:
+                          itemCode == null
+                              ? null
+                              : () {
+                            toggleShoppingItem(
+                              food,
+                            );
+                          },
+                          icon: Icon(
+                            isInShoppingList
+                                ? Icons
+                                .check_circle
+                                : Icons
+                                .shopping_cart_outlined,
+                          ),
+                          color:
+                          isInShoppingList
+                              ? primaryGreen
+                              : Colors.grey,
+                          iconSize: 21,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1191,7 +1445,8 @@ class FoodPricePageState extends State<FoodPricePage> {
         child: Column(
           children: [
             Container(
-              width: double.infinity,
+              width:
+              double.infinity,
               padding:
               const EdgeInsets
                   .fromLTRB(
@@ -1206,7 +1461,8 @@ class FoodPricePageState extends State<FoodPricePage> {
                 LinearGradient(
                   begin:
                   Alignment.topLeft,
-                  end: Alignment
+                  end:
+                  Alignment
                       .bottomRight,
                   colors: [
                     primaryGreen,
@@ -1238,27 +1494,27 @@ class FoodPricePageState extends State<FoodPricePage> {
                       Colors.white,
                       fontSize: 23,
                       fontWeight:
-                      FontWeight.bold,
+                      FontWeight
+                          .bold,
                     ),
                   ),
-
                   const SizedBox(
-                      height: 5),
-
+                    height: 5,
+                  ),
                   const Text(
                     'Search and compare food prices across Malaysia',
                     style:
                     TextStyle(
-                      color: Color(
+                      color:
+                      Color(
                         0xFFDCEDE6,
                       ),
                       fontSize: 11,
                     ),
                   ),
-
                   const SizedBox(
-                      height: 18),
-
+                    height: 18,
+                  ),
                   TextField(
                     controller:
                     searchController,
@@ -1267,6 +1523,18 @@ class FoodPricePageState extends State<FoodPricePage> {
                         .search,
                     onSubmitted:
                         (value) {
+                      if (value
+                          .trim()
+                          .isEmpty) {
+                        setState(() {
+                          foodPriceList =
+                          [];
+                          isLoading =
+                          false;
+                        });
+                        return;
+                      }
+
                       fetchFoodPrices();
                     },
                     decoration:
@@ -1279,26 +1547,35 @@ class FoodPricePageState extends State<FoodPricePage> {
                         color:
                         primaryGreen,
                       ),
-                      suffixIcon:
-                      searchController
-                          .text
-                          .isEmpty
-                          ? null
-                          : IconButton(
-                        onPressed:
-                            () {
-                          searchController
-                              .clear();
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: SizedBox(
+                          width: 42,
+                          height: 38,
+                          child: IconButton(
+                            onPressed: () {
+                              if (searchController.text.trim().isEmpty) {
+                                setState(() {
+                                  foodPriceList = [];
+                                  isLoading = false;
+                                });
+                                return;
+                              }
 
-                          setState(
-                                  () {});
-
-                          fetchFoodPrices();
-                        },
-                        icon:
-                        const Icon(
-                          Icons.close,
-                          size: 20,
+                              fetchFoodPrices();
+                            },
+                            style: IconButton.styleFrom(
+                              backgroundColor: primaryGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.search,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
                         ),
                       ),
                       filled: true,
@@ -1312,8 +1589,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                           16,
                         ),
                         borderSide:
-                        BorderSide
-                            .none,
+                        BorderSide.none,
                       ),
                       enabledBorder:
                       OutlineInputBorder(
@@ -1323,290 +1599,410 @@ class FoodPricePageState extends State<FoodPricePage> {
                           16,
                         ),
                         borderSide:
-                        BorderSide
-                            .none,
+                        BorderSide.none,
                       ),
                     ),
-                    onChanged: (value) {
-                      setState(() {});
+                    onChanged:
+                        (value) {
+                      if (value
+                          .trim()
+                          .isEmpty) {
+                        setState(() {
+                          foodPriceList =
+                          [];
+                          isLoading =
+                          false;
+                        });
+                      } else {
+                        setState(() {});
+                      }
                     },
                   ),
                 ],
               ),
             ),
-
             Expanded(
               child:
-              SingleChildScrollView(
-                padding:
-                const EdgeInsets
-                    .fromLTRB(
-                  18,
-                  17,
-                  18,
-                  25,
-                ),
-                child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
-                  children: [
-                    InkWell(
-                      borderRadius:
-                      BorderRadius
-                          .circular(
-                        14,
-                      ),
-                      onTap: () {
-                        setState(() {
-                          showFilters =
-                          !showFilters;
-                        });
-                      },
-                      child: Container(
-                        padding:
-                        const EdgeInsets
-                            .symmetric(
-                          horizontal: 14,
-                          vertical: 12,
-                        ),
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          lightGreen,
-                          borderRadius:
-                          BorderRadius
-                              .circular(
-                            14,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.tune,
-                              size: 18,
-                              color:
-                              primaryGreen,
+              CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding:
+                    const EdgeInsets
+                        .fromLTRB(
+                      18,
+                      17,
+                      18,
+                      25,
+                    ),
+                    sliver:
+                    SliverList(
+                      delegate:
+                      SliverChildListDelegate(
+                        [
+                          InkWell(
+                            borderRadius:
+                            BorderRadius.circular(
+                              14,
                             ),
-
-                            const SizedBox(
-                                width: 7),
-
-                            const Text(
-                              'Filters & Sort',
-                              style:
-                              TextStyle(
-                                fontSize: 12,
-                                fontWeight:
-                                FontWeight
-                                    .w600,
-                                color:
-                                primaryGreen,
+                            onTap: () {
+                              setState(() {
+                                showFilters =
+                                !showFilters;
+                              });
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8E5),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.tune,
+                                    size: 19,
+                                    color: primaryGreen,
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  const Text('Filters & Sort',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: textColor,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Icon(
+                                    showFilters
+                                        ? Icons.keyboard_arrow_up
+                                        : Icons.keyboard_arrow_down,
+                                    color: primaryGreen,
+                                    size: 22,
+                                  ),
+                                ],
                               ),
                             ),
+                          ),
 
-                            const Spacer(),
+                          if (showFilters)
+                            buildFilterArea(),
 
-                            Icon(
-                              showFilters
-                                  ? Icons
-                                  .keyboard_arrow_up
-                                  : Icons
-                                  .keyboard_arrow_down,
-                              color:
-                              primaryGreen,
-                            ),
-                          ],
+                          const SizedBox(
+                            height: 18,
+                          ),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child:
+                                Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+                                  children: [
+                                    const Text(
+                                      'Search Results',
+                                      style:
+                                      TextStyle(
+                                        fontSize:
+                                        18,
+                                        fontWeight:
+                                        FontWeight
+                                            .w700,
+                                        color:
+                                        textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height:
+                                      3,
+                                    ),
+                                    Text(
+                                      searchController
+                                          .text
+                                          .trim()
+                                          .isEmpty
+                                          ? 'Enter a food name to begin searching'
+                                          : '${foodPriceList.length} price record(s) found',
+                                      style:
+                                      const TextStyle(
+                                        fontSize:
+                                        10,
+                                        color:
+                                        Colors
+                                            .black45,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (selectedState !=
+                                  'All States')
+                                Container(
+                                  padding:
+                                  const EdgeInsets
+                                      .symmetric(
+                                    horizontal:
+                                    9,
+                                    vertical:
+                                    5,
+                                  ),
+                                  decoration:
+                                  BoxDecoration(
+                                    color:
+                                    lightGreen,
+                                    borderRadius:
+                                    BorderRadius
+                                        .circular(
+                                      20,
+                                    ),
+                                  ),
+                                  child:
+                                  Text(
+                                    selectedState,
+                                    style:
+                                    const TextStyle(
+                                      fontSize:
+                                      9,
+                                      color:
+                                      primaryGreen,
+                                      fontWeight:
+                                      FontWeight
+                                          .w600,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 12,
+                          ),
+                          if (searchController
+                              .text
+                              .trim()
+                              .isEmpty)
+                            Container(
+                              width:
+                              double.infinity,
+                              margin:
+                              const EdgeInsets
+                                  .only(
+                                top: 55,
+                              ),
+                              padding:
+                              const EdgeInsets
+                                  .symmetric(
+                                horizontal:
+                                30,
+                                vertical:
+                                35,
+                              ),
+                              child:
+                              const Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius:
+                                    36,
+                                    backgroundColor:
+                                    lightGreen,
+                                    child:
+                                    Icon(
+                                      Icons
+                                          .search_rounded,
+                                      size:
+                                      34,
+                                      color:
+                                      primaryGreen,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height:
+                                    18,
+                                  ),
+                                  Text(
+                                    'Search for food prices',
+                                    textAlign:
+                                    TextAlign
+                                        .center,
+                                    style:
+                                    TextStyle(
+                                      fontSize:
+                                      17,
+                                      fontWeight:
+                                      FontWeight
+                                          .w700,
+                                      color:
+                                      textColor,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height:
+                                    7,
+                                  ),
+                                  Text(
+                                    'Please enter a food name above to find\nand compare food prices.',
+                                    textAlign:
+                                    TextAlign
+                                        .center,
+                                    style:
+                                    TextStyle(
+                                      fontSize:
+                                      11,
+                                      height:
+                                      1.5,
+                                      color:
+                                      Colors
+                                          .black45,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else if (isLoading)
+                            const Padding(
+                              padding:
+                              EdgeInsets
+                                  .all(
+                                45,
+                              ),
+                              child:
+                              Center(
+                                child:
+                                CircularProgressIndicator(
+                                  color:
+                                  primaryGreen,
+                                ),
+                              ),
+                            )
+                          else if (foodPriceList
+                                .isEmpty)
+                              Container(
+                                width:
+                                double.infinity,
+                                padding:
+                                const EdgeInsets
+                                    .symmetric(
+                                  vertical:
+                                  45,
+                                  horizontal:
+                                  20,
+                                ),
+                                decoration:
+                                BoxDecoration(
+                                  color:
+                                  Colors.white,
+                                  borderRadius:
+                                  BorderRadius
+                                      .circular(
+                                    18,
+                                  ),
+                                  border:
+                                  Border.all(
+                                    color:
+                                    const Color(
+                                      0xFFE3E9E6,
+                                    ),
+                                  ),
+                                ),
+                                child:
+                                const Column(
+                                  children: [
+                                    Icon(
+                                      Icons
+                                          .search_off_outlined,
+                                      size:
+                                      50,
+                                      color:
+                                      Colors
+                                          .black26,
+                                    ),
+                                    SizedBox(
+                                      height:
+                                      12,
+                                    ),
+                                    Text(
+                                      'No food price found',
+                                      style:
+                                      TextStyle(
+                                        fontSize:
+                                        15,
+                                        fontWeight:
+                                        FontWeight
+                                            .w600,
+                                        color:
+                                        textColor,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                      5,
+                                    ),
+                                    Text(
+                                      'Try another food name or change the filters.',
+                                      textAlign:
+                                      TextAlign
+                                          .center,
+                                      style:
+                                      TextStyle(
+                                        fontSize:
+                                        11,
+                                        color:
+                                        Colors
+                                            .black45,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (searchController
+                      .text
+                      .trim()
+                      .isNotEmpty &&
+                      !isLoading &&
+                      foodPriceList
+                          .isNotEmpty)
+                    SliverPadding(
+                      padding:
+                      const EdgeInsets
+                          .fromLTRB(
+                        18,
+                        0,
+                        18,
+                        25,
+                      ),
+                      sliver:
+                      SliverList(
+                        delegate:
+                        SliverChildBuilderDelegate(
+                              (
+                              context,
+                              index,
+                              ) {
+                            return foodCard(
+                              foodPriceList[
+                              index],
+                            );
+                          },
+                          childCount:
+                          foodPriceList
+                              .length,
                         ),
                       ),
                     ),
-
-                    if (showFilters)
-                      buildFilterArea(),
-
-                    const SizedBox(
-                        height: 18),
-
-                    Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
-                          children: [
-                            const Text(
-                              'Search Results',
-                              style:
-                              TextStyle(
-                                fontSize: 18,
-                                fontWeight:
-                                FontWeight
-                                    .w700,
-                                color:
-                                textColor,
-                              ),
-                            ),
-
-                            const SizedBox(
-                                height: 3),
-
-                            Text(
-                              '${foodPriceList.length} price record(s) found',
-                              style:
-                              const TextStyle(
-                                fontSize: 10,
-                                color:
-                                Colors.black45,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const Spacer(),
-
-                        if (selectedState !=
-                            'All States')
-                          Container(
-                            padding:
-                            const EdgeInsets
-                                .symmetric(
-                              horizontal: 9,
-                              vertical: 5,
-                            ),
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              lightGreen,
-                              borderRadius:
-                              BorderRadius
-                                  .circular(
-                                20,
-                              ),
-                            ),
-                            child: Text(
-                              selectedState,
-                              style:
-                              const TextStyle(
-                                fontSize: 9,
-                                color:
-                                primaryGreen,
-                                fontWeight:
-                                FontWeight
-                                    .w600,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(
-                        height: 12),
-
-                    if (isLoading)
-                      const Padding(
-                        padding:
-                        EdgeInsets.all(
-                          45,
-                        ),
-                        child: Center(
-                          child:
-                          CircularProgressIndicator(
-                            color:
-                            primaryGreen,
-                          ),
-                        ),
-                      )
-                    else if (foodPriceList
-                        .isEmpty)
-                      Container(
-                        width:
-                        double.infinity,
-                        padding:
-                        const EdgeInsets
-                            .symmetric(
-                          vertical: 45,
-                          horizontal: 20,
-                        ),
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          Colors.white,
-                          borderRadius:
-                          BorderRadius
-                              .circular(
-                            18,
-                          ),
-                          border:
-                          Border.all(
-                            color:
-                            const Color(
-                              0xFFE3E9E6,
-                            ),
-                          ),
-                        ),
-                        child:
-                        const Column(
-                          children: [
-                            Icon(
-                              Icons
-                                  .search_off_outlined,
-                              size: 50,
-                              color: Colors
-                                  .black26,
-                            ),
-
-                            SizedBox(
-                                height: 12),
-
-                            Text(
-                              'No food price found',
-                              style:
-                              TextStyle(
-                                fontSize: 15,
-                                fontWeight:
-                                FontWeight
-                                    .w600,
-                              ),
-                            ),
-
-                            SizedBox(
-                                height: 5),
-
-                            Text(
-                              'Try another food name or change the filters.',
-                              textAlign:
-                              TextAlign
-                                  .center,
-                              style:
-                              TextStyle(
-                                fontSize: 11,
-                                color:
-                                Colors.black45,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics:
-                        const NeverScrollableScrollPhysics(),
-                        itemCount:
-                        foodPriceList.length,
-                        itemBuilder:
-                            (
-                            context,
-                            index,
-                            ) {
-                          return foodCard(
-                            foodPriceList[
-                            index],
-                          );
-                        },
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ],
@@ -1618,7 +2014,6 @@ class FoodPricePageState extends State<FoodPricePage> {
   @override
   void dispose() {
     searchController.dispose();
-
     super.dispose();
   }
 }

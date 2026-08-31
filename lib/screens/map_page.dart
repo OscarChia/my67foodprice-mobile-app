@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:location/location.dart';
+import 'package:permission_handler/permission_handler.dart' as handler;
+import '../services/database_service.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -18,17 +22,32 @@ class _MapPageState extends State<MapPage> {
   static const Color textColor = Color(0xFF1F2924);
 
   final MapController mapController = MapController();
+  final DatabaseService databaseService = DatabaseService();
+  final Location location = Location();
+  final TextEditingController searchController = TextEditingController();
+
+  StreamSubscription<LocationData>? locationSubscription;
+
+  double? userLatitude;
+  double? userLongitude;
+
+  bool permissionGranted = false;
+  bool gpsEnabled = false;
+  bool trackingEnabled = false;
 
   bool isLoading = true;
+
+  double selectedRadius = 5;
 
   int? selectedItemCode;
 
   String selectedState = 'All States';
+  String searchText = '';
 
   Map<String, dynamic>? selectedStore;
 
   List<Map<String, dynamic>> foodItems = [];
-
+  List<Map<String, dynamic>> allStoreList = [];
   List<Map<String, dynamic>> storeList = [];
 
   List<String> states = [
@@ -38,7 +57,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-
+    checkStatus();
     loadInitialData();
   }
 
@@ -47,37 +66,339 @@ class _MapPageState extends State<MapPage> {
     await loadFoodItemsWithPrices();
   }
 
+  Future<bool> isPermissionGranted() async {
+    return await handler.Permission.locationWhenInUse.isGranted;
+  }
+
+  Future<bool> isGpsEnabled() async {
+    return await handler.Permission.location.serviceStatus.isEnabled;
+  }
+
+  void checkStatus() async {
+    bool permission = await isPermissionGranted();
+    bool gps = await isGpsEnabled();
+
+    setState(() {
+      permissionGranted = permission;
+      gpsEnabled = gps;
+    });
+  }
+
+  void requestEnableGps() async {
+    if (gpsEnabled) {
+      showMessage(
+        'GPS is already enabled.',
+      );
+
+      return;
+    }
+
+    bool isGpsActive =
+    await location.requestService();
+
+    if (!isGpsActive) {
+      setState(() {
+        gpsEnabled = false;
+      });
+
+      showMessage(
+        'GPS was not enabled.',
+      );
+    } else {
+      setState(() {
+        gpsEnabled = true;
+      });
+
+      showMessage(
+        'GPS enabled.',
+      );
+    }
+  }
+
+  void requestLocationPermission() async {
+    var permissionStatus =
+    await handler.Permission.locationWhenInUse.request();
+
+    if (permissionStatus.isGranted) {
+      setState(() {
+        permissionGranted = true;
+      });
+
+      showMessage(
+        'Location permission granted.',
+      );
+    } else {
+      setState(() {
+        permissionGranted = false;
+      });
+
+      showMessage(
+        'Location permission denied.',
+      );
+    }
+  }
+
+  void stopTracking() {
+    locationSubscription?.cancel();
+    locationSubscription = null;
+
+    setState(() {
+      trackingEnabled = false;
+    });
+
+    showMessage(
+      'Location tracking stopped.',
+    );
+  }
+
+  void updateLocation(
+      LocationData data,
+      ) {
+    if (data.latitude == null ||
+        data.longitude == null) {
+      return;
+    }
+
+    setState(() {
+      userLatitude = data.latitude;
+      userLongitude = data.longitude;
+    });
+
+    filterStoresByRadius();
+
+    mapController.move(
+      LatLng(
+        userLatitude!,
+        userLongitude!,
+      ),
+      15,
+    );
+  }
+
+  void handleLocationButton() {
+    if (trackingEnabled) {
+      stopTracking();
+    } else {
+      startTracking();
+    }
+  }
+
+  Future<void> startTracking() async {
+    try {
+      bool serviceEnabled =
+      await location.serviceEnabled();
+
+      if (!serviceEnabled) {
+        serviceEnabled =
+        await location.requestService();
+
+        if (!serviceEnabled) {
+          setState(() {
+            gpsEnabled = false;
+          });
+
+          showMessage(
+            'Please enable location service.',
+          );
+
+          return;
+        }
+      }
+
+      var permissionStatus =
+      await handler
+          .Permission
+          .locationWhenInUse
+          .status;
+
+      if (!permissionStatus.isGranted) {
+        permissionStatus =
+        await handler
+            .Permission
+            .locationWhenInUse
+            .request();
+
+        if (!permissionStatus.isGranted) {
+          setState(() {
+            permissionGranted = false;
+          });
+
+          showMessage(
+            'Location permission is required.',
+          );
+
+          return;
+        }
+      }
+
+      setState(() {
+        gpsEnabled = true;
+        permissionGranted = true;
+        trackingEnabled = true;
+      });
+
+      final LocationData currentLocation =
+      await location.getLocation();
+
+      if (currentLocation.latitude != null &&
+          currentLocation.longitude != null) {
+        updateLocation(
+          currentLocation,
+        );
+      }
+
+      await locationSubscription?.cancel();
+
+      locationSubscription =
+          location.onLocationChanged.listen(
+                (LocationData data) {
+              updateLocation(data);
+            },
+          );
+
+      showMessage(
+        'Current location detected.',
+      );
+    } catch (e) {
+      setState(() {
+        trackingEnabled = false;
+      });
+
+      showMessage(
+        'Error getting location: $e',
+      );
+    }
+  }
+
+  double calculateDistance(
+      double latitude,
+      double longitude,
+      ) {
+    if (userLatitude == null ||
+        userLongitude == null) {
+      return 0;
+    }
+
+    const Distance distance = Distance();
+
+    final double meter = distance(
+      LatLng(
+        userLatitude!,
+        userLongitude!,
+      ),
+      LatLng(
+        latitude,
+        longitude,
+      ),
+    );
+
+    return meter / 1000;
+  }
+
+  void filterStoresByRadius() {
+    if (userLatitude == null ||
+        userLongitude == null) {
+      setState(() {
+        storeList = allStoreList
+            .take(10)
+            .toList();
+
+        selectedStore = null;
+      });
+
+      moveMapToFirstVerifiedStore();
+
+      return;
+    }
+
+    List<Map<String, dynamic>> nearbyStores = [];
+
+    for (final store in allStoreList) {
+      final status =
+          store['geocode_status']
+              ?.toString() ??
+              '';
+
+      final latitude =
+      double.tryParse(
+        store['latitude']
+            ?.toString() ??
+            '',
+      );
+
+      final longitude =
+      double.tryParse(
+        store['longitude']
+            ?.toString() ??
+            '',
+      );
+
+      if (status != 'verified' ||
+          latitude == null ||
+          longitude == null) {
+        continue;
+      }
+
+      final distance = calculateDistance(
+        latitude,
+        longitude,
+      );
+
+      if (distance <= selectedRadius) {
+        final updatedStore =
+        Map<String, dynamic>.from(
+          store,
+        );
+
+        updatedStore['distance'] =
+            distance;
+
+        nearbyStores.add(
+          updatedStore,
+        );
+      }
+    }
+
+    nearbyStores.sort(
+          (a, b) {
+        final priceA =
+            double.tryParse(
+              a['price'].toString(),
+            ) ??
+                999999;
+
+        final priceB =
+            double.tryParse(
+              b['price'].toString(),
+            ) ??
+                999999;
+
+        return priceA.compareTo(
+          priceB,
+        );
+      },
+    );
+
+    setState(() {
+      storeList =
+          nearbyStores.take(10).toList();
+
+      selectedStore = null;
+    });
+  }
+
   Future<void> loadStates() async {
     try {
-      final data =
-      await Supabase.instance.client
-          .from('premises')
-          .select('state');
-
-      final stateSet = data
-          .map(
-            (row) =>
-        row['state']
-            ?.toString()
-            .trim() ??
-            '',
-      )
-          .where(
-            (state) => state.isNotEmpty,
-      )
-          .toSet()
-          .toList();
-
-      stateSet.sort();
-
-      if (!mounted) {
-        return;
-      }
+      final stateList =
+      await databaseService.getStates();
 
       setState(() {
         states = [
           'All States',
-          ...stateSet,
+          ...stateList.where(
+                (state) =>
+            state != 'All States',
+          ),
         ];
       });
     } catch (e) {
@@ -93,101 +414,19 @@ class _MapPageState extends State<MapPage> {
         isLoading = true;
       });
 
-      final priceData =
-      await Supabase.instance.client
-          .from(
-        'monthly_food_price_summary',
-      )
-          .select(
-        'item_code',
-      );
+      final allFoodItems =
+      await databaseService
+          .getMapFoodItems();
 
-      final itemCodeSet = priceData
-          .map(
-            (row) =>
-        row['item_code'],
-      )
-          .where(
-            (code) => code != null,
-      )
-          .toSet();
-
-      if (itemCodeSet.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
+      if (allFoodItems.isEmpty) {
         setState(() {
           foodItems = [];
+          allStoreList = [];
           storeList = [];
           selectedItemCode = null;
           isLoading = false;
         });
 
-        return;
-      }
-
-      final itemCodes =
-      itemCodeSet.toList();
-
-      final List<Map<String, dynamic>>
-      allFoodItems = [];
-
-      const batchSize = 200;
-
-      for (
-      int i = 0;
-      i < itemCodes.length;
-      i += batchSize
-      ) {
-        final end =
-        i + batchSize < itemCodes.length
-            ? i + batchSize
-            : itemCodes.length;
-
-        final batch =
-        itemCodes.sublist(
-          i,
-          end,
-        );
-
-        final data =
-        await Supabase.instance.client
-            .from('food_items')
-            .select()
-            .inFilter(
-          'item_code',
-          batch,
-        );
-
-        allFoodItems.addAll(
-          List<Map<String, dynamic>>.from(
-            data,
-          ),
-        );
-      }
-
-      allFoodItems.sort(
-            (a, b) {
-          final nameA =
-              a['item']
-                  ?.toString()
-                  .toUpperCase() ??
-                  '';
-
-          final nameB =
-              b['item']
-                  ?.toString()
-                  .toUpperCase() ??
-                  '';
-
-          return nameA.compareTo(
-            nameB,
-          );
-        },
-      );
-
-      if (!mounted) {
         return;
       }
 
@@ -211,10 +450,6 @@ class _MapPageState extends State<MapPage> {
         });
       }
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
@@ -233,30 +468,20 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       isLoading = true;
       selectedStore = null;
+      allStoreList = [];
       storeList = [];
     });
 
     try {
       final priceData =
-      await Supabase.instance.client
-          .from('food_prices')
-          .select()
-          .eq(
-        'item_code',
+      await databaseService
+          .getMapFoodPrices(
         selectedItemCode!,
-      )
-          .order(
-        'date',
-        ascending: false,
-      )
-          .limit(5000);
+      );
 
       if (priceData.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
+          allStoreList = [];
           storeList = [];
           isLoading = false;
         });
@@ -293,11 +518,8 @@ class _MapPageState extends State<MapPage> {
       latestPrices.keys.toList();
 
       if (premiseCodes.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
+          allStoreList = [];
           storeList = [];
           isLoading = false;
         });
@@ -307,43 +529,11 @@ class _MapPageState extends State<MapPage> {
         return;
       }
 
-      final List<Map<String, dynamic>>
-      premises = [];
-
-      const batchSize = 200;
-
-      for (
-      int i = 0;
-      i < premiseCodes.length;
-      i += batchSize
-      ) {
-        final end =
-        i + batchSize <
-            premiseCodes.length
-            ? i + batchSize
-            : premiseCodes.length;
-
-        final batch =
-        premiseCodes.sublist(
-          i,
-          end,
-        );
-
-        final data =
-        await Supabase.instance.client
-            .from('premises')
-            .select()
-            .inFilter(
-          'premise_code',
-          batch,
-        );
-
-        premises.addAll(
-          List<Map<String, dynamic>>.from(
-            data,
-          ),
-        );
-      }
+      final premises =
+      await databaseService
+          .getMapPremisesByCodes(
+        premiseCodes,
+      );
 
       List<Map<String, dynamic>>
       combinedList = [];
@@ -364,7 +554,8 @@ class _MapPageState extends State<MapPage> {
 
         final price =
         latestPrices[
-        premise['premise_code']];
+        premise[
+        'premise_code']];
 
         if (price == null) {
           continue;
@@ -372,7 +563,8 @@ class _MapPageState extends State<MapPage> {
 
         combinedList.add({
           'premise_code':
-          premise['premise_code'],
+          premise[
+          'premise_code'],
           'premise':
           premise['premise'],
           'address':
@@ -382,13 +574,15 @@ class _MapPageState extends State<MapPage> {
           'state':
           premise['state'],
           'premise_type':
-          premise['premise_type'],
+          premise[
+          'premise_type'],
           'latitude':
           premise['latitude'],
           'longitude':
           premise['longitude'],
           'geocode_status':
-          premise['geocode_status'],
+          premise[
+          'geocode_status'],
           'price':
           price['price'],
           'date':
@@ -400,13 +594,15 @@ class _MapPageState extends State<MapPage> {
             (a, b) {
           final priceA =
               double.tryParse(
-                a['price'].toString(),
+                a['price']
+                    .toString(),
               ) ??
                   999999;
 
           final priceB =
               double.tryParse(
-                b['price'].toString(),
+                b['price']
+                    .toString(),
               ) ??
                   999999;
 
@@ -416,24 +612,13 @@ class _MapPageState extends State<MapPage> {
         },
       );
 
-      combinedList =
-          combinedList.take(10).toList();
-
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
-        storeList = combinedList;
+        allStoreList = combinedList;
         isLoading = false;
       });
 
-      moveMapToFirstVerifiedStore();
+      filterStoresByRadius();
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
@@ -473,10 +658,6 @@ class _MapPageState extends State<MapPage> {
             milliseconds: 300,
           ),
               () {
-            if (!mounted) {
-              return;
-            }
-
             mapController.move(
               LatLng(
                 latitude,
@@ -500,10 +681,6 @@ class _MapPageState extends State<MapPage> {
         milliseconds: 300,
       ),
           () {
-        if (!mounted) {
-          return;
-        }
-
         mapController.move(
           const LatLng(
             4.2105,
@@ -577,16 +754,64 @@ class _MapPageState extends State<MapPage> {
     return '';
   }
 
+  List<Map<String, dynamic>>
+  getFilteredFoodItems() {
+    if (searchText.trim().isEmpty) {
+      return foodItems;
+    }
+
+    return foodItems.where(
+          (food) {
+        final itemName =
+            food['item']
+                ?.toString()
+                .toLowerCase() ??
+                '';
+
+        return itemName.contains(
+          searchText
+              .toLowerCase()
+              .trim(),
+        );
+      },
+    ).toList();
+  }
+
   List<Marker> buildMarkers() {
     final List<Marker> markers = [];
 
-    for (
-    int i = 0;
+    if (userLatitude != null &&
+        userLongitude != null) {
+      markers.add(
+        Marker(
+          point: LatLng(
+            userLatitude!,
+            userLongitude!,
+          ),
+          width: 55,
+          height: 55,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blue
+                  .withValues(
+                alpha: 0.15,
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.my_location,
+              color: Colors.blue,
+              size: 30,
+            ),
+          ),
+        ),
+      );
+    }
+
+    for (int i = 0;
     i < storeList.length;
-    i++
-    ) {
-      final store =
-      storeList[i];
+    i++) {
+      final store = storeList[i];
 
       final status =
           store['geocode_status']
@@ -621,8 +846,7 @@ class _MapPageState extends State<MapPage> {
           'premise_code'] ==
               store['premise_code'];
 
-      final isCheapest =
-          i == 0;
+      final isCheapest = i == 0;
 
       markers.add(
         Marker(
@@ -635,8 +859,7 @@ class _MapPageState extends State<MapPage> {
           child: GestureDetector(
             onTap: () {
               setState(() {
-                selectedStore =
-                    store;
+                selectedStore = store;
               });
 
               mapController.move(
@@ -668,62 +891,405 @@ class _MapPageState extends State<MapPage> {
     return markers;
   }
 
+  Widget buildFoodSearch() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        14,
+        14,
+        14,
+        0,
+      ),
+      child: TextField(
+        controller: searchController,
+        onChanged: (value) {
+          setState(() {
+            searchText = value;
+          });
+        },
+        decoration: InputDecoration(
+          hintText:
+          'Search food, e.g. 100PLUS, Tomato, Ayam',
+          hintStyle: const TextStyle(
+            fontSize: 11,
+            color: Colors.black38,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: primaryGreen,
+            size: 20,
+          ),
+          suffixIcon:
+          searchText.isNotEmpty
+              ? IconButton(
+            onPressed: () {
+              searchController
+                  .clear();
+
+              setState(() {
+                searchText = '';
+              });
+            },
+            icon:
+            const Icon(
+              Icons.close,
+              size: 18,
+              color:
+              Colors.black45,
+            ),
+          )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          isDense: true,
+          contentPadding:
+          const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            BorderSide.none,
+          ),
+          enabledBorder:
+          OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            const BorderSide(
+              color: Color(
+                0xFFE3E9E6,
+              ),
+            ),
+          ),
+          focusedBorder:
+          OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            const BorderSide(
+              color: primaryGreen,
+              width: 1.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildRadiusButton(
+      double radius,
+      ) {
+    final bool isSelected =
+        selectedRadius == radius;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            selectedRadius = radius;
+          });
+
+          filterStoresByRadius();
+        },
+        borderRadius:
+        BorderRadius.circular(12),
+        child: Container(
+          padding:
+          const EdgeInsets.symmetric(
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? primaryGreen
+                : Colors.white,
+            borderRadius:
+            BorderRadius.circular(
+              12,
+            ),
+            border: Border.all(
+              color: isSelected
+                  ? primaryGreen
+                  : const Color(
+                0xFFE3E9E6,
+              ),
+            ),
+          ),
+          child: Text(
+            '${radius.toStringAsFixed(0)} KM',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected
+                  ? Colors.white
+                  : primaryGreen,
+              fontSize: 11,
+              fontWeight:
+              FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildRadiusSelector() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        14,
+        14,
+        14,
+        0,
+      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius:
+        BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(
+            0xFFE3E9E6,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.near_me,
+                color: primaryGreen,
+                size: 18,
+              ),
+              const SizedBox(
+                width: 6,
+              ),
+              const Expanded(
+                child: Text(
+                  'Nearby Radius',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                    FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+              ),
+              Text(
+                trackingEnabled
+                    ? 'Live tracking'
+                    : userLatitude != null &&
+                    userLongitude !=
+                        null
+                    ? 'Last location'
+                    : 'Location not started',
+                style: TextStyle(
+                  fontSize: 9,
+                  color:
+                  trackingEnabled
+                      ? primaryGreen
+                      : Colors.black45,
+                  fontWeight:
+                  FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              buildRadiusButton(3),
+              const SizedBox(
+                width: 8,
+              ),
+              buildRadiusButton(5),
+              const SizedBox(
+                width: 8,
+              ),
+              buildRadiusButton(10),
+            ],
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Row(
+            children: [
+              Icon(
+                gpsEnabled
+                    ? Icons.gps_fixed
+                    : Icons.gps_off,
+                size: 15,
+                color: gpsEnabled
+                    ? primaryGreen
+                    : Colors.orange,
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                gpsEnabled
+                    ? 'GPS Enabled'
+                    : 'GPS Disabled',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: gpsEnabled
+                      ? primaryGreen
+                      : Colors.orange,
+                ),
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              Icon(
+                permissionGranted
+                    ? Icons.check_circle
+                    : Icons.warning_amber,
+                size: 15,
+                color:
+                permissionGranted
+                    ? primaryGreen
+                    : Colors.orange,
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Text(
+                permissionGranted
+                    ? 'Permission Granted'
+                    : 'Permission Required',
+                style: TextStyle(
+                  fontSize: 9,
+                  color:
+                  permissionGranted
+                      ? primaryGreen
+                      : Colors.orange,
+                ),
+              ),
+            ],
+          ),
+          if (userLatitude == null ||
+              userLongitude == null) ...[
+            const SizedBox(
+              height: 8,
+            ),
+            const Text(
+              'Tap the location button on the map to start location tracking.',
+              style: TextStyle(
+                fontSize: 9,
+                color: Colors.black45,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget buildFoodDropdown() {
+    final filteredItems =
+    getFilteredFoodItems();
+
+    int? dropdownValue;
+
+    for (final food in filteredItems) {
+      if (food['item_code'] ==
+          selectedItemCode) {
+        dropdownValue =
+            selectedItemCode;
+        break;
+      }
+    }
+
     return DropdownButtonFormField<int>(
-      initialValue: selectedItemCode,
+      value: dropdownValue,
       isExpanded: true,
       menuMaxHeight: 350,
-
+      hint: Text(
+        filteredItems.isEmpty
+            ? 'No food found'
+            : 'Select food',
+        style: const TextStyle(
+          fontSize: 11,
+          color: Colors.black45,
+        ),
+      ),
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.restaurant_menu,
           color: primaryGreen,
           size: 20,
         ),
-
-        prefixIconConstraints: const BoxConstraints(
+        prefixIconConstraints:
+        const BoxConstraints(
           minWidth: 45,
           minHeight: 45,
         ),
-
         filled: true,
         fillColor: Colors.white,
         isDense: true,
-
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding:
+        const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 15,
         ),
-
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          BorderSide.none,
         ),
-
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFFE3E9E6),
+        enabledBorder:
+        OutlineInputBorder(
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          const BorderSide(
+            color: Color(
+              0xFFE3E9E6,
+            ),
           ),
         ),
-
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
+        focusedBorder:
+        OutlineInputBorder(
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          const BorderSide(
             color: primaryGreen,
             width: 1.5,
           ),
         ),
       ),
-
-      items: foodItems.map(
+      items: filteredItems.map(
             (food) {
           return DropdownMenuItem<int>(
-            value: food['item_code'],
+            value:
+            food['item_code'],
             child: Text(
-              food['item']?.toString() ?? '',
+              food['item']
+                  ?.toString() ??
+                  '',
               maxLines: 1,
-              style: const TextStyle(
+              overflow:
+              TextOverflow.ellipsis,
+              style:
+              const TextStyle(
                 fontSize: 12,
                 color: textColor,
               ),
@@ -731,15 +1297,20 @@ class _MapPageState extends State<MapPage> {
           );
         },
       ).toList(),
-
-      onChanged: (value) {
+      onChanged:
+      filteredItems.isEmpty
+          ? null
+          : (value) {
         if (value == null) {
           return;
         }
 
         setState(() {
-          selectedItemCode = value;
-          selectedStore = null;
+          selectedItemCode =
+              value;
+
+          selectedStore =
+          null;
         });
 
         loadStores();
@@ -752,49 +1323,59 @@ class _MapPageState extends State<MapPage> {
       initialValue: selectedState,
       isExpanded: true,
       menuMaxHeight: 350,
-
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.location_on_outlined,
           color: primaryGreen,
           size: 20,
         ),
-
-        prefixIconConstraints: const BoxConstraints(
+        prefixIconConstraints:
+        const BoxConstraints(
           minWidth: 45,
           minHeight: 45,
         ),
-
         filled: true,
         fillColor: Colors.white,
         isDense: true,
-
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding:
+        const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 15,
         ),
-
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          BorderSide.none,
         ),
-
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
-            color: Color(0xFFE3E9E6),
+        enabledBorder:
+        OutlineInputBorder(
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          const BorderSide(
+            color: Color(
+              0xFFE3E9E6,
+            ),
           ),
         ),
-
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(
+        focusedBorder:
+        OutlineInputBorder(
+          borderRadius:
+          BorderRadius.circular(
+            14,
+          ),
+          borderSide:
+          const BorderSide(
             color: primaryGreen,
             width: 1.5,
           ),
         ),
       ),
-
       items: states.map(
             (state) {
           return DropdownMenuItem<String>(
@@ -802,7 +1383,10 @@ class _MapPageState extends State<MapPage> {
             child: Text(
               state,
               maxLines: 1,
-              style: const TextStyle(
+              overflow:
+              TextOverflow.ellipsis,
+              style:
+              const TextStyle(
                 fontSize: 12,
                 color: textColor,
               ),
@@ -810,7 +1394,6 @@ class _MapPageState extends State<MapPage> {
           );
         },
       ).toList(),
-
       onChanged: (value) {
         if (value == null) {
           return;
@@ -857,11 +1440,14 @@ class _MapPageState extends State<MapPage> {
           BorderRadius.circular(
             13,
           ),
-          boxShadow: const [
+          boxShadow:
+          const [
             BoxShadow(
-              color: Colors.black12,
+              color:
+              Colors.black12,
               blurRadius: 8,
-              offset: Offset(
+              offset:
+              Offset(
                 0,
                 2,
               ),
@@ -873,7 +1459,7 @@ class _MapPageState extends State<MapPage> {
           CrossAxisAlignment.start,
           children: [
             const Text(
-              'CHEAPEST',
+              'CHEAPEST NEARBY',
               style: TextStyle(
                 color: Colors.grey,
                 fontSize: 8,
@@ -881,11 +1467,9 @@ class _MapPageState extends State<MapPage> {
                 FontWeight.bold,
               ),
             ),
-
             const SizedBox(
               height: 2,
             ),
-
             Text(
               cheapest['premise']
                   ?.toString() ??
@@ -901,7 +1485,6 @@ class _MapPageState extends State<MapPage> {
                 FontWeight.bold,
               ),
             ),
-
             Text(
               'RM ${price.toStringAsFixed(2)}',
               style:
@@ -946,6 +1529,13 @@ class _MapPageState extends State<MapPage> {
                 storeList.first[
                 'premise_code'];
 
+    final distance =
+    double.tryParse(
+      selectedStore!['distance']
+          ?.toString() ??
+          '',
+    );
+
     return Container(
       margin:
       const EdgeInsets.fromLTRB(
@@ -989,16 +1579,16 @@ class _MapPageState extends State<MapPage> {
                     12,
                   ),
                 ),
-                child: const Icon(
+                child:
+                const Icon(
                   Icons.store,
-                  color: Colors.white,
+                  color:
+                  Colors.white,
                 ),
               ),
-
               const SizedBox(
                 width: 10,
               ),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment:
@@ -1024,11 +1614,9 @@ class _MapPageState extends State<MapPage> {
                         textColor,
                       ),
                     ),
-
                     const SizedBox(
                       height: 3,
                     ),
-
                     Text(
                       '${selectedStore!['district'] ?? ''}, '
                           '${selectedStore!['state'] ?? ''}',
@@ -1039,11 +1627,27 @@ class _MapPageState extends State<MapPage> {
                         fontSize: 9,
                       ),
                     ),
-
+                    if (distance !=
+                        null) ...[
+                      const SizedBox(
+                        height: 3,
+                      ),
+                      Text(
+                        '${distance.toStringAsFixed(2)} KM away',
+                        style:
+                        const TextStyle(
+                          color:
+                          primaryGreen,
+                          fontSize: 9,
+                          fontWeight:
+                          FontWeight
+                              .w600,
+                        ),
+                      ),
+                    ],
                     const SizedBox(
                       height: 4,
                     ),
-
                     Text(
                       selectedStore![
                       'address']
@@ -1061,17 +1665,17 @@ class _MapPageState extends State<MapPage> {
                         height: 1.3,
                       ),
                     ),
-
                     const SizedBox(
                       height: 4,
                     ),
-
                     Text(
                       isVerified
                           ? 'Verified location'
                           : 'Location not verified yet',
-                      style: TextStyle(
-                        color: isVerified
+                      style:
+                      TextStyle(
+                        color:
+                        isVerified
                             ? primaryGreen
                             : Colors.orange,
                         fontSize: 9,
@@ -1083,11 +1687,9 @@ class _MapPageState extends State<MapPage> {
                   ],
                 ),
               ),
-
               const SizedBox(
                 width: 8,
               ),
-
               Column(
                 crossAxisAlignment:
                 CrossAxisAlignment
@@ -1105,18 +1707,20 @@ class _MapPageState extends State<MapPage> {
                       fontSize: 16,
                     ),
                   ),
-
                   IconButton(
-                    onPressed: () {
+                    onPressed:
+                        () {
                       locateStore(
                         selectedStore!,
                       );
                     },
-                    icon: const Icon(
+                    icon:
+                    const Icon(
                       Icons.navigation,
                       size: 20,
                     ),
-                    color: isVerified
+                    color:
+                    isVerified
                         ? primaryGreen
                         : Colors.orange,
                   ),
@@ -1124,7 +1728,6 @@ class _MapPageState extends State<MapPage> {
               ),
             ],
           ),
-
           if (isCheapest)
             Container(
               width:
@@ -1141,7 +1744,8 @@ class _MapPageState extends State<MapPage> {
               ),
               decoration:
               BoxDecoration(
-                color: lightGreen,
+                color:
+                lightGreen,
                 borderRadius:
                 BorderRadius
                     .circular(
@@ -1149,8 +1753,7 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               child: Text(
-                'Best price for '
-                    '${getSelectedFoodName()}',
+                'Cheapest nearby price for ${getSelectedFoodName()}',
                 textAlign:
                 TextAlign.center,
                 style:
@@ -1159,7 +1762,8 @@ class _MapPageState extends State<MapPage> {
                   primaryGreen,
                   fontSize: 10,
                   fontWeight:
-                  FontWeight.bold,
+                  FontWeight
+                      .bold,
                 ),
               ),
             ),
@@ -1195,10 +1799,18 @@ class _MapPageState extends State<MapPage> {
         'premise_code'] ==
             store['premise_code'];
 
+    final distance =
+    double.tryParse(
+      store['distance']
+          ?.toString() ??
+          '',
+    );
+
     return InkWell(
       onTap: () {
         setState(() {
-          selectedStore = store;
+          selectedStore =
+              store;
         });
       },
       borderRadius:
@@ -1214,8 +1826,7 @@ class _MapPageState extends State<MapPage> {
         const EdgeInsets.all(
           11,
         ),
-        decoration:
-        BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
           borderRadius:
           BorderRadius.circular(
@@ -1228,7 +1839,9 @@ class _MapPageState extends State<MapPage> {
               0xFFE7EBEA,
             ),
             width:
-            isSelected ? 2 : 1,
+            isSelected
+                ? 2
+                : 1,
           ),
         ),
         child: Row(
@@ -1240,7 +1853,8 @@ class _MapPageState extends State<MapPage> {
               Alignment.center,
               decoration:
               BoxDecoration(
-                color: isCheapest
+                color:
+                isCheapest
                     ? primaryGreen
                     : lightGreen,
                 shape:
@@ -1249,20 +1863,20 @@ class _MapPageState extends State<MapPage> {
               child: Text(
                 '${index + 1}',
                 style: TextStyle(
-                  color: isCheapest
+                  color:
+                  isCheapest
                       ? Colors.white
                       : primaryGreen,
                   fontWeight:
-                  FontWeight.bold,
+                  FontWeight
+                      .bold,
                   fontSize: 11,
                 ),
               ),
             ),
-
             const SizedBox(
               width: 10,
             ),
-
             Expanded(
               child: Column(
                 crossAxisAlignment:
@@ -1276,20 +1890,17 @@ class _MapPageState extends State<MapPage> {
                         height: 8,
                         decoration:
                         BoxDecoration(
-                          color: isVerified
+                          color:
+                          isVerified
                               ? primaryGreen
-                              : Colors
-                              .orange,
+                              : Colors.orange,
                           shape:
-                          BoxShape
-                              .circle,
+                          BoxShape.circle,
                         ),
                       ),
-
                       const SizedBox(
                         width: 5,
                       ),
-
                       Expanded(
                         child: Text(
                           store['premise']
@@ -1301,7 +1912,8 @@ class _MapPageState extends State<MapPage> {
                               .ellipsis,
                           style:
                           const TextStyle(
-                            fontSize: 12,
+                            fontSize:
+                            12,
                             fontWeight:
                             FontWeight
                                 .bold,
@@ -1310,7 +1922,6 @@ class _MapPageState extends State<MapPage> {
                           ),
                         ),
                       ),
-
                       if (isCheapest)
                         Container(
                           margin:
@@ -1321,8 +1932,10 @@ class _MapPageState extends State<MapPage> {
                           padding:
                           const EdgeInsets
                               .symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                            horizontal:
+                            6,
+                            vertical:
+                            2,
                           ),
                           decoration:
                           BoxDecoration(
@@ -1341,7 +1954,8 @@ class _MapPageState extends State<MapPage> {
                             TextStyle(
                               color:
                               primaryGreen,
-                              fontSize: 8,
+                              fontSize:
+                              8,
                               fontWeight:
                               FontWeight
                                   .bold,
@@ -1350,11 +1964,9 @@ class _MapPageState extends State<MapPage> {
                         ),
                     ],
                   ),
-
                   const SizedBox(
                     height: 3,
                   ),
-
                   Text(
                     '${store['district'] ?? ''}, '
                         '${store['state'] ?? ''}',
@@ -1365,11 +1977,27 @@ class _MapPageState extends State<MapPage> {
                       fontSize: 9,
                     ),
                   ),
-
+                  if (distance !=
+                      null) ...[
+                    const SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      '${distance.toStringAsFixed(2)} KM away',
+                      style:
+                      const TextStyle(
+                        color:
+                        primaryGreen,
+                        fontSize: 9,
+                        fontWeight:
+                        FontWeight
+                            .w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(
                     height: 4,
                   ),
-
                   Text(
                     store['address']
                         ?.toString() ??
@@ -1386,17 +2014,17 @@ class _MapPageState extends State<MapPage> {
                       height: 1.3,
                     ),
                   ),
-
                   const SizedBox(
                     height: 3,
                   ),
-
                   Text(
                     isVerified
                         ? 'Verified location'
                         : 'Location not verified yet',
-                    style: TextStyle(
-                      color: isVerified
+                    style:
+                    TextStyle(
+                      color:
+                      isVerified
                           ? primaryGreen
                           : Colors.orange,
                       fontSize: 8,
@@ -1405,11 +2033,9 @@ class _MapPageState extends State<MapPage> {
                 ],
               ),
             ),
-
             const SizedBox(
               width: 7,
             ),
-
             Column(
               crossAxisAlignment:
               CrossAxisAlignment
@@ -1426,11 +2052,9 @@ class _MapPageState extends State<MapPage> {
                     primaryGreen,
                   ),
                 ),
-
                 const SizedBox(
                   height: 6,
                 ),
-
                 InkWell(
                   onTap: () {
                     locateStore(
@@ -1442,12 +2066,14 @@ class _MapPageState extends State<MapPage> {
                       .circular(
                     30,
                   ),
-                  child: Container(
+                  child:
+                  Container(
                     width: 35,
                     height: 35,
                     decoration:
                     BoxDecoration(
-                      color: isVerified
+                      color:
+                      isVerified
                           ? lightGreen
                           : const Color(
                         0xFFFFF3E0,
@@ -1455,10 +2081,12 @@ class _MapPageState extends State<MapPage> {
                       shape:
                       BoxShape.circle,
                     ),
-                    child: Icon(
+                    child:
+                    Icon(
                       Icons.navigation,
                       size: 18,
-                      color: isVerified
+                      color:
+                      isVerified
                           ? primaryGreen
                           : Colors.orange,
                     ),
@@ -1475,19 +2103,14 @@ class _MapPageState extends State<MapPage> {
   void showMessage(
       String message,
       ) {
-    if (!mounted) {
-      return;
-    }
-
     ScaffoldMessenger.of(context)
         .hideCurrentSnackBar();
 
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-        ),
+        content:
+        Text(message),
         duration:
         const Duration(
           seconds: 2,
@@ -1507,74 +2130,114 @@ class _MapPageState extends State<MapPage> {
         child: Column(
           children: [
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(
-                20, 14, 20, 16,
+              width:
+              double.infinity,
+              padding:
+              const EdgeInsets
+                  .fromLTRB(
+                20,
+                14,
+                20,
+                16,
               ),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+              decoration:
+              const BoxDecoration(
+                gradient:
+                LinearGradient(
+                  begin:
+                  Alignment
+                      .topLeft,
+                  end:
+                  Alignment
+                      .bottomRight,
                   colors: [
-                    primaryGreen, darkGreen,
+                    primaryGreen,
+                    darkGreen,
                   ],
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(25),
-                  bottomRight: Radius.circular(25),
+                borderRadius:
+                BorderRadius
+                    .only(
+                  bottomLeft:
+                  Radius.circular(
+                    25,
+                  ),
+                  bottomRight:
+                  Radius.circular(
+                    25,
+                  ),
                 ),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
                 children: [
                   const Row(
                     children: [
                       Icon(
-                        Icons.location_on,
-                        color: Colors.white,
+                        Icons
+                            .location_on,
+                        color:
+                        Colors.white,
                         size: 22,
                       ),
-                      SizedBox(width: 7),
+                      SizedBox(
+                        width: 7,
+                      ),
                       Text(
                         'Store Map',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                        style:
+                        TextStyle(
+                          color:
+                          Colors.white,
+                          fontSize:
+                          20,
+                          fontWeight:
+                          FontWeight
+                              .bold,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 3),
-
+                  const SizedBox(
+                    height: 3,
+                  ),
                   const Text(
                     'Find stores and compare the latest food prices',
-                    style: TextStyle(
-                      color: Color(0xFFDCEDE6),
-                      fontSize: 10,
+                    style:
+                    TextStyle(
+                      color:
+                      Color(
+                        0xFFDCEDE6,
+                      ),
+                      fontSize:
+                      10,
                     ),
                   ),
-
-                  const SizedBox(height: 12),
-
+                  const SizedBox(
+                    height: 12,
+                  ),
                   Row(
                     children: [
                       Expanded(
-                        flex: 3, child: buildFoodDropdown(),
+                        flex: 3,
+                        child:
+                        buildFoodDropdown(),
                       ),
-
-                      const SizedBox(width: 10),
-
+                      const SizedBox(
+                        width: 10,
+                      ),
                       Expanded(
-                        flex: 2, child: buildStateDropdown(),
+                        flex: 2,
+                        child:
+                        buildStateDropdown(),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-
             Expanded(
               child: isLoading
                   ? const Center(
@@ -1584,20 +2247,31 @@ class _MapPageState extends State<MapPage> {
                   primaryGreen,
                 ),
               )
-                  : SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                      const EdgeInsets
-                          .fromLTRB(
-                        14,
-                        14,
-                        14,
-                        0,
-                      ),
-                      child: Container(
-                        height: 300,
+                  : CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child:
+                    buildFoodSearch(),
+                  ),
+                  SliverToBoxAdapter(
+                    child:
+                    buildRadiusSelector(),
+                  ),
+                  SliverPadding(
+                    padding:
+                    const EdgeInsets
+                        .fromLTRB(
+                      14,
+                      14,
+                      14,
+                      0,
+                    ),
+                    sliver:
+                    SliverToBoxAdapter(
+                      child:
+                      Container(
+                        height:
+                        300,
                         decoration:
                         BoxDecoration(
                           color:
@@ -1616,8 +2290,10 @@ class _MapPageState extends State<MapPage> {
                           ),
                         ),
                         clipBehavior:
-                        Clip.antiAlias,
-                        child: Stack(
+                        Clip
+                            .antiAlias,
+                        child:
+                        Stack(
                           children: [
                             FlutterMap(
                               mapController:
@@ -1639,12 +2315,10 @@ class _MapPageState extends State<MapPage> {
                                   userAgentPackageName:
                                   'com.example.my67food_price',
                                 ),
-
                                 MarkerLayer(
                                   markers:
                                   buildMarkers(),
                                 ),
-
                                 const RichAttributionWidget(
                                   attributions: [
                                     TextSourceAttribution(
@@ -1654,25 +2328,57 @@ class _MapPageState extends State<MapPage> {
                                 ),
                               ],
                             ),
-
                             buildCheapestBadge(),
+                            Positioned(
+                              right: 12,
+                              bottom: 12,
+                              child:
+                              FloatingActionButton
+                                  .small(
+                                heroTag:
+                                'currentLocationButton',
+                                backgroundColor:
+                                trackingEnabled
+                                    ? Colors.red
+                                    : Colors.white,
+                                onPressed:
+                                handleLocationButton,
+                                child:
+                                Icon(
+                                  trackingEnabled
+                                      ? Icons.location_off
+                                      : Icons.my_location,
+                                  color:
+                                  trackingEnabled
+                                      ? Colors.white
+                                      : primaryGreen,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
                     ),
-
-                    buildSelectedStoreCard(),
-
-                    Padding(
-                      padding:
-                      const EdgeInsets
-                          .fromLTRB(
-                        16,
-                        18,
-                        16,
-                        9,
-                      ),
-                      child: Row(
+                  ),
+                  if (selectedStore !=
+                      null)
+                    SliverToBoxAdapter(
+                      child:
+                      buildSelectedStoreCard(),
+                    ),
+                  SliverPadding(
+                    padding:
+                    const EdgeInsets
+                        .fromLTRB(
+                      16,
+                      18,
+                      16,
+                      9,
+                    ),
+                    sliver:
+                    SliverToBoxAdapter(
+                      child:
+                      Row(
                         children: [
                           Expanded(
                             child:
@@ -1681,51 +2387,50 @@ class _MapPageState extends State<MapPage> {
                               CrossAxisAlignment
                                   .start,
                               children: [
-                                const Text(
-                                  'Cheapest Stores',
+                                Text(
+                                  userLatitude != null &&
+                                      userLongitude != null
+                                      ? 'Nearby Stores Within ${selectedRadius.toStringAsFixed(0)} KM'
+                                      : 'Stores by Price',
                                   style:
-                                  TextStyle(
+                                  const TextStyle(
                                     fontSize:
                                     18,
                                     fontWeight:
-                                    FontWeight
-                                        .w700,
+                                    FontWeight.w700,
                                     color:
                                     textColor,
                                   ),
                                 ),
-
                                 const SizedBox(
                                   height:
                                   3,
                                 ),
-
                                 Text(
                                   getSelectedFoodName(),
                                   maxLines:
                                   1,
                                   overflow:
-                                  TextOverflow
-                                      .ellipsis,
+                                  TextOverflow.ellipsis,
                                   style:
                                   const TextStyle(
                                     fontSize:
                                     9,
-                                    color: Colors
-                                        .black45,
+                                    color:
+                                    Colors.black45,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-
                           Container(
                             padding:
                             const EdgeInsets
                                 .symmetric(
                               horizontal:
                               9,
-                              vertical: 5,
+                              vertical:
+                              5,
                             ),
                             decoration:
                             BoxDecoration(
@@ -1737,7 +2442,8 @@ class _MapPageState extends State<MapPage> {
                                 20,
                               ),
                             ),
-                            child: Text(
+                            child:
+                            Text(
                               '${storeList.length}/10 stores',
                               style:
                               const TextStyle(
@@ -1746,129 +2452,135 @@ class _MapPageState extends State<MapPage> {
                                 fontSize:
                                 9,
                                 fontWeight:
-                                FontWeight
-                                    .w600,
+                                FontWeight.w600,
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-
-                    if (storeList.isEmpty)
-                      Container(
-                        margin:
-                        const EdgeInsets
-                            .symmetric(
-                          horizontal:
-                          16,
-                        ),
-                        width:
-                        double.infinity,
-                        padding:
-                        const EdgeInsets
-                            .symmetric(
-                          vertical:
-                          45,
-                        ),
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          Colors.white,
-                          borderRadius:
-                          BorderRadius
-                              .circular(
-                            18,
-                          ),
-                          border:
-                          Border.all(
-                            color:
-                            const Color(
-                              0xFFE3E9E6,
-                            ),
-                          ),
-                        ),
+                  ),
+                  if (storeList
+                      .isEmpty)
+                    SliverPadding(
+                      padding:
+                      const EdgeInsets
+                          .symmetric(
+                        horizontal:
+                        16,
+                      ),
+                      sliver:
+                      SliverToBoxAdapter(
                         child:
-                        const Column(
-                          children: [
-                            Icon(
-                              Icons
-                                  .store_mall_directory_outlined,
-                              size: 48,
-                              color: Colors
-                                  .black26,
+                        Container(
+                          width:
+                          double.infinity,
+                          padding:
+                          const EdgeInsets
+                              .symmetric(
+                            vertical:
+                            45,
+                          ),
+                          decoration:
+                          BoxDecoration(
+                            color:
+                            Colors.white,
+                            borderRadius:
+                            BorderRadius
+                                .circular(
+                              18,
                             ),
-
-                            SizedBox(
-                              height:
-                              10,
-                            ),
-
-                            Text(
-                              'No store price data found',
-                              style:
-                              TextStyle(
-                                fontWeight:
-                                FontWeight
-                                    .w600,
+                            border:
+                            Border.all(
+                              color:
+                              const Color(
+                                0xFFE3E9E6,
                               ),
                             ),
-
-                            SizedBox(
-                              height:
-                              4,
-                            ),
-
-                            Text(
-                              'Try another food item or state.',
-                              style:
-                              TextStyle(
+                          ),
+                          child:
+                          Column(
+                            children: [
+                              const Icon(
+                                Icons
+                                    .store_mall_directory_outlined,
+                                size:
+                                48,
                                 color:
-                                Colors.black45,
-                                fontSize:
+                                Colors.black26,
+                              ),
+                              const SizedBox(
+                                height:
                                 10,
                               ),
-                            ),
-                          ],
+                              Text(
+                                userLatitude != null &&
+                                    userLongitude != null
+                                    ? 'No stores found within ${selectedRadius.toStringAsFixed(0)} KM'
+                                    : 'No store price data found',
+                                style:
+                                const TextStyle(
+                                  fontWeight:
+                                  FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(
+                                height:
+                                4,
+                              ),
+                              Text(
+                                userLatitude != null &&
+                                    userLongitude != null
+                                    ? 'Try a larger radius or another food item.'
+                                    : 'Try another food item or state.',
+                                style:
+                                const TextStyle(
+                                  color:
+                                  Colors.black45,
+                                  fontSize:
+                                  10,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-
-                    if (storeList.isNotEmpty)
-                      Padding(
-                        padding:
-                        const EdgeInsets
-                            .symmetric(
-                          horizontal:
-                          14,
-                        ),
-                        child:
-                        ListView.builder(
-                          shrinkWrap:
-                          true,
-                          physics:
-                          const NeverScrollableScrollPhysics(),
-                          itemCount:
-                          storeList
-                              .length,
-                          itemBuilder:
+                    ),
+                  if (storeList
+                      .isNotEmpty)
+                    SliverPadding(
+                      padding:
+                      const EdgeInsets
+                          .symmetric(
+                        horizontal:
+                        14,
+                      ),
+                      sliver:
+                      SliverList(
+                        delegate:
+                        SliverChildBuilderDelegate(
                               (
                               context,
                               index,
                               ) {
                             return buildStoreCard(
-                              storeList[
-                              index],
+                              storeList[index],
                               index,
                             );
                           },
+                          childCount:
+                          storeList.length,
                         ),
                       ),
-
-                    const SizedBox(
-                      height: 25,
                     ),
-                  ],
-                ),
+                  const SliverToBoxAdapter(
+                    child:
+                    SizedBox(
+                      height:
+                      25,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -1879,6 +2591,8 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void dispose() {
+    locationSubscription?.cancel();
+    searchController.dispose();
     mapController.dispose();
     super.dispose();
   }

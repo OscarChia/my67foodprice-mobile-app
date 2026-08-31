@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/database_service.dart';
 import 'food_details_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,15 +15,29 @@ class HomePage extends StatefulWidget {
   });
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() =>
+      _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  static const Color primaryGreen = Color(0xFF176B52);
-  static const Color darkGreen = Color(0xFF0F513D);
-  static const Color backgroundColor = Color(0xFFF6F8F5);
-  static const Color lightGreen = Color(0xFFEAF4EF);
-  static const Color textColor = Color(0xFF1F2924);
+class _HomePageState
+    extends State<HomePage> {
+  static const Color primaryGreen =
+  Color(0xFF176B52);
+
+  static const Color darkGreen =
+  Color(0xFF0F513D);
+
+  static const Color backgroundColor =
+  Color(0xFFF6F8F5);
+
+  static const Color lightGreen =
+  Color(0xFFEAF4EF);
+
+  static const Color textColor =
+  Color(0xFF1F2924);
+
+  final DatabaseService databaseService =
+  DatabaseService();
 
   bool isLoading = true;
 
@@ -35,130 +49,82 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     fetchHomeData();
   }
 
   Future<void> fetchHomeData() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      final latestData = await Supabase.instance.client
-          .from('food_prices')
-          .select('date')
-          .order(
-        'date',
-        ascending: false,
-      )
-          .limit(1);
-
-      if (latestData.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          isLoading = false;
-        });
-
-        return;
-      }
-
-      final newestDate =
-      latestData.first['date'].toString();
-
-      final priceData = await Supabase.instance.client
-          .from('food_prices')
-          .select()
-          .eq(
-        'date',
-        newestDate,
-      )
-          .limit(80);
-
-      List<dynamic> usedItemCodes = [];
-
-      List<Map<String, dynamic>> uniquePrices = [];
-
-      for (final price in priceData) {
-        final itemCode = price['item_code'];
-
-        if (!usedItemCodes.contains(itemCode)) {
-          usedItemCodes.add(itemCode);
-
-          uniquePrices.add(
-            Map<String, dynamic>.from(price),
-          );
-        }
-
-        if (uniquePrices.length >= 12) {
-          break;
-        }
-      }
-
-      List<Map<String, dynamic>> combinedList = [];
-
-      for (final price in uniquePrices) {
-        final itemData = await Supabase.instance.client
-            .from('food_items')
-            .select()
-            .eq(
-          'item_code',
-          price['item_code'],
-        )
-            .maybeSingle();
-
-        if (itemData != null) {
-          combinedList.add({
-            'item_code': price['item_code'],
-            'item':
-            itemData['item'] ?? 'Unknown Item',
-            'category':
-            itemData['item_category'] ?? '',
-            'unit': itemData['unit'] ?? '',
-            'price': price['price'],
-            'date': price['date'],
-          });
-        }
-      }
-
-      if (!mounted) {
-        return;
-      }
+      final combinedList =
+      await databaseService
+          .getHomeFoodData();
 
       setState(() {
-        latestDate = newestDate;
+        if (combinedList.isNotEmpty) {
+          latestDate =
+              combinedList.first['date']
+                  .toString();
+        } else {
+          latestDate = '';
+        }
 
         latestPrices =
-            combinedList.take(4).toList();
+            combinedList
+                .take(4)
+                .toList();
 
         featuredItems =
-            combinedList.take(8).toList();
+            combinedList
+                .take(8)
+                .toList();
 
         isLoading = false;
       });
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error loading dashboard: $e',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      showMessage(
+        'Unable to load dashboard.',
       );
     }
   }
 
-  String formatPrice(dynamic value) {
-    final price =
-        double.tryParse(value.toString()) ?? 0;
+  void showMessage(
+      String message,
+      ) {
+    ScaffoldMessenger.of(context)
+        .hideCurrentSnackBar();
 
-    return price.toStringAsFixed(2);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+        ),
+        behavior:
+        SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  String formatPrice(
+      dynamic value,
+      ) {
+    final price =
+        double.tryParse(
+          value.toString(),
+        ) ??
+            0;
+
+    return price.toStringAsFixed(
+      2,
+    );
   }
 
   Widget sectionHeader({
@@ -167,29 +133,39 @@ class _HomePageState extends State<HomePage> {
     VoidCallback? onPressed,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
+      padding:
+      const EdgeInsets.symmetric(
         horizontal: 20,
       ),
       child: Row(
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style:
+            const TextStyle(
               fontSize: 19,
-              fontWeight: FontWeight.w700,
-              color: textColor,
+              fontWeight:
+              FontWeight.w700,
+              color:
+              textColor,
             ),
           ),
           const Spacer(),
           if (actionText != null)
             TextButton(
-              onPressed: onPressed,
-              child: Text(
+              onPressed:
+              onPressed,
+              child:
+              Text(
                 actionText,
-                style: const TextStyle(
-                  color: primaryGreen,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                style:
+                const TextStyle(
+                  color:
+                  primaryGreen,
+                  fontSize:
+                  13,
+                  fontWeight:
+                  FontWeight.w600,
                 ),
               ),
             ),
@@ -206,42 +182,64 @@ class _HomePageState extends State<HomePage> {
     return Expanded(
       child: Container(
         height: 96,
-        padding: const EdgeInsets.symmetric(
+        padding:
+        const EdgeInsets.symmetric(
           horizontal: 8,
           vertical: 12,
         ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: const Color(0xFFE6ECE8),
+        decoration:
+        BoxDecoration(
+          color:
+          Colors.white,
+          borderRadius:
+          BorderRadius.circular(
+            18,
+          ),
+          border:
+          Border.all(
+            color:
+            const Color(
+              0xFFE6ECE8,
+            ),
           ),
         ),
-        child: Column(
+        child:
+        Column(
           mainAxisAlignment:
           MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              color: primaryGreen,
+              color:
+              primaryGreen,
               size: 22,
             ),
-            const SizedBox(height: 5),
+            const SizedBox(
+              height: 5,
+            ),
             Text(
               value,
-              style: const TextStyle(
+              style:
+              const TextStyle(
                 fontSize: 19,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+                fontWeight:
+                FontWeight.bold,
+                color:
+                textColor,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(
+              height: 2,
+            ),
             Text(
               title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
+              textAlign:
+              TextAlign.center,
+              style:
+              const TextStyle(
                 fontSize: 10,
-                color: Colors.black54,
+                color:
+                Colors.black54,
               ),
             ),
           ],
@@ -256,20 +254,35 @@ class _HomePageState extends State<HomePage> {
     required IconData icon,
   }) {
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius:
+      BorderRadius.circular(
+        15,
+      ),
       onTap: () {
-        widget.onSearchTap(category);
+        widget.onSearchTap(
+          category,
+        );
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(
+        padding:
+        const EdgeInsets.symmetric(
           horizontal: 6,
-          vertical: 12,
+          vertical: 8,
         ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: const Color(0xFFE6ECE8),
+        decoration:
+        BoxDecoration(
+          color:
+          Colors.white,
+          borderRadius:
+          BorderRadius.circular(
+            15,
+          ),
+          border:
+          Border.all(
+            color:
+            const Color(
+              0xFFE1E8E4,
+            ),
           ),
         ),
         child: Column(
@@ -277,28 +290,40 @@ class _HomePageState extends State<HomePage> {
           MainAxisAlignment.center,
           children: [
             Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: lightGreen,
-                shape: BoxShape.circle,
+              width: 40,
+              height: 40,
+              decoration:
+              const BoxDecoration(
+                color:
+                lightGreen,
+                shape:
+                BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                size: 25,
-                color: primaryGreen,
+                size: 21,
+                color:
+                primaryGreen,
               ),
             ),
-            const SizedBox(height: 9),
+            const SizedBox(
+              height: 7,
+            ),
             Text(
               title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
+              maxLines: 2,
+              overflow:
+              TextOverflow.ellipsis,
+              textAlign:
+              TextAlign.center,
+              style:
+              const TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: textColor,
+                height: 1.15,
+                fontWeight:
+                FontWeight.w700,
+                color:
+                textColor,
               ),
             ),
           ],
@@ -315,9 +340,12 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(
         builder: (context) =>
             FoodDetailsPage(
-              itemCode: food['item_code'],
-              itemName: food['item'],
-              unit: food['unit'],
+              itemCode:
+              food['item_code'],
+              itemName:
+              food['item'],
+              unit:
+              food['unit'],
             ),
       ),
     );
@@ -327,91 +355,133 @@ class _HomePageState extends State<HomePage> {
       Map<String, dynamic> food,
       ) {
     return Container(
-      margin: const EdgeInsets.only(
+      margin:
+      const EdgeInsets.only(
         bottom: 10,
       ),
-      padding: const EdgeInsets.symmetric(
+      padding:
+      const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 10,
       ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFE6ECE8),
+      decoration:
+      BoxDecoration(
+        color:
+        Colors.white,
+        borderRadius:
+        BorderRadius.circular(
+          18,
+        ),
+        border:
+        Border.all(
+          color:
+          const Color(
+            0xFFE6ECE8,
+          ),
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius:
+        BorderRadius.circular(
+          18,
+        ),
         onTap: () {
-          openFoodDetails(food);
+          openFoodDetails(
+            food,
+          );
         },
         child: Row(
           children: [
             Container(
               width: 50,
               height: 50,
-              decoration: BoxDecoration(
-                color: lightGreen,
+              decoration:
+              BoxDecoration(
+                color:
+                lightGreen,
                 borderRadius:
-                BorderRadius.circular(14),
+                BorderRadius.circular(
+                  14,
+                ),
               ),
-              child: const Icon(
-                Icons.shopping_basket_outlined,
-                color: primaryGreen,
+              child:
+              const Icon(
+                Icons
+                    .shopping_basket_outlined,
+                color:
+                primaryGreen,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(
+              width: 12,
+            ),
             Expanded(
-              child: Column(
+              child:
+              Column(
                 crossAxisAlignment:
                 CrossAxisAlignment.start,
                 children: [
                   Text(
-                    food['item'].toString(),
+                    food['item']
+                        .toString(),
                     maxLines: 2,
                     overflow:
                     TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:
+                    const TextStyle(
                       fontSize: 13,
                       fontWeight:
                       FontWeight.w600,
-                      color: textColor,
+                      color:
+                      textColor,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(
+                    height: 4,
+                  ),
                   Text(
                     '${food['category']} • ${food['unit']}',
                     maxLines: 1,
                     overflow:
                     TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:
+                    const TextStyle(
                       fontSize: 10,
-                      color: Colors.black45,
+                      color:
+                      Colors.black45,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(
+              width: 8,
+            ),
             Column(
               crossAxisAlignment:
               CrossAxisAlignment.end,
               children: [
                 Text(
                   'RM ${formatPrice(food['price'])}',
-                  style: const TextStyle(
+                  style:
+                  const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: primaryGreen,
+                    fontWeight:
+                    FontWeight.bold,
+                    color:
+                    primaryGreen,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(
+                  height: 2,
+                ),
                 const Text(
                   'Latest',
-                  style: TextStyle(
+                  style:
+                  TextStyle(
                     fontSize: 9,
-                    color: Colors.black38,
+                    color:
+                    Colors.black38,
                   ),
                 ),
               ],
@@ -427,69 +497,111 @@ class _HomePageState extends State<HomePage> {
       ) {
     return Container(
       width: 168,
-      margin: const EdgeInsets.only(
+      margin:
+      const EdgeInsets.only(
         right: 12,
       ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFE6ECE8),
+      decoration:
+      BoxDecoration(
+        color:
+        Colors.white,
+        borderRadius:
+        BorderRadius.circular(
+          20,
+        ),
+        border:
+        Border.all(
+          color:
+          const Color(
+            0xFFE6ECE8,
+          ),
         ),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius:
+        BorderRadius.circular(
+          20,
+        ),
         onTap: () {
-          openFoodDetails(food);
+          openFoodDetails(
+            food,
+          );
         },
         child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
+          padding:
+          const EdgeInsets.all(
+            12,
+          ),
+          child:
+          Column(
             crossAxisAlignment:
             CrossAxisAlignment.start,
             children: [
               Container(
                 height: 83,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: lightGreen,
+                width:
+                double.infinity,
+                decoration:
+                BoxDecoration(
+                  color:
+                  lightGreen,
                   borderRadius:
-                  BorderRadius.circular(15),
+                  BorderRadius.circular(
+                    15,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.restaurant_menu_rounded,
+                child:
+                const Icon(
+                  Icons
+                      .restaurant_menu_rounded,
                   size: 40,
-                  color: primaryGreen,
+                  color:
+                  primaryGreen,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(
+                height: 10,
+              ),
               Text(
-                food['item'].toString(),
+                food['item']
+                    .toString(),
                 maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                overflow:
+                TextOverflow.ellipsis,
+                style:
+                const TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
+                  fontWeight:
+                  FontWeight.w600,
+                  color:
+                  textColor,
                 ),
               ),
               const Spacer(),
               Text(
                 'RM ${formatPrice(food['price'])}',
-                style: const TextStyle(
+                style:
+                const TextStyle(
                   fontSize: 17,
-                  color: primaryGreen,
-                  fontWeight: FontWeight.bold,
+                  color:
+                  primaryGreen,
+                  fontWeight:
+                  FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(
+                height: 2,
+              ),
               Text(
                 'per ${food['unit']}',
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                overflow:
+                TextOverflow.ellipsis,
+                style:
+                const TextStyle(
                   fontSize: 10,
-                  color: Colors.black45,
+                  color:
+                  Colors.black45,
                 ),
               ),
             ],
@@ -506,15 +618,31 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onTap,
   }) {
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
+      borderRadius:
+      BorderRadius.circular(
+        18,
+      ),
+      onTap:
+      onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: const Color(0xFFE6ECE8),
+        padding:
+        const EdgeInsets.all(
+          12,
+        ),
+        decoration:
+        BoxDecoration(
+          color:
+          Colors.white,
+          borderRadius:
+          BorderRadius.circular(
+            18,
+          ),
+          border:
+          Border.all(
+            color:
+            const Color(
+              0xFFE6ECE8,
+            ),
           ),
         ),
         child: Row(
@@ -522,20 +650,29 @@ class _HomePageState extends State<HomePage> {
             Container(
               width: 45,
               height: 45,
-              decoration: BoxDecoration(
-                color: lightGreen,
+              decoration:
+              BoxDecoration(
+                color:
+                lightGreen,
                 borderRadius:
-                BorderRadius.circular(13),
+                BorderRadius.circular(
+                  13,
+                ),
               ),
-              child: Icon(
+              child:
+              Icon(
                 icon,
                 size: 23,
-                color: primaryGreen,
+                color:
+                primaryGreen,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(
+              width: 10,
+            ),
             Expanded(
-              child: Column(
+              child:
+              Column(
                 mainAxisAlignment:
                 MainAxisAlignment.center,
                 crossAxisAlignment:
@@ -546,22 +683,28 @@ class _HomePageState extends State<HomePage> {
                     maxLines: 1,
                     overflow:
                     TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:
+                    const TextStyle(
                       fontSize: 11,
                       fontWeight:
                       FontWeight.w700,
-                      color: textColor,
+                      color:
+                      textColor,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(
+                    height: 3,
+                  ),
                   Text(
                     subtitle,
                     maxLines: 1,
                     overflow:
                     TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:
+                    const TextStyle(
                       fontSize: 9,
-                      color: Colors.black45,
+                      color:
+                      Colors.black45,
                     ),
                   ),
                 ],
@@ -583,14 +726,12 @@ class _HomePageState extends State<HomePage> {
         child: RefreshIndicator(
           color: primaryGreen,
           onRefresh: fetchHomeData,
-          child: SingleChildScrollView(
+          child: CustomScrollView(
             physics:
             const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-                Container(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Container(
                   width: double.infinity,
                   padding:
                   const EdgeInsets.fromLTRB(
@@ -599,10 +740,14 @@ class _HomePageState extends State<HomePage> {
                     20,
                     30,
                   ),
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                  decoration:
+                  const BoxDecoration(
+                    gradient:
+                    LinearGradient(
+                      begin:
+                      Alignment.topLeft,
+                      end:
+                      Alignment.bottomRight,
                       colors: [
                         primaryGreen,
                         darkGreen,
@@ -611,9 +756,13 @@ class _HomePageState extends State<HomePage> {
                     borderRadius:
                     BorderRadius.only(
                       bottomLeft:
-                      Radius.circular(30),
+                      Radius.circular(
+                        30,
+                      ),
                       bottomRight:
-                      Radius.circular(30),
+                      Radius.circular(
+                        30,
+                      ),
                     ),
                   ),
                   child: Column(
@@ -632,17 +781,22 @@ class _HomePageState extends State<HomePage> {
                                 alpha: 0.15,
                               ),
                               borderRadius:
-                              BorderRadius
-                                  .circular(13),
+                              BorderRadius.circular(
+                                13,
+                              ),
                             ),
-                            child: const Icon(
+                            child:
+                            const Icon(
                               Icons
                                   .shopping_basket_rounded,
-                              color: Colors.white,
+                              color:
+                              Colors.white,
                               size: 23,
                             ),
                           ),
-                          const SizedBox(width: 11),
+                          const SizedBox(
+                            width: 11,
+                          ),
                           const Expanded(
                             child: Column(
                               crossAxisAlignment:
@@ -651,22 +805,26 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 Text(
                                   'My67Food Price',
-                                  style: TextStyle(
+                                  style:
+                                  TextStyle(
                                     color:
                                     Colors.white,
-                                    fontSize: 20,
+                                    fontSize:
+                                    20,
                                     fontWeight:
-                                    FontWeight
-                                        .bold,
+                                    FontWeight.bold,
                                   ),
                                 ),
                                 Text(
                                   'Malaysia Food Price Comparison',
-                                  style: TextStyle(
+                                  style:
+                                  TextStyle(
                                     color:
                                     Color(
-                                        0xFFDCEDE6),
-                                    fontSize: 10,
+                                      0xFFDCEDE6,
+                                    ),
+                                    fontSize:
+                                    10,
                                   ),
                                 ),
                               ],
@@ -684,79 +842,100 @@ class _HomePageState extends State<HomePage> {
                               shape:
                               BoxShape.circle,
                             ),
-                            child: IconButton(
-                              onPressed: widget.onNotificationTap,
-                              icon: const Icon(
-                                Icons.notifications_none_rounded,
-                                color: Colors.white,
+                            child:
+                            IconButton(
+                              onPressed: widget
+                                  .onNotificationTap,
+                              icon:
+                              const Icon(
+                                Icons
+                                    .notifications_none_rounded,
+                                color:
+                                Colors.white,
                                 size: 22,
                               ),
                             ),
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 24),
-
+                      const SizedBox(
+                        height: 24,
+                      ),
                       const Text(
                         'Find better food prices',
-                        style: TextStyle(
-                          color: Colors.white,
+                        style:
+                        TextStyle(
+                          color:
+                          Colors.white,
                           fontSize: 24,
                           fontWeight:
                           FontWeight.w700,
                         ),
                       ),
-
-                      const SizedBox(height: 5),
-
+                      const SizedBox(
+                        height: 5,
+                      ),
                       Text(
                         latestDate.isEmpty
                             ? 'Compare prices across Malaysia'
                             : 'Latest data updated $latestDate',
-                        style: const TextStyle(
+                        style:
+                        const TextStyle(
                           color:
-                          Color(0xFFDCEDE6),
+                          Color(
+                            0xFFDCEDE6,
+                          ),
                           fontSize: 12,
                         ),
                       ),
-
-                      const SizedBox(height: 20),
-
+                      const SizedBox(
+                        height: 20,
+                      ),
                       Material(
-                        color: Colors.white,
+                        color:
+                        Colors.white,
                         borderRadius:
                         BorderRadius.circular(
-                            17),
+                          17,
+                        ),
                         child: InkWell(
                           borderRadius:
                           BorderRadius.circular(
-                              17),
+                            17,
+                          ),
                           onTap: () {
-                            widget.onSearchTap(null);
+                            widget.onSearchTap(
+                              null,
+                            );
                           },
                           child: Container(
                             height: 55,
                             padding:
                             const EdgeInsets
                                 .symmetric(
-                              horizontal: 16,
+                              horizontal:
+                              16,
                             ),
-                            child: const Row(
+                            child:
+                            const Row(
                               children: [
                                 Icon(
                                   Icons.search,
                                   color:
                                   primaryGreen,
                                 ),
-                                SizedBox(width: 11),
+                                SizedBox(
+                                  width: 11,
+                                ),
                                 Expanded(
                                   child: Text(
                                     'Search food prices...',
                                     style:
                                     TextStyle(
-                                      fontSize: 14,
-                                      color: Colors
+                                      fontSize:
+                                      14,
+                                      color:
+                                      Colors
                                           .black45,
                                     ),
                                   ),
@@ -765,7 +944,8 @@ class _HomePageState extends State<HomePage> {
                                   Icons
                                       .tune_rounded,
                                   color:
-                                  Colors.black38,
+                                  Colors
+                                      .black38,
                                   size: 20,
                                 ),
                               ],
@@ -776,127 +956,180 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 18),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 18,
+                ),
+              ),
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
+              SliverPadding(
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                sliver:
+                SliverToBoxAdapter(
                   child: Row(
                     children: [
                       statisticCard(
                         value: '320+',
-                        title: 'Food Items',
+                        title:
+                        'Food Items',
                         icon: Icons
                             .restaurant_menu_rounded,
                       ),
-                      const SizedBox(width: 9),
+                      const SizedBox(
+                        width: 9,
+                      ),
                       statisticCard(
                         value: '16',
-                        title: 'States',
+                        title:
+                        'States',
                         icon: Icons
                             .location_on_outlined,
                       ),
-                      const SizedBox(width: 9),
+                      const SizedBox(
+                        width: 9,
+                      ),
                       statisticCard(
                         value: '463K+',
-                        title: 'Price Records',
-                        icon:
-                        Icons.analytics_outlined,
+                        title:
+                        'Price Records',
+                        icon: Icons
+                            .analytics_outlined,
                       ),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 23),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 23,
+                ),
+              ),
 
-                sectionHeader(
-                  title: 'Food Categories',
-                  actionText: 'See all',
+              SliverToBoxAdapter(
+                child: sectionHeader(
+                  title:
+                  'Food Categories',
+                  actionText:
+                  'See all',
                   onPressed: () {
-                    widget.onSearchTap(null);
+                    widget.onSearchTap(
+                      null,
+                    );
                   },
                 ),
+              ),
 
-                const SizedBox(height: 6),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 6,
+                ),
+              ),
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  child: GridView.count(
+              SliverPadding(
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                sliver: SliverGrid(
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    shrinkWrap: true,
-                    physics:
-                    const NeverScrollableScrollPhysics(),
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 1.02,
-                    children: [
+                    childAspectRatio:
+                    1.38,
+                  ),
+                  delegate:
+                  SliverChildListDelegate(
+                    [
                       categoryCard(
-                        title: 'Sayur-sayuran',
+                        title:
+                        'Sayur-sayuran',
                         category:
                         'SAYUR-SAYURAN',
-                        icon: Icons.eco_outlined,
+                        icon:
+                        Icons.eco_outlined,
                       ),
                       categoryCard(
-                        title: 'Buah-buahan',
+                        title:
+                        'Buah-buahan',
                         category:
                         'BUAH-BUAHAN',
-                        icon: Icons.apple,
-                      ),
-                      categoryCard(
-                        title: 'Daging',
-                        category: 'DAGING',
                         icon:
-                        Icons.restaurant,
+                        Icons.apple,
                       ),
                       categoryCard(
-                        title: 'Bahan Laut',
+                        title:
+                        'Daging',
+                        category:
+                        'DAGING',
+                        icon: Icons
+                            .restaurant,
+                      ),
+                      categoryCard(
+                        title:
+                        'Bahan Laut',
                         category:
                         'BAHAN LAUT',
-                        icon: Icons.set_meal,
+                        icon:
+                        Icons.set_meal,
                       ),
                       categoryCard(
-                        title: 'Minumam',
+                        title:
+                        'Minuman',
                         category:
                         'TERSEDIA MINUM',
                         icon: Icons
                             .local_drink_outlined,
                       ),
                       categoryCard(
-                        title: 'Beras',
-                        category: 'BERAS',
-                        icon:
-                        Icons.rice_bowl_outlined,
+                        title:
+                        'Beras',
+                        category:
+                        'BERAS',
+                        icon: Icons
+                            .rice_bowl_outlined,
                       ),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 24),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 24,
+                ),
+              ),
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
+              SliverPadding(
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                sliver:
+                SliverToBoxAdapter(
                   child: Row(
                     children: [
                       const Text(
                         'Latest Prices',
-                        style: TextStyle(
+                        style:
+                        TextStyle(
                           fontSize: 19,
                           fontWeight:
                           FontWeight.w700,
-                          color: textColor,
+                          color:
+                          textColor,
                         ),
                       ),
                       const Spacer(),
-                      if (latestDate.isNotEmpty)
+                      if (latestDate
+                          .isNotEmpty)
                         Container(
                           padding:
                           const EdgeInsets
@@ -906,10 +1139,13 @@ class _HomePageState extends State<HomePage> {
                           ),
                           decoration:
                           BoxDecoration(
-                            color: lightGreen,
+                            color:
+                            lightGreen,
                             borderRadius:
                             BorderRadius
-                                .circular(20),
+                                .circular(
+                              20,
+                            ),
                           ),
                           child: Text(
                             latestDate,
@@ -919,26 +1155,29 @@ class _HomePageState extends State<HomePage> {
                               color:
                               primaryGreen,
                               fontWeight:
-                              FontWeight.w600,
+                              FontWeight
+                                  .w600,
                             ),
                           ),
                         ),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 10),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 10,
+                ),
+              ),
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  child: isLoading
-                      ? const Padding(
+              if (isLoading)
+                const SliverToBoxAdapter(
+                  child: Padding(
                     padding:
                     EdgeInsets.all(
-                        30),
+                      30,
+                    ),
                     child: Center(
                       child:
                       CircularProgressIndicator(
@@ -946,165 +1185,253 @@ class _HomePageState extends State<HomePage> {
                         primaryGreen,
                       ),
                     ),
-                  )
-                      : latestPrices.isEmpty
-                      ? Container(
-                    width:
-                    double.infinity,
-                    padding:
-                    const EdgeInsets
-                        .all(25),
-                    decoration:
-                    BoxDecoration(
-                      color:
-                      Colors.white,
-                      borderRadius:
-                      BorderRadius
-                          .circular(
-                          18),
-                    ),
-                    child:
-                    const Text(
-                      'No latest price data found.',
-                      textAlign:
-                      TextAlign
-                          .center,
-                      style:
-                      TextStyle(
-                        color: Colors
-                            .black45,
+                  ),
+                )
+              else if (latestPrices.isEmpty)
+                SliverPadding(
+                  padding:
+                  const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  sliver:
+                  SliverToBoxAdapter(
+                    child: Container(
+                      width:
+                      double.infinity,
+                      padding:
+                      const EdgeInsets.all(
+                        25,
+                      ),
+                      decoration:
+                      BoxDecoration(
+                        color:
+                        Colors.white,
+                        borderRadius:
+                        BorderRadius.circular(
+                          18,
+                        ),
+                      ),
+                      child:
+                      const Text(
+                        'No latest price data found.',
+                        textAlign:
+                        TextAlign.center,
+                        style:
+                        TextStyle(
+                          color:
+                          Colors.black45,
+                        ),
                       ),
                     ),
-                  )
-                      : Column(
-                    children:
-                    latestPrices
-                        .map(
-                          (food) =>
-                          latestPriceCard(
-                            food,
-                          ),
-                    )
-                        .toList(),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding:
+                  const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  sliver: SliverList(
+                    delegate:
+                    SliverChildBuilderDelegate(
+                          (
+                          context,
+                          index,
+                          ) {
+                        return latestPriceCard(
+                          latestPrices[index],
+                        );
+                      },
+                      childCount:
+                      latestPrices.length,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 20,
+                ),
+              ),
 
-                sectionHeader(
-                  title: 'Featured Items',
-                  actionText: 'View all',
+              SliverToBoxAdapter(
+                child: sectionHeader(
+                  title:
+                  'Featured Items',
+                  actionText:
+                  'View all',
                   onPressed: () {
-                    widget.onSearchTap(null);
+                    widget.onSearchTap(
+                      null,
+                    );
                   },
                 ),
+              ),
 
-                const SizedBox(height: 7),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 7,
+                ),
+              ),
 
-                SizedBox(
+              SliverToBoxAdapter(
+                child: SizedBox(
                   height: 220,
-                  child: featuredItems.isEmpty
+                  child:
+                  featuredItems.isEmpty
                       ? const Center(
                     child: Text(
                       'No featured items',
-                      style: TextStyle(
+                      style:
+                      TextStyle(
                         color:
                         Colors.black45,
                       ),
                     ),
                   )
-                      : ListView.builder(
+                      : SingleChildScrollView(
                     scrollDirection:
                     Axis.horizontal,
                     padding:
-                    const EdgeInsets.only(
+                    const EdgeInsets
+                        .only(
                       left: 20,
                       right: 8,
                     ),
-                    itemCount:
-                    featuredItems.length,
-                    itemBuilder:
-                        (context, index) {
-                      return featuredItemCard(
-                        featuredItems[index],
-                      );
-                    },
+                    child: Row(
+                      children:
+                      featuredItems
+                          .map(
+                            (
+                            food,
+                            ) =>
+                            featuredItemCard(
+                              food,
+                            ),
+                      )
+                          .toList(),
+                    ),
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 24),
-
-                sectionHeader(
-                  title: 'Quick Access',
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 24,
                 ),
+              ),
 
-                const SizedBox(height: 7),
+              SliverToBoxAdapter(
+                child: sectionHeader(
+                  title:
+                  'Quick Access',
+                ),
+              ),
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(
-                    horizontal: 20,
-                  ),
-                  child: GridView.count(
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 7,
+                ),
+              ),
+
+              SliverPadding(
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 20,
+                ),
+                sliver: SliverGrid(
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics:
-                    const NeverScrollableScrollPhysics(),
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 2.15,
-                    children: [
+                    childAspectRatio:
+                    2.15,
+                  ),
+                  delegate:
+                  SliverChildListDelegate(
+                    [
                       quickNavigationCard(
-                        title: 'Store Map',
+                        title:
+                        'Store Map',
                         subtitle:
                         'Find nearby premises',
                         icon:
                         Icons.map_outlined,
                         onTap: () {
                           widget
-                              .onNavigationTap(2);
+                              .onNavigationTap(
+                            2,
+                          );
                         },
                       ),
                       quickNavigationCard(
-                        title: 'Price Trends',
+                        title:
+                        'Price Trends',
                         subtitle:
                         'Analyse price history',
                         icon: Icons
                             .show_chart_rounded,
                         onTap: () {
                           widget
-                              .onNavigationTap(3);
+                              .onNavigationTap(
+                            3,
+                          );
                         },
                       ),
                       quickNavigationCard(
-                        title: 'Saved Items',
+                        title:
+                        'Saved Items',
                         subtitle:
                         'View favourites',
                         icon: Icons
                             .favorite_border,
                         onTap: () {
                           widget
-                              .onNavigationTap(4);
+                              .onNavigationTap(
+                            4,
+                          );
                         },
                       ),
                       quickNavigationCard(
-                        title: 'My Profile',
+                        title:
+                        'Shopping List',
                         subtitle:
-                        'Account settings',
-                        icon:
-                        Icons.person_outline,
+                        'Shopping List',
+                        icon: Icons
+                            .shopping_cart,
                         onTap: () {
                           widget
-                              .onNavigationTap(5);
+                              .onNavigationTap(
+                            5,
+                          );
+                        },
+                      ),
+                      quickNavigationCard(
+                        title:
+                        'My Profile',
+                        subtitle:
+                        'Account settings',
+                        icon: Icons
+                            .person_outline,
+                        onTap: () {
+                          widget
+                              .onNavigationTap(
+                            6,
+                          );
                         },
                       ),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 35),
-              ],
-            ),
+              const SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 35,
+                ),
+              ),
+            ],
           ),
         ),
       ),

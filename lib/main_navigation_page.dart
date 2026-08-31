@@ -3,7 +3,9 @@ import '/screens/home_page.dart';
 import '/screens/food_price_page.dart';
 import '/screens/map_page.dart';
 import '/screens/trend_page.dart';
-import '/screens/saved_page.dart';
+import '/screens/favorites_page.dart';
+import '/screens/profile_page.dart';
+import '/screens/shopping_list_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   final int initialIndex;
@@ -29,6 +31,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
 
   final GlobalKey<FoodPricePageState>foodPriceKey = GlobalKey<FoodPricePageState>();
   final GlobalKey<SavedPageState>savedPageKey = GlobalKey<SavedPageState>();
+  final GlobalKey<ShoppingListPageState> shoppingListKey = GlobalKey<ShoppingListPageState>();
 
   @override
   void initState() {
@@ -41,13 +44,19 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     setState(() {
       selectedIndex = index;
     });
-
-    if (index == 1) {
-      foodPriceKey.currentState?.refreshSavedItems();
+    if (index == 5) {
+      shoppingListKey.currentState
+          ?.loadShoppingList();
     }
 
     if (index == 4) {
-      savedPageKey.currentState?.loadSavedItems();
+      savedPageKey.currentState
+          ?.loadSavedItems();
+    }
+
+    if (index == 1) {
+      foodPriceKey.currentState
+          ?.refreshSavedItems();
     }
   }
 
@@ -59,11 +68,26 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
     savedPageKey.currentState
         ?.openNotifications();
   }
-  void openSearch(String? category) {
+
+  void openSearch(
+      String? category
+      ) {
     setState(() {
       selectedFoodCategory = category;
       selectedIndex = 1;
     });
+
+    Future.delayed(
+      const Duration(
+        milliseconds: 100,
+      ),
+          () {
+        foodPriceKey.currentState
+            ?.filterByCategory(
+          category,
+        );
+      },
+    );
   }
 
   @override
@@ -85,15 +109,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         key: foodPriceKey,
         initialCategory: selectedFoodCategory,
       ),
-
       const MapPage(),
       const TrendPage(),
-
       SavedPage(
         key: savedPageKey,
       ),
-
-      const ProfilePlaceholderPage(),
+      ShoppingListPage(
+        key: shoppingListKey,
+        onBrowseFood: () {
+          changePage(1);
+        },
+      ),
+      const ProfilePage(),
     ];
 
     return Scaffold(
@@ -195,7 +222,17 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 activeIcon: Icon(
                   Icons.favorite,
                 ),
-                label: 'Saved',
+                label: 'Favorites',
+              ),
+
+              BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.shopping_cart_outlined,
+                ),
+                activeIcon: Icon(
+                  Icons.shopping_cart,
+                ),
+                label: 'Cart',
               ),
 
               BottomNavigationBarItem(
@@ -208,26 +245,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 label: 'Profile',
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ProfilePlaceholderPage extends StatelessWidget {
-  const ProfilePlaceholderPage({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFF6F8F5),
-      body: SafeArea(
-        child: Center(
-          child: Text(
-            'User profile will be displayed here',
           ),
         ),
       ),

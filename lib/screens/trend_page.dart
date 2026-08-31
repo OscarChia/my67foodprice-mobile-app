@@ -1,7 +1,6 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/database_service.dart';
 
 class TrendPage extends StatefulWidget {
   const TrendPage({super.key});
@@ -17,7 +16,7 @@ class _TrendPageState extends State<TrendPage> {
   static const Color lightGreen = Color(0xFFEAF4EF);
   static const Color textColor = Color(0xFF1F2924);
 
-  final supabase = Supabase.instance.client;
+  final DatabaseService databaseService = DatabaseService();
 
   bool isLoading = true;
   bool isMonthlyLoading = false;
@@ -47,30 +46,18 @@ class _TrendPageState extends State<TrendPage> {
     await loadFoodItemsWithPrices();
   }
 
-  Future<void> loadFoodItemsWithPrices() async {
+  Future<void>
+  loadFoodItemsWithPrices() async {
     try {
       setState(() {
         isLoading = true;
       });
 
-      final priceData = await supabase
-          .from('monthly_food_price_summary')
-          .select('item_code');
+      final allFoodItems =
+      await databaseService
+          .getTrendFoodItems();
 
-      final itemCodeSet = priceData
-          .map(
-            (row) => row['item_code'],
-      )
-          .where(
-            (code) => code != null,
-      )
-          .toSet();
-
-      if (itemCodeSet.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
+      if (allFoodItems.isEmpty) {
         setState(() {
           foodItems = [];
           trendData = [];
@@ -82,58 +69,13 @@ class _TrendPageState extends State<TrendPage> {
         return;
       }
 
-      final itemCodes = itemCodeSet.toList();
-
-      final List<Map<String, dynamic>> allFoodItems = [];
-
-      const batchSize = 200;
-
-      for (
-      int i = 0; i < itemCodes.length; i += batchSize) {
-        final end =
-        i + batchSize < itemCodes.length
-            ? i + batchSize
-            : itemCodes.length;
-
-        final batch = itemCodes.sublist(i, end,);
-
-        final data = await supabase
-            .from('food_items')
-            .select(
-          'item_code, item, unit',
-        )
-            .inFilter(
-          'item_code',
-          batch,
-        );
-
-        allFoodItems.addAll(
-          List<Map<String, dynamic>>.from(
-            data,
-          ),
-        );
-      }
-
-      allFoodItems.sort(
-            (a, b) {
-          final nameA = a['item']?.toString().toUpperCase() ?? '';
-          final nameB = b['item']?.toString().toUpperCase() ?? '';
-
-          return nameA.compareTo(
-            nameB,
-          );
-        },
-      );
-
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         foodItems = allFoodItems;
 
         if (foodItems.isNotEmpty) {
-          selectedItemCode = foodItems.first['item_code'];
+          selectedItemCode =
+          foodItems.first[
+          'item_code'];
         } else {
           selectedItemCode = null;
         }
@@ -148,10 +90,6 @@ class _TrendPageState extends State<TrendPage> {
         });
       }
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
@@ -176,15 +114,15 @@ class _TrendPageState extends State<TrendPage> {
       List<Map<String, dynamic>> result;
 
       if (selectedPeriod == 'Daily') {
-        result = await loadDailyTrend();
-      } else if (selectedPeriod == 'Weekly') {
-        result = await loadWeeklyTrend();
+        result =
+        await loadDailyTrend();
+      } else if (
+      selectedPeriod == 'Weekly') {
+        result =
+        await loadWeeklyTrend();
       } else {
-        result = await loadMonthlyTrend();
-      }
-
-      if (!mounted) {
-        return;
+        result =
+        await loadMonthlyTrend();
       }
 
       setState(() {
@@ -192,10 +130,6 @@ class _TrendPageState extends State<TrendPage> {
         isLoading = false;
       });
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isLoading = false;
       });
@@ -208,46 +142,43 @@ class _TrendPageState extends State<TrendPage> {
 
   Future<List<Map<String, dynamic>>>
   loadDailyTrend() async {
-    final data = await supabase
-        .from('daily_food_price_summary')
-        .select(
-      'date, avg_price',
-    )
-        .eq(
-      'item_code',
+    final data =
+    await databaseService
+        .getDailyTrend(
       selectedItemCode!,
-    )
-        .order(
-      'date',
-      ascending: false,
-    )
-        .limit(15);
+    );
 
     final rows =
-    List<Map<String, dynamic>>.from(
-      data,
-    ).reversed.toList();
+    data.reversed.toList();
 
-    final List<Map<String, dynamic>> result = [];
+    final List<Map<String, dynamic>>
+    result = [];
 
     for (final row in rows) {
-      final date = DateTime.tryParse(
+      final date =
+      DateTime.tryParse(
         row['date'].toString(),
       );
 
-      final price = double.tryParse(
+      final price =
+      double.tryParse(
         row['avg_price'].toString(),
       );
 
-      if (date == null || price == null) {
+      if (date == null ||
+          price == null) {
         continue;
       }
 
       result.add({
-        'date': row['date'],
+        'date':
+        row['date'],
+
         'label':
         '${monthName(date.month)} ${date.day}',
-        'price': price,
+
+        'price':
+        price,
       });
     }
 
@@ -256,30 +187,14 @@ class _TrendPageState extends State<TrendPage> {
 
   Future<List<Map<String, dynamic>>>
   loadWeeklyTrend() async {
-    final data = await supabase
-        .from('weekly_food_price_summary')
-        .select(
-      'month, week_number, start_date, end_date, avg_price',
-    )
-        .eq(
-      'item_code',
-      selectedItemCode!,
-    )
-        .order(
-      'month',
-      ascending: true,
-    )
-        .order(
-      'week_number',
-      ascending: true,
-    );
-
     final rows =
-    List<Map<String, dynamic>>.from(
-      data,
+    await databaseService
+        .getWeeklyTrend(
+      selectedItemCode!,
     );
 
-    final List<Map<String, dynamic>> result = [];
+    final List<Map<String, dynamic>>
+    result = [];
 
     for (final row in rows) {
       final startDate =
@@ -305,7 +220,8 @@ class _TrendPageState extends State<TrendPage> {
 
       String label;
 
-      if (startDate.day == endDate.day) {
+      if (startDate.day ==
+          endDate.day) {
         label =
         '${monthName(startDate.month)} ${startDate.day}';
       } else {
@@ -315,9 +231,14 @@ class _TrendPageState extends State<TrendPage> {
       }
 
       result.add({
-        'date': row['start_date'],
-        'label': label,
-        'price': price,
+        'date':
+        row['start_date'],
+
+        'label':
+        label,
+
+        'price':
+        price,
       });
     }
 
@@ -332,45 +253,40 @@ class _TrendPageState extends State<TrendPage> {
 
   Future<List<Map<String, dynamic>>>
   loadMonthlyTrend() async {
-    final data = await supabase
-        .from('monthly_food_price_summary')
-        .select(
-      'month, start_date, end_date, avg_price',
-    )
-        .eq(
-      'item_code',
-      selectedItemCode!,
-    )
-        .order(
-      'month',
-      ascending: true,
-    );
-
     final rows =
-    List<Map<String, dynamic>>.from(
-      data,
+    await databaseService
+        .getMonthlyTrend(
+      selectedItemCode!,
     );
 
-    final List<Map<String, dynamic>> result = [];
+    final List<Map<String, dynamic>>
+    result = [];
 
     for (final row in rows) {
-      final date = DateTime.tryParse(
+      final date =
+      DateTime.tryParse(
         row['month'].toString(),
       );
 
-      final price = double.tryParse(
+      final price =
+      double.tryParse(
         row['avg_price'].toString(),
       );
 
-      if (date == null || price == null) {
+      if (date == null ||
+          price == null) {
         continue;
       }
 
       result.add({
-        'date': row['month'],
+        'date':
+        row['month'],
+
         'label':
         '${monthName(date.month)} ${date.year}',
-        'price': price,
+
+        'price':
+        price,
       });
     }
 
@@ -379,28 +295,15 @@ class _TrendPageState extends State<TrendPage> {
 
   Future<void> loadMonthlyItems() async {
     try {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isMonthlyLoading = true;
       });
 
-      final latestData = await supabase
-          .from('monthly_food_price_summary')
-          .select('month')
-          .order(
-        'month',
-        ascending: false,
-      )
-          .limit(1);
+      final latestData =
+      await databaseService
+          .getLatestMonthData();
 
       if (latestData.isEmpty) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
           monthlyItems = [];
           isMonthlyLoading = false;
@@ -411,14 +314,11 @@ class _TrendPageState extends State<TrendPage> {
 
       final latestMonth =
       DateTime.tryParse(
-        latestData.first['month'].toString(),
+        latestData.first['month']
+            .toString(),
       );
 
       if (latestMonth == null) {
-        if (!mounted) {
-          return;
-        }
-
         setState(() {
           monthlyItems = [];
           isMonthlyLoading = false;
@@ -427,7 +327,8 @@ class _TrendPageState extends State<TrendPage> {
         return;
       }
 
-      final previousMonth = DateTime(
+      final previousMonth =
+      DateTime(
         latestMonth.year,
         latestMonth.month - 1,
         1,
@@ -441,66 +342,60 @@ class _TrendPageState extends State<TrendPage> {
           '${previousMonth.year}-'
           '${two(previousMonth.month)}-01';
 
-      final currentData = await supabase
-          .from('monthly_food_price_summary')
-          .select(
-        'item_code, avg_price',
-      )
-          .eq(
-        'month',
+      final currentRows =
+      await databaseService
+          .getMonthlyPrices(
         latestMonthText,
       );
 
-      final previousData = await supabase
-          .from('monthly_food_price_summary')
-          .select(
-        'item_code, avg_price',
-      )
-          .eq(
-        'month',
+      final previousRows =
+      await databaseService
+          .getMonthlyPrices(
         previousMonthText,
       );
 
-      final currentRows =
-      List<Map<String, dynamic>>.from(
-        currentData,
-      );
+      final Map<dynamic, double>
+      currentPrices = {};
 
-      final previousRows =
-      List<Map<String, dynamic>>.from(
-        previousData,
-      );
-
-      final Map<dynamic, double> currentPrices = {};
-      final Map<dynamic, double> previousPrices = {};
+      final Map<dynamic, double>
+      previousPrices = {};
 
       for (final row in currentRows) {
-        final code = row['item_code'];
+        final code =
+        row['item_code'];
 
         final price =
         double.tryParse(
-          row['avg_price'].toString(),
+          row['avg_price']
+              .toString(),
         );
 
-        if (code != null && price != null) {
-          currentPrices[code] = price;
+        if (code != null &&
+            price != null) {
+          currentPrices[code] =
+              price;
         }
       }
 
       for (final row in previousRows) {
-        final code = row['item_code'];
+        final code =
+        row['item_code'];
 
         final price =
         double.tryParse(
-          row['avg_price'].toString(),
+          row['avg_price']
+              .toString(),
         );
 
-        if (code != null && price != null) {
-          previousPrices[code] = price;
+        if (code != null &&
+            price != null) {
+          previousPrices[code] =
+              price;
         }
       }
 
-      final List<Map<String, dynamic>> itemsToShow = [];
+      final List<Map<String, dynamic>>
+      itemsToShow = [];
 
       if (selectedItemCode != null) {
         for (final item in foodItems) {
@@ -509,7 +404,10 @@ class _TrendPageState extends State<TrendPage> {
               currentPrices.containsKey(
                 selectedItemCode,
               )) {
-            itemsToShow.add(item);
+            itemsToShow.add(
+              item,
+            );
+
             break;
           }
         }
@@ -520,23 +418,30 @@ class _TrendPageState extends State<TrendPage> {
           break;
         }
 
-        final code = item['item_code'];
+        final code =
+        item['item_code'];
 
-        if (code == selectedItemCode) {
+        if (code ==
+            selectedItemCode) {
           continue;
         }
 
-        if (!currentPrices.containsKey(code)) {
+        if (!currentPrices
+            .containsKey(code)) {
           continue;
         }
 
-        itemsToShow.add(item);
+        itemsToShow.add(
+          item,
+        );
       }
 
-      final List<Map<String, dynamic>> result = [];
+      final List<Map<String, dynamic>>
+      result = [];
 
       for (final item in itemsToShow) {
-        final code = item['item_code'];
+        final code =
+        item['item_code'];
 
         final current =
         currentPrices[code];
@@ -559,16 +464,21 @@ class _TrendPageState extends State<TrendPage> {
         }
 
         result.add({
-          'item_code': code,
-          'item': item['item'],
-          'unit': item['unit'],
-          'price': current,
-          'change': change,
-        });
-      }
+          'item_code':
+          code,
 
-      if (!mounted) {
-        return;
+          'item':
+          item['item'],
+
+          'unit':
+          item['unit'],
+
+          'price':
+          current,
+
+          'change':
+          change,
+        });
       }
 
       setState(() {
@@ -576,10 +486,6 @@ class _TrendPageState extends State<TrendPage> {
         isMonthlyLoading = false;
       });
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
-
       setState(() {
         isMonthlyLoading = false;
       });
@@ -1655,18 +1561,17 @@ class _TrendPageState extends State<TrendPage> {
   void showMessage(
       String message,
       ) {
-    if (!mounted) {
-      return;
-    }
-
     ScaffoldMessenger.of(context)
         .hideCurrentSnackBar();
 
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        content: Text(message),
-        duration: const Duration(
+        content: Text(
+          message,
+        ),
+        duration:
+        const Duration(
           seconds: 2,
         ),
       ),
