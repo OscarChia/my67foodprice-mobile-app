@@ -428,16 +428,65 @@ class DatabaseService {
 
   Future<List<Map<String, dynamic>>>
   getFoodItems() async {
-    final data = await supabase
-        .from('food_items')
-        .select(
-      'item_code, item, unit, item_category',
-    )
-        .limit(500);
+    final List<Map<String, dynamic>>
+    allFoodItems = [];
 
-    return List<Map<String, dynamic>>.from(
-      data,
+    const batchSize = 500;
+
+    int from = 0;
+
+    while (true) {
+      final data = await supabase
+          .from('food_items')
+          .select(
+        'item_code, item, unit, item_category',
+      )
+          .order(
+        'item_code',
+        ascending: true,
+      )
+          .range(
+        from,
+        from + batchSize - 1,
+      );
+
+      final rows =
+      List<Map<String, dynamic>>.from(
+        data,
+      );
+
+      allFoodItems.addAll(
+        rows,
+      );
+
+      if (rows.length < batchSize) {
+        break;
+      }
+
+      from += batchSize;
+    }
+
+    allFoodItems.sort(
+          (a, b) {
+        final nameA =
+            a['item']
+                ?.toString()
+                .toUpperCase() ??
+                '';
+
+        final nameB =
+            b['item']
+                ?.toString()
+                .toUpperCase() ??
+                '';
+
+        return nameA.compareTo(
+          nameB,
+        );
+      },
     );
+
+    return allFoodItems;
   }
 
   Future<List<Map<String, dynamic>>>
@@ -491,13 +540,91 @@ class DatabaseService {
       return [];
     }
 
-    final limitedItemCodes =
-    itemCodes.take(100).toList();
+    final List<Map<String, dynamic>>
+    allPriceData = [];
+
+    const itemBatchSize = 100;
+    const premiseBatchSize = 100;
 
     if (premiseCodes != null &&
         premiseCodes.isNotEmpty) {
-      final limitedPremiseCodes =
-      premiseCodes.take(100).toList();
+      for (
+      int i = 0;
+      i < itemCodes.length;
+      i += itemBatchSize
+      ) {
+        final itemEnd =
+        i + itemBatchSize < itemCodes.length
+            ? i + itemBatchSize
+            : itemCodes.length;
+
+        final itemBatch =
+        itemCodes.sublist(
+          i,
+          itemEnd,
+        );
+
+        for (
+        int j = 0;
+        j < premiseCodes.length;
+        j += premiseBatchSize
+        ) {
+          final premiseEnd =
+          j + premiseBatchSize <
+              premiseCodes.length
+              ? j + premiseBatchSize
+              : premiseCodes.length;
+
+          final premiseBatch =
+          premiseCodes.sublist(
+            j,
+            premiseEnd,
+          );
+
+          final data = await supabase
+              .from('food_prices')
+              .select(
+            'item_code, premise_code, date, price',
+          )
+              .inFilter(
+            'item_code',
+            itemBatch,
+          )
+              .inFilter(
+            'premise_code',
+            premiseBatch,
+          )
+              .order(
+            'date',
+            ascending: false,
+          );
+
+          allPriceData.addAll(
+            List<Map<String, dynamic>>.from(
+              data,
+            ),
+          );
+        }
+      }
+
+      return allPriceData;
+    }
+
+    for (
+    int i = 0;
+    i < itemCodes.length;
+    i += itemBatchSize
+    ) {
+      final end =
+      i + itemBatchSize < itemCodes.length
+          ? i + itemBatchSize
+          : itemCodes.length;
+
+      final batch =
+      itemCodes.sublist(
+        i,
+        end,
+      );
 
       final data = await supabase
           .from('food_prices')
@@ -506,47 +633,27 @@ class DatabaseService {
       )
           .inFilter(
         'item_code',
-        limitedItemCodes,
-      )
-          .inFilter(
-        'premise_code',
-        limitedPremiseCodes,
+        batch,
       )
           .order(
         'date',
         ascending: false,
-      )
-          .limit(100);
+      );
 
-      return List<Map<String, dynamic>>.from(
-        data,
+      allPriceData.addAll(
+        List<Map<String, dynamic>>.from(
+          data,
+        ),
       );
     }
 
-    final data = await supabase
-        .from('food_prices')
-        .select(
-      'item_code, premise_code, date, price',
-    )
-        .inFilter(
-      'item_code',
-      limitedItemCodes,
-    )
-        .order(
-      'date',
-      ascending: false,
-    )
-        .limit(100);
-
-    return List<Map<String, dynamic>>.from(
-      data,
-    );
+    return allPriceData;
   }
 
   Future<List<Map<String, dynamic>>>
   getMapFoodItems() async {
     final priceData = await supabase
-        .from('monthly_food_price_summary')
+        .from('monthly_food_price_avg')
         .select('item_code');
 
     final itemCodeSet = priceData
@@ -697,7 +804,7 @@ class DatabaseService {
   Future<List<Map<String, dynamic>>>
   getTrendFoodItems() async {
     final priceData = await supabase
-        .from('monthly_food_price_summary')
+        .from('monthly_food_price_avg')
         .select('item_code');
 
     final itemCodeSet = priceData
@@ -727,8 +834,7 @@ class DatabaseService {
     i += batchSize
     ) {
       final end =
-      i + batchSize <
-          itemCodes.length
+      i + batchSize < itemCodes.length
           ? i + batchSize
           : itemCodes.length;
 
@@ -784,7 +890,7 @@ class DatabaseService {
       ) async {
     final data = await supabase
         .from(
-      'daily_food_price_summary',
+      'daily_food_price_avg',
     )
         .select(
       'date, avg_price',
@@ -810,7 +916,7 @@ class DatabaseService {
       ) async {
     final data = await supabase
         .from(
-      'weekly_food_price_summary',
+      'weekly_food_price_avg',
     )
         .select(
       'month, week_number, start_date, end_date, avg_price',
@@ -839,7 +945,7 @@ class DatabaseService {
       ) async {
     final data = await supabase
         .from(
-      'monthly_food_price_summary',
+      'monthly_food_price_avg',
     )
         .select(
       'month, start_date, end_date, avg_price',
@@ -862,7 +968,7 @@ class DatabaseService {
   getLatestMonthData() async {
     final data = await supabase
         .from(
-      'monthly_food_price_summary',
+      'monthly_food_price_avg',
     )
         .select(
       'month',
@@ -884,7 +990,7 @@ class DatabaseService {
       ) async {
     final data = await supabase
         .from(
-      'monthly_food_price_summary',
+      'monthly_food_price_avg',
     )
         .select(
       'item_code, avg_price',
@@ -1633,7 +1739,7 @@ class DatabaseService {
     }
 
     final data = await supabase
-        .from('daily_food_price_summary')
+        .from('daily_food_price_avg')
         .select(
       'item_code, date, avg_price',
     )

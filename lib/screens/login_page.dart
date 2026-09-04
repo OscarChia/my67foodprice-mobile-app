@@ -15,6 +15,18 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState
     extends State<LoginPage> {
+  static const Color primaryGreen =
+  Color(0xFF176B52);
+
+  static const Color darkGreen =
+  Color(0xFF0F513D);
+
+  static const Color backgroundColor =
+  Color(0xFFF6F8F5);
+
+  static const Color textColor =
+  Color(0xFF1F2924);
+
   final _formKey =
   GlobalKey<FormState>();
 
@@ -42,16 +54,18 @@ class _LoginPageState
     try {
       final response =
       await databaseService.loginUser(
-        email:
-        emailController.text.trim(),
+        email: emailController.text.trim(),
         password:
         passwordController.text.trim(),
       );
 
-      final user =
-          response.user;
+      final user = response.user;
 
       if (user == null) {
+        setState(() {
+          isLoading = false;
+        });
+
         showMessage(
           'Unable to login.',
         );
@@ -59,10 +73,12 @@ class _LoginPageState
         return;
       }
 
-      if (user.emailConfirmedAt ==
-          null) {
-        await databaseService
-            .logoutUser();
+      if (user.emailConfirmedAt == null) {
+        await databaseService.logoutUser();
+
+        setState(() {
+          isLoading = false;
+        });
 
         showMessage(
           'Please verify your email before logging in.',
@@ -70,6 +86,10 @@ class _LoginPageState
 
         return;
       }
+
+      setState(() {
+        isLoading = false;
+      });
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -82,6 +102,10 @@ class _LoginPageState
     } catch (e) {
       final errorMessage =
       e.toString().toLowerCase();
+
+      setState(() {
+        isLoading = false;
+      });
 
       if (errorMessage.contains(
         'email not confirmed',
@@ -100,10 +124,6 @@ class _LoginPageState
           'Unable to login. Please try again.',
         );
       }
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -125,110 +145,87 @@ class _LoginPageState
     );
   }
 
-  Future<void>
-  showForgotPasswordDialog() async {
-    final resetEmailController =
-    TextEditingController(
-      text:
-      emailController.text.trim(),
-    );
-
-    await showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text(
-            'Forgot Password',
+  InputDecoration fieldDecoration({
+    required String hintText,
+    required IconData icon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: const TextStyle(
+        fontSize: 14,
+        color: Colors.black45,
+        fontWeight: FontWeight.w400,
+      ),
+      prefixIcon: Icon(
+        icon,
+        color: primaryGreen,
+        size: 22,
+      ),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: backgroundColor,
+      contentPadding:
+      const EdgeInsets.symmetric(
+        horizontal: 15,
+        vertical: 17,
+      ),
+      border: OutlineInputBorder(
+        borderRadius:
+        BorderRadius.circular(
+          14,
+        ),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder:
+      OutlineInputBorder(
+        borderRadius:
+        BorderRadius.circular(
+          14,
+        ),
+        borderSide:
+        const BorderSide(
+          color: Color(
+            0xFFE1E8E4,
           ),
-          content: Column(
-            mainAxisSize:
-            MainAxisSize.min,
-            children: [
-              const Text(
-                'Enter your email address. '
-                    'A password reset link will be sent to your email.',
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller:
-                resetEmailController,
-                keyboardType:
-                TextInputType
-                    .emailAddress,
-                decoration:
-                const InputDecoration(
-                  labelText:
-                  'Email',
-                  prefixIcon:
-                  Icon(
-                    Icons.email_outlined,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                  dialogContext,
-                );
-              },
-              child:
-              const Text(
-                'Cancel',
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                final email =
-                resetEmailController
-                    .text
-                    .trim();
-
-                if (email.isEmpty ||
-                    !email.contains(
-                      '@',
-                    )) {
-                  showMessage(
-                    'Please enter a valid email.',
-                  );
-
-                  return;
-                }
-
-                try {
-                  await databaseService
-                      .resetPassword(
-                    email,
-                  );
-
-                  Navigator.pop(
-                    dialogContext,
-                  );
-
-                  showMessage(
-                    'Password reset email sent. Please check your email.',
-                  );
-                } catch (e) {
-                  showMessage(
-                    'Unable to send password reset email.',
-                  );
-                }
-              },
-              child:
-              const Text(
-                'Send Reset Link',
-              ),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
+      focusedBorder:
+      OutlineInputBorder(
+        borderRadius:
+        BorderRadius.circular(
+          14,
+        ),
+        borderSide:
+        const BorderSide(
+          color: primaryGreen,
+          width: 1.5,
+        ),
+      ),
+      errorBorder:
+      OutlineInputBorder(
+        borderRadius:
+        BorderRadius.circular(
+          14,
+        ),
+        borderSide:
+        const BorderSide(
+          color: Colors.redAccent,
+        ),
+      ),
+      focusedErrorBorder:
+      OutlineInputBorder(
+        borderRadius:
+        BorderRadius.circular(
+          14,
+        ),
+        borderSide:
+        const BorderSide(
+          color: Colors.redAccent,
+          width: 1.5,
+        ),
+      ),
     );
-
-    resetEmailController.dispose();
   }
 
   @override
@@ -236,37 +233,28 @@ class _LoginPageState
       BuildContext context,
       ) {
     return Scaffold(
+      backgroundColor:
+      backgroundColor,
       body: Container(
-        width:
-        double.infinity,
-        height:
-        double.infinity,
+        width: double.infinity,
+        height: double.infinity,
         decoration:
         const BoxDecoration(
-          gradient:
-          LinearGradient(
+          gradient: LinearGradient(
             begin:
             Alignment.topCenter,
             end:
             Alignment.bottomCenter,
             colors: [
-              Color(
-                0xFF176B52,
-              ),
-              Color(
-                0xFF0F513D,
-              ),
-              Color(
-                0xFFF6F8F5,
-              ),
-              Color(
-                0xFFF6F8F5,
-              ),
+              primaryGreen,
+              darkGreen,
+              backgroundColor,
+              backgroundColor,
             ],
             stops: [
               0.0,
-              0.35,
-              0.35,
+              0.36,
+              0.36,
               1.0,
             ],
           ),
@@ -276,34 +264,33 @@ class _LoginPageState
           SingleChildScrollView(
             padding:
             const EdgeInsets.symmetric(
-              horizontal: 24,
+              horizontal: 20,
             ),
             child: Column(
               children: [
                 const SizedBox(
-                  height: 35,
+                  height: 34,
                 ),
 
                 Container(
-                  width: 82,
-                  height: 82,
+                  width: 78,
+                  height: 78,
                   decoration:
                   BoxDecoration(
-                    color:
-                    Colors.white,
+                    color: Colors.white,
                     borderRadius:
-                    BorderRadius.circular(
-                      24,
+                    BorderRadius
+                        .circular(
+                      22,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                        Colors.black
+                        color: Colors
+                            .black
                             .withValues(
                           alpha: 0.12,
                         ),
-                        blurRadius:
-                        18,
+                        blurRadius: 18,
                         offset:
                         const Offset(
                           0,
@@ -316,11 +303,9 @@ class _LoginPageState
                   const Icon(
                     Icons
                         .shopping_basket_rounded,
-                    size: 45,
+                    size: 43,
                     color:
-                    Color(
-                      0xFF176B52,
-                    ),
+                    primaryGreen,
                   ),
                 ),
 
@@ -330,62 +315,61 @@ class _LoginPageState
 
                 const Text(
                   'My67Food Price',
-                  style:
-                  TextStyle(
-                    color:
-                    Colors.white,
-                    fontSize:
-                    27,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 27,
                     fontWeight:
-                    FontWeight.bold,
+                    FontWeight.w800,
                   ),
                 ),
 
                 const SizedBox(
-                  height: 6,
+                  height: 7,
                 ),
 
                 const Text(
                   'Compare smarter. Save better.',
-                  style:
-                  TextStyle(
-                    color:
-                    Color(
+                  style: TextStyle(
+                    color: Color(
                       0xFFE0F2EA,
                     ),
-                    fontSize:
-                    14,
+                    fontSize: 15,
+                    fontWeight:
+                    FontWeight.w500,
                   ),
                 ),
 
                 const SizedBox(
-                  height: 35,
+                  height: 34,
                 ),
 
                 Container(
                   width:
                   double.infinity,
                   padding:
-                  const EdgeInsets.all(
+                  const EdgeInsets
+                      .fromLTRB(
+                    22,
+                    24,
+                    22,
                     24,
                   ),
                   decoration:
                   BoxDecoration(
-                    color:
-                    Colors.white,
+                    color: Colors.white,
                     borderRadius:
-                    BorderRadius.circular(
-                      26,
+                    BorderRadius
+                        .circular(
+                      25,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                        Colors.black
+                        color: Colors
+                            .black
                             .withValues(
-                          alpha: 0.08,
+                          alpha: 0.07,
                         ),
-                        blurRadius:
-                        24,
+                        blurRadius: 24,
                         offset:
                         const Offset(
                           0,
@@ -395,8 +379,7 @@ class _LoginPageState
                     ],
                   ),
                   child: Form(
-                    key:
-                    _formKey,
+                    key: _formKey,
                     child: Column(
                       crossAxisAlignment:
                       CrossAxisAlignment
@@ -406,14 +389,12 @@ class _LoginPageState
                           'Welcome Back',
                           style:
                           TextStyle(
-                            fontSize:
-                            24,
+                            fontSize: 25,
                             fontWeight:
-                            FontWeight.bold,
+                            FontWeight
+                                .w800,
                             color:
-                            Color(
-                              0xFF1F2924,
-                            ),
+                            textColor,
                           ),
                         ),
 
@@ -425,25 +406,29 @@ class _LoginPageState
                           'Login to check and compare food prices.',
                           style:
                           TextStyle(
-                            fontSize:
-                            13,
-                            color:
-                            Colors.black54,
+                            fontSize: 14,
+                            color: Colors
+                                .black54,
+                            fontWeight:
+                            FontWeight
+                                .w500,
                           ),
                         ),
 
                         const SizedBox(
-                          height: 26,
+                          height: 25,
                         ),
 
                         const Text(
                           'Email Address',
                           style:
                           TextStyle(
-                            fontSize:
-                            13,
+                            fontSize: 15,
                             fontWeight:
-                            FontWeight.w600,
+                            FontWeight
+                                .w700,
+                            color:
+                            textColor,
                           ),
                         ),
 
@@ -457,15 +442,24 @@ class _LoginPageState
                           keyboardType:
                           TextInputType
                               .emailAddress,
+                          textInputAction:
+                          TextInputAction
+                              .next,
+                          style:
+                          const TextStyle(
+                            fontSize: 15,
+                            fontWeight:
+                            FontWeight
+                                .w500,
+                            color:
+                            textColor,
+                          ),
                           decoration:
-                          const InputDecoration(
+                          fieldDecoration(
                             hintText:
                             'Enter your email',
-                            prefixIcon:
-                            Icon(
-                              Icons
-                                  .email_outlined,
-                            ),
+                            icon: Icons
+                                .email_outlined,
                           ),
                           validator:
                               (value) {
@@ -489,17 +483,19 @@ class _LoginPageState
                         ),
 
                         const SizedBox(
-                          height: 18,
+                          height: 20,
                         ),
 
                         const Text(
                           'Password',
                           style:
                           TextStyle(
-                            fontSize:
-                            13,
+                            fontSize: 15,
                             fontWeight:
-                            FontWeight.w600,
+                            FontWeight
+                                .w700,
+                            color:
+                            textColor,
                           ),
                         ),
 
@@ -508,51 +504,47 @@ class _LoginPageState
                         ),
 
                         TextFormField(
-                          controller:
-                          passwordController,
-                          obscureText:
-                          hidePassword,
-                          decoration:
-                          InputDecoration(
-                            hintText:
-                            'Enter your password',
-                            prefixIcon:
-                            const Icon(
-                              Icons
-                                  .lock_outline,
-                            ),
-                            suffixIcon:
-                            IconButton(
-                              onPressed:
-                                  () {
-                                setState(
-                                        () {
-                                      hidePassword =
-                                      !hidePassword;
-                                    });
+                          controller: passwordController,
+                          obscureText: hidePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (value) {
+                            if (isLoading) {
+                              return;
+                            }
+
+                            if (_formKey.currentState!.validate()) {
+                              loginUser();
+                            }
+                          },
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
+                          ),
+                          decoration: fieldDecoration(
+                            hintText: 'Enter your password',
+                            icon: Icons.lock_outline,
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  hidePassword = !hidePassword;
+                                });
                               },
-                              icon:
-                              Icon(
+                              icon: Icon(
                                 hidePassword
-                                    ? Icons
-                                    .visibility_off_outlined
-                                    : Icons
-                                    .visibility_outlined,
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: Colors.black54,
+                                size: 21,
                               ),
                             ),
                           ),
-                          validator:
-                              (value) {
-                            if (value ==
-                                null ||
-                                value
-                                    .isEmpty) {
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
                               return 'Please enter your password';
                             }
 
-                            if (value
-                                .length <
-                                6) {
+                            if (value.length < 6) {
                               return 'Password must be at least 6 characters';
                             }
 
@@ -560,66 +552,46 @@ class _LoginPageState
                           },
                         ),
 
-                        Align(
-                          alignment:
-                          Alignment
-                              .centerRight,
-                          child:
-                          TextButton(
-                            onPressed:
-                            showForgotPasswordDialog,
-                            child:
-                            const Text(
-                              'Forgot Password?',
-                              style:
-                              TextStyle(
-                                color:
-                                Color(
-                                  0xFF176B52,
-                                ),
-                                fontWeight:
-                                FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-
                         const SizedBox(
-                          height: 5,
+                          height: 20,
                         ),
 
                         SizedBox(
-                          width:
-                          double.infinity,
-                          child:
-                          ElevatedButton(
-                            onPressed:
-                            isLoading
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryGreen,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  14,
+                                ),
+                              ),
+                            ),
+                            onPressed: isLoading
                                 ? null
                                 : () {
-                              if (_formKey
-                                  .currentState!
-                                  .validate()) {
+                              if (_formKey.currentState!.validate()) {
                                 loginUser();
                               }
                             },
-                            child:
-                            isLoading
+                            child: isLoading
                                 ? const SizedBox(
-                              width:
-                              23,
-                              height:
-                              23,
-                              child:
-                              CircularProgressIndicator(
-                                strokeWidth:
-                                2.5,
-                                color:
-                                Colors.white,
+                              width: 23,
+                              height: 23,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
                               ),
                             )
                                 : const Text(
                               'Login',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
@@ -647,11 +619,13 @@ class _LoginPageState
                                 style:
                                 TextStyle(
                                   fontSize:
-                                  12,
-                                  color:
-                                  Colors
+                                  13,
+                                  color: Colors
                                       .grey
                                       .shade600,
+                                  fontWeight:
+                                  FontWeight
+                                      .w500,
                                 ),
                               ),
                             ),
@@ -663,33 +637,31 @@ class _LoginPageState
                         ),
 
                         const SizedBox(
-                          height: 15,
+                          height: 17,
                         ),
 
                         SizedBox(
-                          width:
-                          double.infinity,
-                          height: 52,
+                          width: double
+                              .infinity,
+                          height: 54,
                           child:
                           OutlinedButton(
                             style:
                             OutlinedButton
                                 .styleFrom(
                               foregroundColor:
-                              const Color(
-                                0xFF176B52,
-                              ),
+                              primaryGreen,
                               side:
                               const BorderSide(
                                 color:
-                                Color(
-                                  0xFF176B52,
-                                ),
+                                primaryGreen,
+                                width: 1.2,
                               ),
                               shape:
                               RoundedRectangleBorder(
                                 borderRadius:
-                                BorderRadius.circular(
+                                BorderRadius
+                                    .circular(
                                   14,
                                 ),
                               ),
@@ -698,10 +670,12 @@ class _LoginPageState
                             isLoading
                                 ? null
                                 : () {
-                              Navigator.push(
+                              Navigator
+                                  .push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
+                                  builder:
+                                      (context) =>
                                   const RegisterPage(),
                                 ),
                               );
@@ -711,8 +685,10 @@ class _LoginPageState
                               'Create New Account',
                               style:
                               TextStyle(
+                                fontSize: 15,
                                 fontWeight:
-                                FontWeight.w600,
+                                FontWeight
+                                    .w700,
                               ),
                             ),
                           ),
@@ -723,22 +699,21 @@ class _LoginPageState
                 ),
 
                 const SizedBox(
-                  height: 25,
+                  height: 24,
                 ),
 
                 const Text(
                   'Malaysia Food Price Comparison',
-                  style:
-                  TextStyle(
-                    fontSize:
-                    11,
-                    color:
-                    Colors.black45,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.black54,
+                    fontWeight:
+                    FontWeight.w500,
                   ),
                 ),
 
                 const SizedBox(
-                  height: 20,
+                  height: 25,
                 ),
               ],
             ),

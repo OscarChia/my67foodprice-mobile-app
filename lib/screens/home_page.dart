@@ -36,6 +36,9 @@ class _HomePageState
   static const Color textColor =
   Color(0xFF1F2924);
 
+  static const Color secondaryText =
+  Color(0xFF6B756F);
+
   final DatabaseService databaseService =
   DatabaseService();
 
@@ -133,39 +136,29 @@ class _HomePageState
     VoidCallback? onPressed,
   }) {
     return Padding(
-      padding:
-      const EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 20,
       ),
       child: Row(
         children: [
           Text(
             title,
-            style:
-            const TextStyle(
-              fontSize: 19,
-              fontWeight:
-              FontWeight.w700,
-              color:
-              textColor,
+            style: const TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              color: textColor,
             ),
           ),
           const Spacer(),
           if (actionText != null)
             TextButton(
-              onPressed:
-              onPressed,
-              child:
-              Text(
+              onPressed: onPressed,
+              child: Text(
                 actionText,
-                style:
-                const TextStyle(
-                  color:
-                  primaryGreen,
-                  fontSize:
-                  13,
-                  fontWeight:
-                  FontWeight.w600,
+                style: const TextStyle(
+                  color: primaryGreen,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -181,65 +174,54 @@ class _HomePageState
   }) {
     return Expanded(
       child: Container(
-        height: 96,
-        padding:
-        const EdgeInsets.symmetric(
+        height: 118,
+        padding: const EdgeInsets.symmetric(
           horizontal: 8,
-          vertical: 12,
+          vertical: 10,
         ),
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.white,
-          borderRadius:
-          BorderRadius.circular(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
             18,
           ),
-          border:
-          Border.all(
-            color:
-            const Color(
+          border: Border.all(
+            color: const Color(
               0xFFE6ECE8,
             ),
           ),
         ),
-        child:
-        Column(
+        child: Column(
           mainAxisAlignment:
           MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              color:
-              primaryGreen,
-              size: 22,
+              color: primaryGreen,
+              size: 24,
             ),
             const SizedBox(
-              height: 5,
+              height: 4,
             ),
             Text(
               value,
-              style:
-              const TextStyle(
-                fontSize: 19,
-                fontWeight:
-                FontWeight.bold,
-                color:
-                textColor,
+              style: const TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.w800,
+                color: textColor,
               ),
             ),
             const SizedBox(
-              height: 2,
+              height: 3,
             ),
             Text(
               title,
-              textAlign:
-              TextAlign.center,
-              style:
-              const TextStyle(
-                fontSize: 10,
-                color:
-                Colors.black54,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black54,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -254,9 +236,8 @@ class _HomePageState
     required IconData icon,
   }) {
     return InkWell(
-      borderRadius:
-      BorderRadius.circular(
-        15,
+      borderRadius: BorderRadius.circular(
+        16,
       ),
       onTap: () {
         widget.onSearchTap(
@@ -264,23 +245,17 @@ class _HomePageState
         );
       },
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: 6,
-          vertical: 8,
+          vertical: 10,
         ),
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.white,
-          borderRadius:
-          BorderRadius.circular(
-            15,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
+            16,
           ),
-          border:
-          Border.all(
-            color:
-            const Color(
+          border: Border.all(
+            color: const Color(
               0xFFE1E8E4,
             ),
           ),
@@ -290,40 +265,31 @@ class _HomePageState
           MainAxisAlignment.center,
           children: [
             Container(
-              width: 40,
-              height: 40,
-              decoration:
-              const BoxDecoration(
-                color:
-                lightGreen,
-                shape:
-                BoxShape.circle,
+              width: 43,
+              height: 43,
+              decoration: const BoxDecoration(
+                color: lightGreen,
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                size: 21,
-                color:
-                primaryGreen,
+                size: 23,
+                color: primaryGreen,
               ),
             ),
             const SizedBox(
-              height: 7,
+              height: 8,
             ),
             Text(
               title,
               maxLines: 2,
-              overflow:
-              TextOverflow.ellipsis,
-              textAlign:
-              TextAlign.center,
-              style:
-              const TextStyle(
-                fontSize: 11,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
                 height: 1.15,
-                fontWeight:
-                FontWeight.w700,
-                color:
-                textColor,
+                fontWeight: FontWeight.w700,
+                color: textColor,
               ),
             ),
           ],
@@ -355,34 +321,22 @@ class _HomePageState
       Map<String, dynamic> food,
       ) {
     return Container(
-      margin:
-      const EdgeInsets.only(
-        bottom: 10,
+      margin: const EdgeInsets.only(
+        bottom: 11,
       ),
-      padding:
-      const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 10,
-      ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.white,
-        borderRadius:
-        BorderRadius.circular(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
           18,
         ),
-        border:
-        Border.all(
-          color:
-          const Color(
+        border: Border.all(
+          color: const Color(
             0xFFE6ECE8,
           ),
         ),
       ),
       child: InkWell(
-        borderRadius:
-        BorderRadius.circular(
+        borderRadius: BorderRadius.circular(
           18,
         ),
         onTap: () {
@@ -390,103 +344,102 @@ class _HomePageState
             food,
           );
         },
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration:
-              BoxDecoration(
-                color:
-                lightGreen,
-                borderRadius:
-                BorderRadius.circular(
-                  14,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 13,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: lightGreen,
+                  borderRadius:
+                  BorderRadius.circular(
+                    15,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.shopping_basket_outlined,
+                  color: primaryGreen,
+                  size: 25,
                 ),
               ),
-              child:
-              const Icon(
-                Icons
-                    .shopping_basket_outlined,
-                color:
-                primaryGreen,
+              const SizedBox(
+                width: 13,
               ),
-            ),
-            const SizedBox(
-              width: 12,
-            ),
-            Expanded(
-              child:
+              Expanded(
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      food['item'].toString(),
+                      maxLines: 2,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.25,
+                        fontWeight:
+                        FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    Text(
+                      '${food['category']} • ${food['unit']}',
+                      maxLines: 1,
+                      overflow:
+                      TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color:
+                        secondaryText,
+                        fontWeight:
+                        FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 9,
+              ),
               Column(
                 crossAxisAlignment:
-                CrossAxisAlignment.start,
+                CrossAxisAlignment.end,
                 children: [
                   Text(
-                    food['item']
-                        .toString(),
-                    maxLines: 2,
-                    overflow:
-                    TextOverflow.ellipsis,
-                    style:
-                    const TextStyle(
-                      fontSize: 13,
+                    'RM ${formatPrice(food['price'])}',
+                    style: const TextStyle(
+                      fontSize: 17,
                       fontWeight:
-                      FontWeight.w600,
-                      color:
-                      textColor,
+                      FontWeight.w800,
+                      color: primaryGreen,
                     ),
                   ),
                   const SizedBox(
                     height: 4,
                   ),
-                  Text(
-                    '${food['category']} • ${food['unit']}',
-                    maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
-                    style:
-                    const TextStyle(
-                      fontSize: 10,
+                  const Text(
+                    'Latest',
+                    style: TextStyle(
+                      fontSize: 12,
                       color:
-                      Colors.black45,
+                      secondaryText,
+                      fontWeight:
+                      FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(
-              width: 8,
-            ),
-            Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'RM ${formatPrice(food['price'])}',
-                  style:
-                  const TextStyle(
-                    fontSize: 15,
-                    fontWeight:
-                    FontWeight.bold,
-                    color:
-                    primaryGreen,
-                  ),
-                ),
-                const SizedBox(
-                  height: 2,
-                ),
-                const Text(
-                  'Latest',
-                  style:
-                  TextStyle(
-                    fontSize: 9,
-                    color:
-                    Colors.black38,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -496,30 +449,23 @@ class _HomePageState
       Map<String, dynamic> food,
       ) {
     return Container(
-      width: 168,
-      margin:
-      const EdgeInsets.only(
+      width: 176,
+      margin: const EdgeInsets.only(
         right: 12,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.white,
-        borderRadius:
-        BorderRadius.circular(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
           20,
         ),
-        border:
-        Border.all(
-          color:
-          const Color(
+        border: Border.all(
+          color: const Color(
             0xFFE6ECE8,
           ),
         ),
       ),
       child: InkWell(
-        borderRadius:
-        BorderRadius.circular(
+        borderRadius: BorderRadius.circular(
           20,
         ),
         onTap: () {
@@ -528,80 +474,68 @@ class _HomePageState
           );
         },
         child: Padding(
-          padding:
-          const EdgeInsets.all(
-            12,
+          padding: const EdgeInsets.all(
+            13,
           ),
-          child:
-          Column(
+          child: Column(
             crossAxisAlignment:
             CrossAxisAlignment.start,
             children: [
               Container(
-                height: 83,
-                width:
-                double.infinity,
-                decoration:
-                BoxDecoration(
-                  color:
-                  lightGreen,
+                height: 88,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: lightGreen,
                   borderRadius:
                   BorderRadius.circular(
                     15,
                   ),
                 ),
-                child:
-                const Icon(
-                  Icons
-                      .restaurant_menu_rounded,
-                  size: 40,
-                  color:
-                  primaryGreen,
+                child: const Icon(
+                  Icons.restaurant_menu_rounded,
+                  size: 42,
+                  color: primaryGreen,
                 ),
               ),
               const SizedBox(
-                height: 10,
+                height: 11,
               ),
               Text(
-                food['item']
-                    .toString(),
+                food['item'].toString(),
                 maxLines: 2,
                 overflow:
                 TextOverflow.ellipsis,
-                style:
-                const TextStyle(
-                  fontSize: 12,
+                style: const TextStyle(
+                  fontSize: 14,
+                  height: 1.25,
                   fontWeight:
-                  FontWeight.w600,
-                  color:
-                  textColor,
+                  FontWeight.w700,
+                  color: textColor,
                 ),
               ),
               const Spacer(),
               Text(
                 'RM ${formatPrice(food['price'])}',
-                style:
-                const TextStyle(
-                  fontSize: 17,
-                  color:
-                  primaryGreen,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: primaryGreen,
                   fontWeight:
-                  FontWeight.bold,
+                  FontWeight.w800,
                 ),
               ),
               const SizedBox(
-                height: 2,
+                height: 3,
               ),
               Text(
                 'per ${food['unit']}',
                 maxLines: 1,
                 overflow:
                 TextOverflow.ellipsis,
-                style:
-                const TextStyle(
-                  fontSize: 10,
-                  color:
-                  Colors.black45,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: secondaryText,
+                  fontWeight:
+                  FontWeight.w500,
                 ),
               ),
             ],
@@ -618,29 +552,22 @@ class _HomePageState
     required VoidCallback onTap,
   }) {
     return InkWell(
-      borderRadius:
-      BorderRadius.circular(
+      borderRadius: BorderRadius.circular(
         18,
       ),
-      onTap:
-      onTap,
+      onTap: onTap,
       child: Container(
-        padding:
-        const EdgeInsets.all(
-          12,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
         ),
-        decoration:
-        BoxDecoration(
-          color:
-          Colors.white,
-          borderRadius:
-          BorderRadius.circular(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(
             18,
           ),
-          border:
-          Border.all(
-            color:
-            const Color(
+          border: Border.all(
+            color: const Color(
               0xFFE6ECE8,
             ),
           ),
@@ -648,31 +575,25 @@ class _HomePageState
         child: Row(
           children: [
             Container(
-              width: 45,
-              height: 45,
-              decoration:
-              BoxDecoration(
-                color:
-                lightGreen,
-                borderRadius:
-                BorderRadius.circular(
-                  13,
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: lightGreen,
+                borderRadius: BorderRadius.circular(
+                  14,
                 ),
               ),
-              child:
-              Icon(
+              child: Icon(
                 icon,
-                size: 23,
-                color:
-                primaryGreen,
+                size: 25,
+                color: primaryGreen,
               ),
             ),
             const SizedBox(
-              width: 10,
+              width: 12,
             ),
             Expanded(
-              child:
-              Column(
+              child: Column(
                 mainAxisAlignment:
                 MainAxisAlignment.center,
                 crossAxisAlignment:
@@ -683,28 +604,26 @@ class _HomePageState
                     maxLines: 1,
                     overflow:
                     TextOverflow.ellipsis,
-                    style:
-                    const TextStyle(
-                      fontSize: 11,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight:
                       FontWeight.w700,
-                      color:
-                      textColor,
+                      color: textColor,
                     ),
                   ),
                   const SizedBox(
-                    height: 3,
+                    height: 5,
                   ),
                   Text(
                     subtitle,
                     maxLines: 1,
                     overflow:
                     TextOverflow.ellipsis,
-                    style:
-                    const TextStyle(
-                      fontSize: 9,
-                      color:
-                      Colors.black45,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                      fontWeight:
+                      FontWeight.w500,
                     ),
                   ),
                 ],
@@ -817,14 +736,12 @@ class _HomePageState
                                 ),
                                 Text(
                                   'Malaysia Food Price Comparison',
-                                  style:
-                                  TextStyle(
-                                    color:
-                                    Color(
+                                  style: TextStyle(
+                                    color: Color(
                                       0xFFDCEDE6,
                                     ),
-                                    fontSize:
-                                    10,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -867,7 +784,7 @@ class _HomePageState
                         TextStyle(
                           color:
                           Colors.white,
-                          fontSize: 24,
+                          fontSize: 26,
                           fontWeight:
                           FontWeight.w700,
                         ),
@@ -879,13 +796,12 @@ class _HomePageState
                         latestDate.isEmpty
                             ? 'Compare prices across Malaysia'
                             : 'Latest data updated $latestDate',
-                        style:
-                        const TextStyle(
-                          color:
-                          Color(
+                        style: const TextStyle(
+                          color: Color(
                             0xFFDCEDE6,
                           ),
-                          fontSize: 12,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(
@@ -932,11 +848,8 @@ class _HomePageState
                                     'Search food prices...',
                                     style:
                                     TextStyle(
-                                      fontSize:
-                                      14,
-                                      color:
-                                      Colors
-                                          .black45,
+                                      fontSize: 15,
+                                      color: Colors.black45,
                                     ),
                                   ),
                                 ),
@@ -1131,11 +1044,9 @@ class _HomePageState
                       if (latestDate
                           .isNotEmpty)
                         Container(
-                          padding:
-                          const EdgeInsets
-                              .symmetric(
-                            horizontal: 9,
-                            vertical: 5,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 11,
+                            vertical: 6,
                           ),
                           decoration:
                           BoxDecoration(
@@ -1149,14 +1060,10 @@ class _HomePageState
                           ),
                           child: Text(
                             latestDate,
-                            style:
-                            const TextStyle(
-                              fontSize: 9,
-                              color:
-                              primaryGreen,
-                              fontWeight:
-                              FontWeight
-                                  .w600,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: primaryGreen,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -1335,8 +1242,7 @@ class _HomePageState
               ),
 
               SliverPadding(
-                padding:
-                const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
                 sliver: SliverGrid(
@@ -1345,79 +1251,47 @@ class _HomePageState
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio:
-                    2.15,
+                    childAspectRatio: 1.95,
                   ),
-                  delegate:
-                  SliverChildListDelegate(
+                  delegate: SliverChildListDelegate(
                     [
                       quickNavigationCard(
-                        title:
-                        'Store Map',
-                        subtitle:
-                        'Find nearby premises',
-                        icon:
-                        Icons.map_outlined,
+                        title: 'Store Map',
+                        subtitle: 'Find nearby premises',
+                        icon: Icons.map_outlined,
                         onTap: () {
-                          widget
-                              .onNavigationTap(
+                          widget.onNavigationTap(
                             2,
                           );
                         },
                       ),
                       quickNavigationCard(
-                        title:
-                        'Price Trends',
-                        subtitle:
-                        'Analyse price history',
-                        icon: Icons
-                            .show_chart_rounded,
+                        title: 'Price Trends',
+                        subtitle: 'Analyse price history',
+                        icon: Icons.show_chart_rounded,
                         onTap: () {
-                          widget
-                              .onNavigationTap(
+                          widget.onNavigationTap(
                             3,
                           );
                         },
                       ),
                       quickNavigationCard(
-                        title:
-                        'Saved Items',
-                        subtitle:
-                        'View favourites',
-                        icon: Icons
-                            .favorite_border,
+                        title: 'Favorites',
+                        subtitle: 'View favourites',
+                        icon: Icons.favorite_border,
                         onTap: () {
-                          widget
-                              .onNavigationTap(
+                          widget.onNavigationTap(
                             4,
                           );
                         },
                       ),
                       quickNavigationCard(
-                        title:
-                        'Shopping List',
-                        subtitle:
-                        'Shopping List',
-                        icon: Icons
-                            .shopping_cart,
+                        title: 'Shopping List',
+                        subtitle: 'Manage shopping items',
+                        icon: Icons.shopping_cart_outlined,
                         onTap: () {
-                          widget
-                              .onNavigationTap(
+                          widget.onNavigationTap(
                             5,
-                          );
-                        },
-                      ),
-                      quickNavigationCard(
-                        title:
-                        'My Profile',
-                        subtitle:
-                        'Account settings',
-                        icon: Icons
-                            .person_outline,
-                        onTap: () {
-                          widget
-                              .onNavigationTap(
-                            6,
                           );
                         },
                       ),

@@ -734,27 +734,19 @@ class ShoppingListPageState
                           .start,
                       children: [
                         Text(
-                          item['item']
-                              ?.toString() ??
+                          item['item']?.toString() ??
                               'Unknown Item',
                           maxLines: 2,
-                          overflow:
-                          TextOverflow
-                              .ellipsis,
-                          style:
-                          TextStyle(
-                            fontSize: 14,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
                             height: 1.2,
-                            fontWeight:
-                            FontWeight
-                                .w800,
+                            fontWeight: FontWeight.w800,
                             color: isBought
                                 ? secondaryTextColor
                                 : textColor,
-                            decoration:
-                            isBought
-                                ? TextDecoration
-                                .lineThrough
+                            decoration: isBought
+                                ? TextDecoration.lineThrough
                                 : null,
                           ),
                         ),
@@ -764,45 +756,25 @@ class ShoppingListPageState
                         Row(
                           children: [
                             Flexible(
-                              child:
-                              Container(
-                                padding:
-                                const EdgeInsets
-                                    .symmetric(
-                                  horizontal:
-                                  8,
-                                  vertical:
-                                  3,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
-                                decoration:
-                                BoxDecoration(
-                                  color:
-                                  softGrey,
-                                  borderRadius:
-                                  BorderRadius
-                                      .circular(
+                                decoration: BoxDecoration(
+                                  color: softGrey,
+                                  borderRadius: BorderRadius.circular(
                                     16,
                                   ),
                                 ),
-                                child:
-                                Text(
-                                  item['category']
-                                      ?.toString() ??
-                                      '',
-                                  maxLines:
-                                  1,
-                                  overflow:
-                                  TextOverflow
-                                      .ellipsis,
-                                  style:
-                                  const TextStyle(
-                                    fontSize:
-                                    9,
-                                    fontWeight:
-                                    FontWeight
-                                        .w600,
-                                    color:
-                                    Color(
+                                child: Text(
+                                  item['category']?.toString() ?? '',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(
                                       0xFF5B5B5B,
                                     ),
                                   ),
@@ -814,12 +786,10 @@ class ShoppingListPageState
                             ),
                             Text(
                               '• ${item['unit'] ?? ''}',
-                              style:
-                              const TextStyle(
-                                fontSize:
-                                9,
-                                color:
-                                secondaryTextColor,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: secondaryTextColor,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
@@ -829,39 +799,26 @@ class ShoppingListPageState
                         ),
                         Row(
                           crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
+                          CrossAxisAlignment.start,
                           children: [
                             const Icon(
-                              Icons
-                                  .storefront_outlined,
+                              Icons.storefront_outlined,
                               size: 14,
-                              color:
-                              accentColor,
+                              color: accentColor,
                             ),
                             const SizedBox(
                               width: 5,
                             ),
                             Expanded(
-                              child:
-                              Text(
+                              child: Text(
                                 premise,
-                                maxLines:
-                                2,
-                                overflow:
-                                TextOverflow
-                                    .ellipsis,
-                                style:
-                                const TextStyle(
-                                  fontSize:
-                                  10,
-                                  height:
-                                  1.25,
-                                  fontWeight:
-                                  FontWeight
-                                      .w700,
-                                  color:
-                                  Color(
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  height: 1.25,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(
                                     0xFF45464A,
                                   ),
                                 ),
@@ -870,74 +827,55 @@ class ShoppingListPageState
                           ],
                         ),
                         const SizedBox(
-                          height: 4,
+                          height: 5,
                         ),
                         Row(
                           children: [
                             const Icon(
-                              Icons
-                                  .location_on_outlined,
-                              size: 13,
-                              color:
-                              secondaryTextColor,
+                              Icons.location_on_outlined,
+                              size: 14,
+                              color: secondaryTextColor,
                             ),
                             const SizedBox(
                               width: 5,
                             ),
                             Expanded(
-                              child:
-                              Text(
+                              child: Text(
                                 '$district, $state',
-                                maxLines:
-                                1,
-                                overflow:
-                                TextOverflow
-                                    .ellipsis,
-                                style:
-                                const TextStyle(
-                                  fontSize:
-                                  9,
-                                  color:
-                                  secondaryTextColor,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        if (date
-                            .isNotEmpty) ...[
+                        if (date.isNotEmpty) ...[
                           const SizedBox(
-                            height: 4,
+                            height: 5,
                           ),
                           Row(
                             children: [
                               const Icon(
-                                Icons
-                                    .calendar_month_outlined,
-                                size:
-                                12,
-                                color:
-                                secondaryTextColor,
+                                Icons.calendar_month_outlined,
+                                size: 14,
+                                color: secondaryTextColor,
                               ),
                               const SizedBox(
-                                width:
-                                5,
+                                width: 5,
                               ),
                               Flexible(
-                                child:
-                                Text(
+                                child: Text(
                                   'Updated: $date',
-                                  maxLines:
-                                  1,
-                                  overflow:
-                                  TextOverflow
-                                      .ellipsis,
-                                  style:
-                                  const TextStyle(
-                                    fontSize:
-                                    8,
-                                    color:
-                                    secondaryTextColor,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    color: secondaryTextColor,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -1056,17 +994,12 @@ class ShoppingListPageState
                               ),
                               Text(
                                 'per ${item['unit'] ?? ''}',
-                                maxLines:
-                                1,
-                                overflow:
-                                TextOverflow
-                                    .ellipsis,
-                                style:
-                                const TextStyle(
-                                  fontSize:
-                                  8,
-                                  color:
-                                  secondaryTextColor,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: secondaryTextColor,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -1091,14 +1024,10 @@ class ShoppingListPageState
                 children: [
                   const Text(
                     'Quantity',
-                    style:
-                    TextStyle(
-                      fontSize: 10,
-                      fontWeight:
-                      FontWeight
-                          .w600,
-                      color:
-                      secondaryTextColor,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: secondaryTextColor,
                     ),
                   ),
                   const SizedBox(
@@ -1122,17 +1051,11 @@ class ShoppingListPageState
                     width: 36,
                     child: Center(
                       child: Text(
-                        quantity
-                            .toString(),
-                        style:
-                        const TextStyle(
-                          fontSize:
-                          14,
-                          fontWeight:
-                          FontWeight
-                              .bold,
-                          color:
-                          textColor,
+                        quantity.toString(),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
                         ),
                       ),
                     ),
@@ -1157,12 +1080,10 @@ class ShoppingListPageState
                     children: [
                       const Text(
                         'Subtotal',
-                        style:
-                        TextStyle(
-                          fontSize:
-                          9,
-                          color:
-                          secondaryTextColor,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: secondaryTextColor,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(
@@ -1172,15 +1093,10 @@ class ShoppingListPageState
                         price > 0
                             ? 'RM ${estimated.toStringAsFixed(2)}'
                             : 'N/A',
-                        style:
-                        const TextStyle(
-                          fontSize:
-                          15,
-                          fontWeight:
-                          FontWeight
-                              .bold,
-                          color:
-                          textColor,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
                         ),
                       ),
                     ],
@@ -1321,16 +1237,13 @@ class ShoppingListPageState
   }) {
     return Expanded(
       child: Container(
-        height: 55,
-        padding:
-        const EdgeInsets.symmetric(
+        height: 62,
+        padding: const EdgeInsets.symmetric(
           horizontal: 10,
         ),
-        decoration:
-        BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius:
-          BorderRadius.circular(
+          borderRadius: BorderRadius.circular(
             12,
           ),
           border: Border.all(
@@ -1341,48 +1254,42 @@ class ShoppingListPageState
           children: [
             Icon(
               icon,
-              color:
-              accentColor,
-              size: 19,
+              color: accentColor,
+              size: 20,
             ),
             const SizedBox(
-              width: 7,
+              width: 8,
             ),
             Expanded(
               child: Column(
                 mainAxisAlignment:
-                MainAxisAlignment
-                    .center,
+                MainAxisAlignment.center,
                 crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                CrossAxisAlignment.start,
                 children: [
                   Text(
                     value,
-                    style:
-                    const TextStyle(
-                      color:
-                      textColor,
+                    style: const TextStyle(
+                      color: textColor,
                       fontWeight:
-                      FontWeight
-                          .bold,
-                      fontSize:
-                      13,
+                      FontWeight.bold,
+                      fontSize: 15,
                     ),
+                  ),
+                  const SizedBox(
+                    height: 2,
                   ),
                   Text(
                     label,
-                    maxLines:
-                    1,
+                    maxLines: 1,
                     overflow:
-                    TextOverflow
-                        .ellipsis,
-                    style:
-                    const TextStyle(
+                    TextOverflow.ellipsis,
+                    style: const TextStyle(
                       color:
                       secondaryTextColor,
-                      fontSize:
-                      8,
+                      fontSize: 11,
+                      fontWeight:
+                      FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1475,15 +1382,10 @@ class ShoppingListPageState
                   children: [
                     const Text(
                       'Estimated Total',
-                      style:
-                      TextStyle(
-                        fontSize:
-                        14,
-                        fontWeight:
-                        FontWeight
-                            .bold,
-                        color:
-                        textColor,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(
@@ -1491,12 +1393,10 @@ class ShoppingListPageState
                     ),
                     Text(
                       '${shoppingItems.length} item(s) • ${getTotalQuantity()} quantity',
-                      style:
-                      const TextStyle(
-                        fontSize:
-                        9,
-                        color:
-                        secondaryTextColor,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: secondaryTextColor,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -1509,25 +1409,18 @@ class ShoppingListPageState
                 children: [
                   Text(
                     'RM ${estimatedTotal.toStringAsFixed(2)}',
-                    style:
-                    const TextStyle(
-                      fontSize:
-                      20,
-                      fontWeight:
-                      FontWeight
-                          .bold,
-                      color:
-                      accentColor,
+                    style: const TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                      color: accentColor,
                     ),
                   ),
                   Text(
                     '${getBoughtCount()} of ${shoppingItems.length} bought',
-                    style:
-                    const TextStyle(
-                      fontSize:
-                      9,
-                      color:
-                      secondaryTextColor,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: secondaryTextColor,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1591,22 +1484,15 @@ class ShoppingListPageState
                 TextButton.icon(
                   onPressed:
                   clearBoughtItems,
-                  icon:
-                  const Icon(
-                    Icons
-                        .check_circle_outline,
-                    size: 16,
+                  icon: const Icon(
+                    Icons.check_circle_outline,
+                    size: 18,
                   ),
-                  label:
-                  const Text(
+                  label: const Text(
                     'Clear Bought',
-                    style:
-                    TextStyle(
-                      fontSize:
-                      10,
-                      fontWeight:
-                      FontWeight
-                          .w600,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   style:
@@ -1638,22 +1524,15 @@ class ShoppingListPageState
                 TextButton.icon(
                   onPressed:
                   clearAllItems,
-                  icon:
-                  const Icon(
-                    Icons
-                        .delete_outline,
-                    size: 16,
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
                   ),
-                  label:
-                  const Text(
+                  label: const Text(
                     'Clear All',
-                    style:
-                    TextStyle(
-                      fontSize:
-                      10,
-                      fontWeight:
-                      FontWeight
-                          .w600,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   style:
@@ -1769,17 +1648,12 @@ class ShoppingListPageState
                   shoppingItems.isEmpty
                       ? 'Plan your shopping, buy smarter'
                       : '${shoppingItems.length} item(s) • ${getTotalQuantity()} total quantity',
-                  maxLines:
-                  1,
-                  overflow:
-                  TextOverflow
-                      .ellipsis,
-                  style:
-                  const TextStyle(
-                    color:
-                    secondaryTextColor,
-                    fontSize:
-                    10,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: secondaryTextColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -1844,25 +1718,18 @@ class ShoppingListPageState
                       children: [
                         Text(
                           '$bought/$total',
-                          style:
-                          const TextStyle(
-                            fontSize:
-                            10,
-                            fontWeight:
-                            FontWeight
-                                .bold,
-                            color:
-                            textColor,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
                           ),
                         ),
                         const Text(
                           'Bought',
-                          style:
-                          TextStyle(
-                            fontSize:
-                            7,
-                            color:
-                            secondaryTextColor,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: secondaryTextColor,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],

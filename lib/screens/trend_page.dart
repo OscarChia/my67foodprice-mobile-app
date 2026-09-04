@@ -17,6 +17,9 @@ class _TrendPageState extends State<TrendPage> {
   static const Color textColor = Color(0xFF1F2924);
 
   final DatabaseService databaseService = DatabaseService();
+  final TextEditingController searchController = TextEditingController();
+
+  String searchText = '';
 
   bool isLoading = true;
   bool isMonthlyLoading = false;
@@ -557,6 +560,41 @@ class _TrendPageState extends State<TrendPage> {
     return '';
   }
 
+  List<Map<String, dynamic>>
+  getFilteredFoodItems() {
+    if (searchText.trim().isEmpty) {
+      return foodItems;
+    }
+
+    final keyword =
+    searchText
+        .toLowerCase()
+        .trim();
+
+    return foodItems.where(
+          (food) {
+        final itemName =
+            food['item']
+                ?.toString()
+                .toLowerCase() ??
+                '';
+
+        final unit =
+            food['unit']
+                ?.toString()
+                .toLowerCase() ??
+                '';
+
+        return itemName.contains(
+          keyword,
+        ) ||
+            unit.contains(
+              keyword,
+            );
+      },
+    ).toList();
+  }
+
   double getCurrentPrice() {
     if (trendData.isEmpty) {
       return 0;
@@ -661,9 +699,9 @@ class _TrendPageState extends State<TrendPage> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
         20,
-        18,
+        16,
         20,
-        22,
+        18,
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -675,10 +713,8 @@ class _TrendPageState extends State<TrendPage> {
           ],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft:
-          Radius.circular(28),
-          bottomRight:
-          Radius.circular(28),
+          bottomLeft: Radius.circular(26),
+          bottomRight: Radius.circular(26),
         ),
       ),
       child: const Column(
@@ -690,27 +726,26 @@ class _TrendPageState extends State<TrendPage> {
               Icon(
                 Icons.show_chart,
                 color: Colors.white,
-                size: 25,
+                size: 24,
               ),
               SizedBox(width: 9),
               Text(
                 'Price Trends',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 23,
-                  fontWeight:
-                  FontWeight.bold,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 5),
           Text(
             'Track and analyse food price changes over time',
             style: TextStyle(
-              color:
-              Color(0xFFDCEDE6),
-              fontSize: 11,
+              color: Color(0xFFDCEDE6),
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -719,21 +754,40 @@ class _TrendPageState extends State<TrendPage> {
   }
 
   Widget buildFoodSelector() {
+    final filteredItems =
+    getFilteredFoodItems();
+
+    int? dropdownValue;
+
+    for (final item in filteredItems) {
+      if (item['item_code'] ==
+          selectedItemCode) {
+        dropdownValue =
+            selectedItemCode;
+        break;
+      }
+    }
+
     return Container(
       margin: const EdgeInsets.fromLTRB(
         16,
-        16,
+        10,
         16,
         0,
       ),
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(
+        14,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(
+          16,
+        ),
         border: Border.all(
-          color:
-          const Color(0xFFE3E9E6),
+          color: const Color(
+            0xFFE3E9E6,
+          ),
         ),
       ),
       child: Column(
@@ -743,26 +797,42 @@ class _TrendPageState extends State<TrendPage> {
           const Text(
             'Select Food Item',
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight:
               FontWeight.w700,
               color: textColor,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(
+            height: 9,
+          ),
           DropdownButtonFormField<int>(
-            initialValue:
-            selectedItemCode,
+            initialValue: dropdownValue,
             isExpanded: true,
             menuMaxHeight: 350,
+            hint: Text(
+              filteredItems.isEmpty
+                  ? 'No food found'
+                  : 'Select food item',
+              style:
+              const TextStyle(
+                fontSize: 13,
+                color:
+                Colors.black45,
+              ),
+            ),
             decoration:
             InputDecoration(
               prefixIcon:
               const Icon(
                 Icons.restaurant_menu,
-                color:
-                primaryGreen,
-                size: 20,
+                color: primaryGreen,
+                size: 21,
+              ),
+              prefixIconConstraints:
+              const BoxConstraints(
+                minWidth: 46,
+                minHeight: 46,
               ),
               filled: true,
               fillColor:
@@ -777,7 +847,9 @@ class _TrendPageState extends State<TrendPage> {
               OutlineInputBorder(
                 borderRadius:
                 BorderRadius
-                    .circular(14),
+                    .circular(
+                  13,
+                ),
                 borderSide:
                 const BorderSide(
                   color: Color(
@@ -789,7 +861,9 @@ class _TrendPageState extends State<TrendPage> {
               OutlineInputBorder(
                 borderRadius:
                 BorderRadius
-                    .circular(14),
+                    .circular(
+                  13,
+                ),
                 borderSide:
                 const BorderSide(
                   color: Color(
@@ -801,15 +875,19 @@ class _TrendPageState extends State<TrendPage> {
               OutlineInputBorder(
                 borderRadius:
                 BorderRadius
-                    .circular(14),
+                    .circular(
+                  13,
+                ),
                 borderSide:
                 const BorderSide(
                   color:
                   primaryGreen,
+                  width: 1.4,
                 ),
               ),
             ),
-            items: foodItems.map(
+            items:
+            filteredItems.map(
                   (item) {
                 return DropdownMenuItem<
                     int>(
@@ -824,26 +902,36 @@ class _TrendPageState extends State<TrendPage> {
                         .ellipsis,
                     style:
                     const TextStyle(
-                      fontSize: 11,
+                      fontSize: 13,
+                      color:
+                      textColor,
+                      fontWeight:
+                      FontWeight
+                          .w500,
                     ),
                   ),
                 );
               },
             ).toList(),
             onChanged:
-                (value) async {
-              if (value == null) {
+            filteredItems.isEmpty
+                ? null
+                : (value) async {
+              if (value ==
+                  null) {
                 return;
               }
 
               setState(() {
                 selectedItemCode =
                     value;
+
                 selectedPointIndex =
                 null;
               });
 
               await loadTrendData();
+
               await loadMonthlyItems();
             },
           ),
@@ -856,15 +944,15 @@ class _TrendPageState extends State<TrendPage> {
     return Container(
       margin: const EdgeInsets.fromLTRB(
         16,
-        12,
+        10,
         16,
         0,
       ),
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(16),
+        BorderRadius.circular(14),
         border: Border.all(
           color:
           const Color(0xFFE3E9E6),
@@ -895,7 +983,7 @@ class _TrendPageState extends State<TrendPage> {
                 },
                 borderRadius:
                 BorderRadius
-                    .circular(12),
+                    .circular(10),
                 child: Container(
                   padding:
                   const EdgeInsets
@@ -911,7 +999,7 @@ class _TrendPageState extends State<TrendPage> {
                     borderRadius:
                     BorderRadius
                         .circular(
-                      12,
+                      10,
                     ),
                   ),
                   alignment:
@@ -923,7 +1011,7 @@ class _TrendPageState extends State<TrendPage> {
                           ? Colors.white
                           : Colors
                           .black54,
-                      fontSize: 11,
+                      fontSize: 13,
                       fontWeight:
                       FontWeight
                           .w600,
@@ -934,6 +1022,100 @@ class _TrendPageState extends State<TrendPage> {
             );
           },
         ).toList(),
+      ),
+    );
+  }
+
+  Widget buildFoodSearch() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        16,
+        14,
+        16,
+        0,
+      ),
+      child: TextField(
+        controller: searchController,
+        style: const TextStyle(
+          fontSize: 14,
+          color: textColor,
+          fontWeight: FontWeight.w500,
+        ),
+        onChanged: (value) {
+          setState(() {
+            searchText = value;
+          });
+        },
+        decoration: InputDecoration(
+          hintText:
+          'Search food item',
+          hintStyle: const TextStyle(
+            fontSize: 13,
+            color: Colors.black45,
+          ),
+          prefixIcon: const Icon(
+            Icons.search,
+            color: primaryGreen,
+            size: 22,
+          ),
+          suffixIcon:
+          searchText.isNotEmpty
+              ? IconButton(
+            onPressed: () {
+              searchController.clear();
+
+              setState(() {
+                searchText = '';
+              });
+            },
+            icon: const Icon(
+              Icons.close,
+              size: 20,
+              color: Colors.black54,
+            ),
+          )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+          const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 15,
+          ),
+          border:
+          OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            BorderSide.none,
+          ),
+          enabledBorder:
+          OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            const BorderSide(
+              color:
+              Color(0xFFE3E9E6),
+            ),
+          ),
+          focusedBorder:
+          OutlineInputBorder(
+            borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
+            borderSide:
+            const BorderSide(
+              color: primaryGreen,
+              width: 1.5,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -954,15 +1136,15 @@ class _TrendPageState extends State<TrendPage> {
     return Container(
       margin: const EdgeInsets.fromLTRB(
         16,
-        12,
+        10,
         16,
         0,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(16),
         border: Border.all(
           color:
           const Color(0xFFE3E9E6),
@@ -990,47 +1172,41 @@ class _TrendPageState extends State<TrendPage> {
                           .ellipsis,
                       style:
                       const TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight:
                         FontWeight
                             .w600,
-                        color:
-                        textColor,
+                        color: textColor,
                       ),
                     ),
-
                     const SizedBox(
-                        height: 6),
-
+                      height: 5,
+                    ),
                     Text(
                       'RM ${current.toStringAsFixed(2)}',
                       style:
                       const TextStyle(
-                        color:
-                        textColor,
-                        fontSize: 26,
+                        color: textColor,
+                        fontSize: 27,
                         fontWeight:
                         FontWeight
                             .bold,
                       ),
                     ),
-
                     const SizedBox(
-                        height: 2),
-
+                      height: 2,
+                    ),
                     Text(
                       getSelectedFoodUnit(),
-                      style:
-                      const TextStyle(
-                        color: Colors
-                            .black45,
-                        fontSize: 9,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-
               Column(
                 crossAxisAlignment:
                 CrossAxisAlignment.end,
@@ -1054,7 +1230,7 @@ class _TrendPageState extends State<TrendPage> {
                       borderRadius:
                       BorderRadius
                           .circular(
-                        12,
+                        11,
                       ),
                     ),
                     child: Text(
@@ -1068,17 +1244,16 @@ class _TrendPageState extends State<TrendPage> {
                             ? primaryGreen
                             : Colors
                             .grey,
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight:
                         FontWeight
                             .bold,
                       ),
                     ),
                   ),
-
                   const SizedBox(
-                      height: 5),
-
+                    height: 5,
+                  ),
                   Text(
                     '${change > 0 ? '+' : change < 0 ? '-' : ''}'
                         'RM ${change.abs().toStringAsFixed(2)}',
@@ -1088,39 +1263,37 @@ class _TrendPageState extends State<TrendPage> {
                           : isDown
                           ? primaryGreen
                           : Colors.grey,
-                      fontSize: 9,
+                      fontSize: 11,
                       fontWeight:
-                      FontWeight
-                          .w600,
+                      FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-
-          const SizedBox(height: 12),
-
+          const SizedBox(height: 10),
           Text(
             '$selectedPeriod Price Trend',
             style: const TextStyle(
-              fontSize: 10,
-              color: Colors.black45,
+              fontSize: 13,
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
             ),
           ),
-
-          const SizedBox(height: 10),
-
+          const SizedBox(height: 6),
           SizedBox(
-            height: 200,
+            height: 210,
             width: double.infinity,
             child: trendData.isEmpty
                 ? const Center(
               child: Text(
                 'No trend data available',
-                style: TextStyle(
+                style:
+                TextStyle(
                   color:
                   Colors.grey,
+                  fontSize: 13,
                 ),
               ),
             )
@@ -1137,25 +1310,27 @@ class _TrendPageState extends State<TrendPage> {
               },
             ),
           ),
-
-          if (selectedPointIndex != null &&
+          if (selectedPointIndex !=
+              null &&
               selectedPointIndex! <
                   trendData.length)
             Container(
-              width: double.infinity,
+              width:
+              double.infinity,
               margin:
               const EdgeInsets.only(
-                top: 10,
+                top: 8,
               ),
               padding:
               const EdgeInsets.all(
                 10,
               ),
-              decoration: BoxDecoration(
+              decoration:
+              BoxDecoration(
                 color: lightGreen,
                 borderRadius:
                 BorderRadius.circular(
-                  12,
+                  11,
                 ),
               ),
               child: Row(
@@ -1165,11 +1340,11 @@ class _TrendPageState extends State<TrendPage> {
                         .touch_app_outlined,
                     color:
                     primaryGreen,
-                    size: 17,
+                    size: 18,
                   ),
-
-                  const SizedBox(width: 7),
-
+                  const SizedBox(
+                    width: 7,
+                  ),
                   Expanded(
                     child: Text(
                       trendData[
@@ -1178,19 +1353,18 @@ class _TrendPageState extends State<TrendPage> {
                           .toString(),
                       style:
                       const TextStyle(
-                        fontSize: 10,
+                        fontSize: 12,
                         fontWeight:
                         FontWeight
                             .w600,
                       ),
                     ),
                   ),
-
                   Text(
                     'RM ${(trendData[selectedPointIndex!]['price'] as double).toStringAsFixed(2)}',
                     style:
                     const TextStyle(
-                      fontSize: 11,
+                      fontSize: 13,
                       color:
                       primaryGreen,
                       fontWeight:
@@ -1208,7 +1382,8 @@ class _TrendPageState extends State<TrendPage> {
 
   Widget buildSummaryCards() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding:
+      const EdgeInsets.fromLTRB(
         16,
         12,
         16,
@@ -1221,23 +1396,21 @@ class _TrendPageState extends State<TrendPage> {
           const Text(
             'Price Summary',
             style: TextStyle(
-              fontSize: 17,
+              fontSize: 18,
               fontWeight:
               FontWeight.w700,
               color: textColor,
             ),
           ),
-
-          const SizedBox(height: 10),
-
+          const SizedBox(height: 8),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics:
             const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.8,
+            crossAxisSpacing: 9,
+            mainAxisSpacing: 9,
+            childAspectRatio: 2.35,
             children: [
               buildSummaryCard(
                 getCurrentLabel(),
@@ -1287,11 +1460,14 @@ class _TrendPageState extends State<TrendPage> {
       Color valueColor,
       ) {
     return Container(
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 13,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(16),
+        BorderRadius.circular(14),
         border: Border.all(
           color:
           const Color(0xFFE3E9E6),
@@ -1305,14 +1481,20 @@ class _TrendPageState extends State<TrendPage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.black45,
-              fontSize: 9,
+            maxLines: 1,
+            overflow:
+            TextOverflow.ellipsis,
+            style:
+            const TextStyle(
+              color: Colors.black54,
+              fontSize: 11,
+              fontWeight:
+              FontWeight.w500,
             ),
           ),
-
-          const SizedBox(height: 6),
-
+          const SizedBox(
+            height: 4,
+          ),
           Text(
             value,
             style: TextStyle(
@@ -1335,11 +1517,11 @@ class _TrendPageState extends State<TrendPage> {
         16,
         20,
       ),
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(16),
         border: Border.all(
           color:
           const Color(0xFFE3E9E6),
@@ -1355,33 +1537,38 @@ class _TrendPageState extends State<TrendPage> {
                 Icons.trending_up,
                 color:
                 primaryGreen,
-                size: 18,
+                size: 20,
               ),
               SizedBox(width: 7),
-              Text(
-                'Monthly Food Price Changes',
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 16,
-                  fontWeight:
-                  FontWeight.w700,
+              Expanded(
+                child: Text(
+                  'Monthly Food Price Changes',
+                  style: TextStyle(
+                    color:
+                    textColor,
+                    fontSize: 17,
+                    fontWeight:
+                    FontWeight
+                        .w700,
+                  ),
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 4),
-
+          const SizedBox(
+            height: 4,
+          ),
           const Text(
             'Latest month compared with previous month',
             style: TextStyle(
-              color: Colors.black45,
-              fontSize: 9,
+              color: Colors.black87,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
             ),
           ),
-
-          const SizedBox(height: 13),
-
+          const SizedBox(
+            height: 10,
+          ),
           if (isMonthlyLoading)
             const Padding(
               padding:
@@ -1397,7 +1584,6 @@ class _TrendPageState extends State<TrendPage> {
                 ),
               ),
             ),
-
           if (!isMonthlyLoading &&
               monthlyItems.isEmpty)
             const Padding(
@@ -1408,15 +1594,15 @@ class _TrendPageState extends State<TrendPage> {
               child: Center(
                 child: Text(
                   'No monthly item data available',
-                  style: TextStyle(
+                  style:
+                  TextStyle(
                     color:
                     Colors.grey,
-                    fontSize: 10,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ),
-
           if (!isMonthlyLoading)
             ...monthlyItems.map(
                   (item) {
@@ -1434,17 +1620,28 @@ class _TrendPageState extends State<TrendPage> {
                 final isDown =
                     change < 0;
 
-                return Padding(
+                return Container(
                   padding:
                   const EdgeInsets
-                      .only(
-                    bottom: 11,
+                      .symmetric(
+                    vertical: 9,
+                  ),
+                  decoration:
+                  const BoxDecoration(
+                    border: Border(
+                      bottom:
+                      BorderSide(
+                        color: Color(
+                          0xFFEEF1EF,
+                        ),
+                      ),
+                    ),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        width: 38,
-                        height: 38,
+                        width: 42,
+                        height: 42,
                         decoration:
                         BoxDecoration(
                           color:
@@ -1452,7 +1649,7 @@ class _TrendPageState extends State<TrendPage> {
                           borderRadius:
                           BorderRadius
                               .circular(
-                            11,
+                            10,
                           ),
                         ),
                         child:
@@ -1461,13 +1658,12 @@ class _TrendPageState extends State<TrendPage> {
                               .restaurant_menu,
                           color:
                           primaryGreen,
-                          size: 18,
+                          size: 20,
                         ),
                       ),
-
                       const SizedBox(
-                          width: 10),
-
+                        width: 10,
+                      ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
@@ -1475,42 +1671,32 @@ class _TrendPageState extends State<TrendPage> {
                               .start,
                           children: [
                             Text(
-                              item['item']
-                                  ?.toString() ??
-                                  '',
+                              item['item']?.toString() ?? '',
                               maxLines: 1,
-                              overflow:
-                              TextOverflow
-                                  .ellipsis,
-                              style:
-                              const TextStyle(
-                                color:
-                                textColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight
-                                    .w600,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: textColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-
                             const SizedBox(
-                                height: 2),
-
+                              height: 3,
+                            ),
                             Text(
-                              item['unit']
-                                  ?.toString() ??
-                                  '',
-                              style:
-                              const TextStyle(
-                                color: Colors
-                                    .black45,
-                                fontSize: 8,
+                              item['unit']?.toString() ?? '',
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-
+                      const SizedBox(
+                        width: 6,
+                      ),
                       Text(
                         '${isUp ? '↗' : isDown ? '↘' : '→'} '
                             '${change > 0 ? '+' : ''}'
@@ -1521,30 +1707,22 @@ class _TrendPageState extends State<TrendPage> {
                               : isDown
                               ? primaryGreen
                               : Colors.grey,
-                          fontSize: 9,
-                          fontWeight:
-                          FontWeight
-                              .bold,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       const SizedBox(
-                          width: 10),
-
+                        width: 10,
+                      ),
                       SizedBox(
-                        width: 60,
+                        width: 72,
                         child: Text(
                           'RM ${price.toStringAsFixed(2)}',
-                          textAlign:
-                          TextAlign.right,
-                          style:
-                          const TextStyle(
-                            color:
-                            textColor,
-                            fontSize: 9,
-                            fontWeight:
-                            FontWeight
-                                .w600,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -1616,15 +1794,16 @@ class _TrendPageState extends State<TrendPage> {
                 SingleChildScrollView(
                   physics:
                   const AlwaysScrollableScrollPhysics(),
-                  child: Column(
-                    children: [
-                      buildFoodSelector(),
-                      buildPeriodSelector(),
-                      buildTrendCard(),
-                      buildSummaryCards(),
-                      buildMonthlyItems(),
-                    ],
-                  ),
+                    child: Column(
+                      children: [
+                        buildFoodSearch(),
+                        buildFoodSelector(),
+                        buildPeriodSelector(),
+                        buildTrendCard(),
+                        buildSummaryCards(),
+                        buildMonthlyItems(),
+                      ],
+                    )
                 ),
               ),
             ),
@@ -1632,6 +1811,11 @@ class _TrendPageState extends State<TrendPage> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 }
 
@@ -1648,9 +1832,7 @@ class TrendChart extends StatelessWidget {
   });
 
   @override
-  Widget build(
-      BuildContext context,
-      ) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (
           context,
@@ -1662,33 +1844,31 @@ class TrendChart extends StatelessWidget {
               return;
             }
 
-            const leftPadding = 42.0;
-            const rightPadding = 12.0;
+            const leftPadding = 30.0;
+            const rightPadding = 18.0;
+            const pointInset = 10.0;
 
-            final width =
+            final chartWidth =
                 constraints.maxWidth -
                     leftPadding -
                     rightPadding;
 
-            if (width <= 0) {
-              return;
-            }
+            final usableWidth =
+                chartWidth - pointInset * 2;
 
             final relativeX =
                 details.localPosition.dx -
-                    leftPadding;
+                    leftPadding -
+                    pointInset;
 
             final spacing =
-            data.length <= 1
-                ? width
-                : width /
-                (data.length - 1);
+                usableWidth /
+                    (data.length - 1);
 
             int index =
             spacing == 0
                 ? 0
-                : (relativeX /
-                spacing)
+                : (relativeX / spacing)
                 .round();
 
             index = index.clamp(
@@ -1696,17 +1876,14 @@ class TrendChart extends StatelessWidget {
               data.length - 1,
             );
 
-            onPointSelected(
-              index,
-            );
+            onPointSelected(index);
           },
           child: CustomPaint(
             size: Size(
               constraints.maxWidth,
-              200,
+              210,
             ),
-            painter:
-            TrendChartPainter(
+            painter: TrendChartPainter(
               data: data,
               selectedIndex:
               selectedIndex,
@@ -1737,10 +1914,10 @@ class TrendChartPainter
       return;
     }
 
-    const left = 42.0;
-    const right = 12.0;
-    const top = 15.0;
-    const bottom = 36.0;
+    const left = 30.0;
+    const right = 18.0;
+    const top = 24.0;
+    const bottom = 50.0;
 
     final chartWidth =
         size.width -
@@ -1784,9 +1961,9 @@ class TrendChartPainter
     final gridPaint = Paint()
       ..color =
       Colors.grey.withValues(
-        alpha: 0.30,
+        alpha: 0.22,
       )
-      ..strokeWidth = 0.7;
+      ..strokeWidth = 0.8;
 
     const horizontalLines = 4;
 
@@ -1824,14 +2001,20 @@ class TrendChartPainter
       TextPainter(
         text: TextSpan(
           text:
-          price.toStringAsFixed(
+          price
+              .toStringAsFixed(
             2,
           ),
           style:
           const TextStyle(
             color:
-            Colors.grey,
-            fontSize: 7,
+            Color(
+              0xFF555555,
+            ),
+            fontSize: 10,
+            fontWeight:
+            FontWeight
+                .w500,
           ),
         ),
         textDirection:
@@ -1841,17 +2024,18 @@ class TrendChartPainter
       priceText.paint(
         canvas,
         Offset(
-          left -
-              priceText.width -
-              5,
-          y -
-              priceText.height /
-                  2,
+          left - priceText.width - 7,
+          y - priceText.height / 2,
         ),
       );
     }
 
     final List<Offset> points = [];
+
+    const pointInset = 10.0;
+
+    final usableWidth =
+        chartWidth - pointInset * 2;
 
     for (
     int i = 0;
@@ -1859,18 +2043,16 @@ class TrendChartPainter
     i++
     ) {
       final price =
-      data[i]['price']
-      as double;
+      data[i]['price'] as double;
 
       final x =
       data.length == 1
-          ? left +
-          chartWidth / 2
+          ? left + chartWidth / 2
           : left +
-          chartWidth *
+          pointInset +
+          usableWidth *
               i /
-              (data.length -
-                  1);
+              (data.length - 1);
 
       final normalized =
           (price - minimum) /
@@ -1882,10 +2064,7 @@ class TrendChartPainter
                   (1 - normalized);
 
       points.add(
-        Offset(
-          x,
-          y,
-        ),
+        Offset(x, y),
       );
     }
 
@@ -1893,7 +2072,11 @@ class TrendChartPainter
       ..color =
           _TrendPageState
               .primaryGreen
-      ..strokeWidth = 2.5
+      ..strokeWidth = 2.8
+      ..strokeCap =
+          StrokeCap.round
+      ..strokeJoin =
+          StrokeJoin.round
       ..style =
           PaintingStyle.stroke;
 
@@ -1930,9 +2113,10 @@ class TrendChartPainter
 
       canvas.drawCircle(
         points[i],
-        selected ? 5 : 3.5,
+        selected ? 6 : 4,
         Paint()
-          ..color = selected
+          ..color =
+          selected
               ? Colors.white
               : _TrendPageState
               .primaryGreen,
@@ -1941,7 +2125,7 @@ class TrendChartPainter
       if (selected) {
         canvas.drawCircle(
           points[i],
-          3.5,
+          4,
           Paint()
             ..color =
                 _TrendPageState
@@ -1956,11 +2140,20 @@ class TrendChartPainter
 
       bool showLabel = true;
 
-      if (data.length > 8) {
+      if (data.length > 10) {
         showLabel =
             i == 0 ||
                 i ==
-                    data.length - 1 ||
+                    data.length -
+                        1 ||
+                i % 3 == 0;
+      } else if (
+      data.length > 6) {
+        showLabel =
+            i == 0 ||
+                i ==
+                    data.length -
+                        1 ||
                 i % 2 == 0;
       }
 
@@ -1972,23 +2165,45 @@ class TrendChartPainter
             style:
             const TextStyle(
               color:
-              Colors.grey,
-              fontSize: 7,
+              Color(
+                0xFF555555,
+              ),
+              fontSize: 10,
+              fontWeight:
+              FontWeight
+                  .w500,
             ),
           ),
           textDirection:
           TextDirection.ltr,
         )..layout();
 
+        double labelX =
+            points[i].dx -
+                labelText.width / 2;
+
+        final minimumX = left;
+
+        final maximumX =
+            size.width -
+                right -
+                labelText.width;
+
+        if (labelX < minimumX) {
+          labelX = minimumX;
+        }
+
+        if (labelX > maximumX) {
+          labelX = maximumX;
+        }
+
         labelText.paint(
           canvas,
           Offset(
-            points[i].dx -
-                labelText.width /
-                    2,
+            labelX,
             top +
                 chartHeight +
-                9,
+                18,
           ),
         );
       }
@@ -2022,8 +2237,8 @@ class TrendChartPainter
             ?.toString() ??
             '';
 
-    const boxWidth = 140.0;
-    const boxHeight = 54.0;
+    const boxWidth = 150.0;
+    const boxHeight = 60.0;
 
     double left =
         point.dx -
@@ -2033,8 +2248,7 @@ class TrendChartPainter
       left = 5;
     }
 
-    if (left +
-        boxWidth >
+    if (left + boxWidth >
         size.width - 5) {
       left =
           size.width -
@@ -2060,13 +2274,16 @@ class TrendChartPainter
         boxWidth,
         boxHeight,
       ),
-      const Radius.circular(8),
+      const Radius.circular(
+        8,
+      ),
     );
 
     canvas.drawRRect(
       rectangle,
       Paint()
-        ..color = Colors.white,
+        ..color =
+            Colors.white,
     );
 
     canvas.drawRRect(
@@ -2089,7 +2306,7 @@ class TrendChartPainter
           color:
           _TrendPageState
               .textColor,
-          fontSize: 9,
+          fontSize: 11,
           fontWeight:
           FontWeight.bold,
         ),
@@ -2101,8 +2318,8 @@ class TrendChartPainter
     labelText.paint(
       canvas,
       Offset(
-        left + 10,
-        top + 9,
+        left + 12,
+        top + 10,
       ),
     );
 
@@ -2116,9 +2333,9 @@ class TrendChartPainter
           color:
           _TrendPageState
               .primaryGreen,
-          fontSize: 9,
+          fontSize: 12,
           fontWeight:
-          FontWeight.w600,
+          FontWeight.w700,
         ),
       ),
       textDirection:
@@ -2128,8 +2345,8 @@ class TrendChartPainter
     priceText.paint(
       canvas,
       Offset(
-        left + 10,
-        top + 30,
+        left + 12,
+        top + 34,
       ),
     );
   }
@@ -2159,7 +2376,9 @@ class TrendChartPainter
     double drawn = 0;
 
     while (drawn < distance) {
-      final from = start + direction * drawn;
+      final from =
+          start +
+              direction * drawn;
 
       final nextDistance =
       min(
@@ -2167,18 +2386,32 @@ class TrendChartPainter
         distance,
       );
 
-      final to = start + direction * nextDistance;
-      canvas.drawLine(from, to, paint,);
-      drawn += dashWidth + dashSpace;
+      final to =
+          start +
+              direction *
+                  nextDistance;
+
+      canvas.drawLine(
+        from,
+        to,
+        paint,
+      );
+
+      drawn +=
+          dashWidth +
+              dashSpace;
     }
   }
 
   @override
   bool shouldRepaint(
-      covariant TrendChartPainter oldDelegate,
+      covariant TrendChartPainter
+      oldDelegate,
       ) {
-    return oldDelegate.data != data ||
-        oldDelegate.selectedIndex !=
+    return oldDelegate.data !=
+        data ||
+        oldDelegate
+            .selectedIndex !=
             selectedIndex;
   }
 }

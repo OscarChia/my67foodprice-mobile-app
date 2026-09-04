@@ -460,16 +460,17 @@ class SavedPageState extends State<SavedPage> {
         onTap: () {
           setState(() {
             selectedTab = index;
-
             generateNotifications();
           });
         },
         borderRadius:
-        BorderRadius.circular(12),
+        BorderRadius.circular(
+          12,
+        ),
         child: Container(
           padding:
           const EdgeInsets.symmetric(
-            vertical: 10,
+            vertical: 12,
           ),
           decoration:
           BoxDecoration(
@@ -489,9 +490,9 @@ class SavedPageState extends State<SavedPage> {
               color: selected
                   ? Colors.white
                   : Colors.black54,
-              fontSize: 11,
+              fontSize: 15,
               fontWeight:
-              FontWeight.w600,
+              FontWeight.w700,
             ),
           ),
         ),
@@ -527,13 +528,15 @@ class SavedPageState extends State<SavedPage> {
     return Container(
       margin:
       const EdgeInsets.only(
-        bottom: 11,
+        bottom: 12,
       ),
       decoration:
       BoxDecoration(
         color: Colors.white,
         borderRadius:
-        BorderRadius.circular(18),
+        BorderRadius.circular(
+          18,
+        ),
         border:
         Border.all(
           color:
@@ -542,7 +545,8 @@ class SavedPageState extends State<SavedPage> {
           ),
         ),
       ),
-      child: Column(
+      child:
+      Column(
         children: [
           InkWell(
             onTap: () {
@@ -553,27 +557,33 @@ class SavedPageState extends State<SavedPage> {
             borderRadius:
             const BorderRadius.only(
               topLeft:
-              Radius.circular(18),
+              Radius.circular(
+                18,
+              ),
               topRight:
-              Radius.circular(18),
+              Radius.circular(
+                18,
+              ),
             ),
-            child: Padding(
+            child:
+            Padding(
               padding:
               const EdgeInsets.all(
-                13,
+                15,
               ),
-              child: Row(
+              child:
+              Row(
                 children: [
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: 56,
+                    height: 56,
                     decoration:
                     BoxDecoration(
                       color:
                       lightGreen,
                       borderRadius:
                       BorderRadius.circular(
-                        14,
+                        15,
                       ),
                     ),
                     child:
@@ -581,16 +591,17 @@ class SavedPageState extends State<SavedPage> {
                       Icons.restaurant_menu,
                       color:
                       primaryGreen,
-                      size: 26,
+                      size: 28,
                     ),
                   ),
 
                   const SizedBox(
-                    width: 11,
+                    width: 13,
                   ),
 
                   Expanded(
-                    child: Column(
+                    child:
+                    Column(
                       crossAxisAlignment:
                       CrossAxisAlignment.start,
                       children: [
@@ -602,16 +613,17 @@ class SavedPageState extends State<SavedPage> {
                           TextOverflow.ellipsis,
                           style:
                           const TextStyle(
-                            fontSize: 12,
+                            fontSize: 16,
+                            height: 1.25,
                             fontWeight:
-                            FontWeight.w700,
+                            FontWeight.w800,
                             color:
                             textColor,
                           ),
                         ),
 
                         const SizedBox(
-                          height: 4,
+                          height: 6,
                         ),
 
                         Text(
@@ -621,14 +633,16 @@ class SavedPageState extends State<SavedPage> {
                           TextOverflow.ellipsis,
                           style:
                           const TextStyle(
-                            fontSize: 9,
+                            fontSize: 13,
                             color:
-                            Colors.black45,
+                            Colors.black54,
+                            fontWeight:
+                            FontWeight.w500,
                           ),
                         ),
 
                         const SizedBox(
-                          height: 6,
+                          height: 8,
                         ),
 
                         if (previousPrice > 0)
@@ -640,7 +654,7 @@ class SavedPageState extends State<SavedPage> {
                                     : isDecrease
                                     ? Icons.trending_down
                                     : Icons.trending_flat,
-                                size: 14,
+                                size: 17,
                                 color:
                                 isIncrease
                                     ? Colors.red
@@ -650,26 +664,29 @@ class SavedPageState extends State<SavedPage> {
                               ),
 
                               const SizedBox(
-                                width: 4,
+                                width: 5,
                               ),
 
-                              Text(
-                                isIncrease
-                                    ? 'Up RM ${priceDifference.abs().toStringAsFixed(2)}'
-                                    : isDecrease
-                                    ? 'Down RM ${priceDifference.abs().toStringAsFixed(2)}'
-                                    : 'No price change',
-                                style:
-                                TextStyle(
-                                  color:
+                              Flexible(
+                                child:
+                                Text(
                                   isIncrease
-                                      ? Colors.red
+                                      ? 'Up RM ${priceDifference.abs().toStringAsFixed(2)}'
                                       : isDecrease
-                                      ? primaryGreen
-                                      : Colors.grey,
-                                  fontSize: 9,
-                                  fontWeight:
-                                  FontWeight.w600,
+                                      ? 'Down RM ${priceDifference.abs().toStringAsFixed(2)}'
+                                      : 'No price change',
+                                  style:
+                                  TextStyle(
+                                    color:
+                                    isIncrease
+                                        ? Colors.red
+                                        : isDecrease
+                                        ? primaryGreen
+                                        : Colors.grey,
+                                    fontSize: 13,
+                                    fontWeight:
+                                    FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ],
@@ -679,7 +696,7 @@ class SavedPageState extends State<SavedPage> {
                   ),
 
                   const SizedBox(
-                    width: 8,
+                    width: 9,
                   ),
 
                   Column(
@@ -692,7 +709,7 @@ class SavedPageState extends State<SavedPage> {
                             : '-',
                         style:
                         const TextStyle(
-                          fontSize: 15,
+                          fontSize: 18,
                           fontWeight:
                           FontWeight.bold,
                           color:
@@ -701,30 +718,34 @@ class SavedPageState extends State<SavedPage> {
                       ),
 
                       const SizedBox(
-                        height: 2,
+                        height: 4,
                       ),
 
                       const Text(
                         'Latest Avg',
                         style:
                         TextStyle(
-                          fontSize: 8,
+                          fontSize: 12,
                           color:
-                          Colors.black38,
+                          Colors.black54,
+                          fontWeight:
+                          FontWeight.w500,
                         ),
                       ),
 
                       if (previousPrice > 0) ...[
                         const SizedBox(
-                          height: 3,
+                          height: 4,
                         ),
                         Text(
                           'Was RM ${previousPrice.toStringAsFixed(2)}',
                           style:
                           const TextStyle(
-                            fontSize: 8,
+                            fontSize: 12,
                             color:
-                            Colors.black45,
+                            Colors.black54,
+                            fontWeight:
+                            FontWeight.w500,
                           ),
                         ),
                       ],
@@ -742,16 +763,18 @@ class SavedPageState extends State<SavedPage> {
           Row(
             children: [
               Expanded(
-                child: InkWell(
+                child:
+                InkWell(
                   onTap: () {
                     toggleAlert(
                       item,
                     );
                   },
-                  child: Container(
+                  child:
+                  Container(
                     padding:
                     const EdgeInsets.symmetric(
-                      vertical: 10,
+                      vertical: 13,
                     ),
                     decoration:
                     const BoxDecoration(
@@ -765,7 +788,8 @@ class SavedPageState extends State<SavedPage> {
                         ),
                       ),
                     ),
-                    child: Row(
+                    child:
+                    Row(
                       mainAxisAlignment:
                       MainAxisAlignment.center,
                       children: [
@@ -773,13 +797,13 @@ class SavedPageState extends State<SavedPage> {
                           alertEnabled
                               ? Icons.notifications_active_outlined
                               : Icons.notifications_off_outlined,
-                          size: 15,
+                          size: 18,
                           color:
                           primaryGreen,
                         ),
 
                         const SizedBox(
-                          width: 5,
+                          width: 6,
                         ),
 
                         Text(
@@ -790,9 +814,9 @@ class SavedPageState extends State<SavedPage> {
                           const TextStyle(
                             color:
                             primaryGreen,
-                            fontSize: 9,
+                            fontSize: 13,
                             fontWeight:
-                            FontWeight.w600,
+                            FontWeight.w700,
                           ),
                         ),
                       ],
@@ -802,16 +826,18 @@ class SavedPageState extends State<SavedPage> {
               ),
 
               Expanded(
-                child: InkWell(
+                child:
+                InkWell(
                   onTap: () {
                     removeSavedItem(
                       item['saved_id'],
                     );
                   },
-                  child: Container(
+                  child:
+                  Container(
                     padding:
                     const EdgeInsets.symmetric(
-                      vertical: 10,
+                      vertical: 13,
                     ),
                     child:
                     const Row(
@@ -820,13 +846,13 @@ class SavedPageState extends State<SavedPage> {
                       children: [
                         Icon(
                           Icons.favorite,
-                          size: 15,
+                          size: 18,
                           color:
                           Colors.red,
                         ),
 
                         SizedBox(
-                          width: 5,
+                          width: 6,
                         ),
 
                         Text(
@@ -835,9 +861,9 @@ class SavedPageState extends State<SavedPage> {
                           TextStyle(
                             color:
                             Colors.red,
-                            fontSize: 9,
+                            fontSize: 13,
                             fontWeight:
-                            FontWeight.w600,
+                            FontWeight.w700,
                           ),
                         ),
                       ],
@@ -875,13 +901,16 @@ class SavedPageState extends State<SavedPage> {
     return Container(
       margin:
       const EdgeInsets.only(
-        bottom: 10,
+        bottom: 12,
       ),
       decoration:
       BoxDecoration(
-        color: Colors.white,
+        color:
+        Colors.white,
         borderRadius:
-        BorderRadius.circular(17),
+        BorderRadius.circular(
+          18,
+        ),
         border:
         Border.all(
           color:
@@ -890,22 +919,29 @@ class SavedPageState extends State<SavedPage> {
           ),
         ),
       ),
-      child: InkWell(
+      child:
+      InkWell(
         onTap: () {
           openFoodDetails(
             item,
           );
         },
         borderRadius:
-        BorderRadius.circular(17),
-        child: Padding(
+        BorderRadius.circular(
+          18,
+        ),
+        child:
+        Padding(
           padding:
-          const EdgeInsets.all(13),
-          child: Row(
+          const EdgeInsets.all(
+            15,
+          ),
+          child:
+          Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 48,
+                height: 48,
                 decoration:
                 BoxDecoration(
                   color:
@@ -921,7 +957,8 @@ class SavedPageState extends State<SavedPage> {
                   shape:
                   BoxShape.circle,
                 ),
-                child: Icon(
+                child:
+                Icon(
                   isIncrease
                       ? Icons.trending_up
                       : isDecrease
@@ -933,37 +970,39 @@ class SavedPageState extends State<SavedPage> {
                       : isDecrease
                       ? primaryGreen
                       : Colors.grey,
-                  size: 19,
+                  size: 23,
                 ),
               ),
 
               const SizedBox(
-                width: 11,
+                width: 13,
               ),
 
               Expanded(
-                child: Column(
+                child:
+                Column(
                   crossAxisAlignment:
                   CrossAxisAlignment.start,
                   children: [
                     Text(
                       item['item']
                           .toString(),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow:
                       TextOverflow.ellipsis,
                       style:
                       const TextStyle(
-                        fontSize: 11,
+                        fontSize: 15,
+                        height: 1.25,
                         fontWeight:
-                        FontWeight.w700,
+                        FontWeight.w800,
                         color:
                         textColor,
                       ),
                     ),
 
                     const SizedBox(
-                      height: 4,
+                      height: 6,
                     ),
 
                     Text(
@@ -974,9 +1013,9 @@ class SavedPageState extends State<SavedPage> {
                           : 'No price change',
                       style:
                       TextStyle(
-                        fontSize: 9,
+                        fontSize: 13,
                         fontWeight:
-                        FontWeight.w600,
+                        FontWeight.w700,
                         color:
                         isIncrease
                             ? Colors.red
@@ -987,30 +1026,34 @@ class SavedPageState extends State<SavedPage> {
                     ),
 
                     const SizedBox(
-                      height: 4,
+                      height: 6,
                     ),
 
                     Text(
                       'RM ${previousPrice.toStringAsFixed(2)} → RM ${latestPrice.toStringAsFixed(2)}',
                       style:
                       const TextStyle(
-                        fontSize: 8,
+                        fontSize: 12,
                         color:
-                        Colors.black45,
+                        Colors.black54,
+                        fontWeight:
+                        FontWeight.w500,
                       ),
                     ),
 
                     const SizedBox(
-                      height: 2,
+                      height: 4,
                     ),
 
                     Text(
                       'Latest: ${item['latest_date']}',
                       style:
                       const TextStyle(
-                        fontSize: 8,
+                        fontSize: 12,
                         color:
-                        Colors.black45,
+                        Colors.black54,
+                        fontWeight:
+                        FontWeight.w500,
                       ),
                     ),
                   ],
@@ -1024,8 +1067,8 @@ class SavedPageState extends State<SavedPage> {
               Icon(
                 Icons.chevron_right,
                 color:
-                Colors.grey.shade400,
-                size: 20,
+                Colors.grey.shade500,
+                size: 24,
               ),
             ],
           ),
@@ -1085,9 +1128,8 @@ class SavedPageState extends State<SavedPage> {
                 'No favourites yet',
                 style:
                 TextStyle(
-                  fontSize: 15,
-                  fontWeight:
-                  FontWeight.w600,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
 
@@ -1097,13 +1139,12 @@ class SavedPageState extends State<SavedPage> {
 
               Text(
                 'Tap the heart icon on the Search page to add food to your favourites.',
-                textAlign:
-                TextAlign.center,
-                style:
-                TextStyle(
-                  fontSize: 10,
-                  color:
-                  Colors.black45,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.45,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -1298,10 +1339,9 @@ class SavedPageState extends State<SavedPage> {
 
                     Text(
                       'No price alerts',
-                      style:
-                      TextStyle(
-                        fontWeight:
-                        FontWeight.w600,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
 
@@ -1311,13 +1351,11 @@ class SavedPageState extends State<SavedPage> {
 
                     Text(
                       'There are no significant price changes for your favourite food items.',
-                      textAlign:
-                      TextAlign.center,
-                      style:
-                      TextStyle(
-                        fontSize: 9,
-                        color:
-                        Colors.black45,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.45,
+                        color: Colors.black54,
                       ),
                     ),
                   ],
@@ -1360,12 +1398,13 @@ class SavedPageState extends State<SavedPage> {
           ),
           sliver:
           SliverToBoxAdapter(
-            child: Container(
+            child:
+            Container(
               width:
               double.infinity,
               padding:
               const EdgeInsets.all(
-                14,
+                16,
               ),
               decoration:
               BoxDecoration(
@@ -1383,23 +1422,25 @@ class SavedPageState extends State<SavedPage> {
                   Colors.orange,
                 ),
               ),
-              child: Row(
+              child:
+              Row(
                 crossAxisAlignment:
                 CrossAxisAlignment.start,
                 children: [
                   const Icon(
                     Icons.notifications_active_outlined,
-                    size: 18,
+                    size: 22,
                     color:
                     Colors.orange,
                   ),
 
                   const SizedBox(
-                    width: 8,
+                    width: 10,
                   ),
 
                   Expanded(
-                    child: Column(
+                    child:
+                    Column(
                       crossAxisAlignment:
                       CrossAxisAlignment.start,
                       children: [
@@ -1411,19 +1452,24 @@ class SavedPageState extends State<SavedPage> {
                             Colors.orange,
                             fontWeight:
                             FontWeight.bold,
-                            fontSize: 11,
+                            fontSize: 15,
                           ),
                         ),
 
                         const SizedBox(
-                          height: 4,
+                          height: 6,
                         ),
 
                         Text(
                           'Alerts are triggered when the price changes by ${alertThreshold.toStringAsFixed(0)}% or more. The actual increase or decrease is shown in RM.',
-                          style: const TextStyle(
-                            fontSize: 9,
-                            color: Colors.black54,
+                          style:
+                          const TextStyle(
+                            fontSize: 13,
+                            height: 1.45,
+                            color:
+                            Colors.black54,
+                            fontWeight:
+                            FontWeight.w500,
                           ),
                         ),
                       ],
@@ -1532,13 +1578,12 @@ class SavedPageState extends State<SavedPage> {
                     savedItems.length == 1
                         ? '1 favorite item'
                         : '${savedItems.length} favorite items',
-                    style:
-                    const TextStyle(
-                      color:
-                      Color(
+                    style: const TextStyle(
+                      color: Color(
                         0xFFDCEDE6,
                       ),
-                      fontSize: 10,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
 

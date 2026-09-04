@@ -33,9 +33,6 @@ class _FoodDetailsPageState
   static const Color lightGreen =
   Color(0xFFE8F3EE);
 
-  static const Color softGreen =
-  Color(0xFFF1F8F5);
-
   static const Color textColor =
   Color(0xFF1D2923);
 
@@ -489,32 +486,23 @@ class _FoodDetailsPageState
   }) {
     return Expanded(
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(
-          vertical: 15,
+        padding: const EdgeInsets.symmetric(
+          vertical: 21,
           horizontal: 8,
         ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius:
-          BorderRadius.circular(
-            18,
-          ),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color:
-            const Color(
-              0xFFE3E9E6,
-            ),
+            color: const Color(0xFFE0E7E3),
           ),
           boxShadow: [
             BoxShadow(
-              color:
-              Colors.black.withValues(
-                alpha: 0.025,
+              color: Colors.black.withValues(
+                alpha: 0.035,
               ),
               blurRadius: 10,
-              offset:
-              const Offset(
+              offset: const Offset(
                 0,
                 4,
               ),
@@ -524,60 +512,52 @@ class _FoodDetailsPageState
         child: Column(
           children: [
             Container(
-              width: 38,
-              height: 38,
-              decoration:
-              const BoxDecoration(
-                color:
-                lightGreen,
-                shape:
-                BoxShape.circle,
+              width: 48,
+              height: 48,
+              decoration: const BoxDecoration(
+                color: lightGreen,
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color:
-                primaryGreen,
-                size: 18,
+                color: primaryGreen,
+                size: 24,
               ),
             ),
             const SizedBox(
-              height: 9,
+              height: 11,
             ),
             Text(
               title,
-              style:
-              const TextStyle(
-                fontSize: 10,
-                color:
-                secondaryText,
-                fontWeight:
-                FontWeight.w500,
+              style: const TextStyle(
+                fontSize: 14,
+                color: secondaryText,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(
-              height: 3,
+              height: 5,
             ),
-            Text(
-              'RM ${price.toStringAsFixed(2)}',
-              style:
-              const TextStyle(
-                fontSize: 15,
-                fontWeight:
-                FontWeight.bold,
-                color:
-                textColor,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'RM ${price.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
               ),
             ),
             const SizedBox(
-              height: 2,
+              height: 5,
             ),
             Text(
               subtitle,
-              style:
-              const TextStyle(
-                fontSize: 8,
-                color:
-                Colors.black38,
+              style: const TextStyle(
+                fontSize: 12,
+                color: secondaryText,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -596,41 +576,34 @@ class _FoodDetailsPageState
         ) ??
             0;
 
-    final isCheapest =
-        index == 0;
+    final isCheapest = index == 0;
 
     return Container(
-      margin:
-      const EdgeInsets.only(
-        bottom: 11,
+      margin: const EdgeInsets.only(
+        bottom: 14,
       ),
-      decoration:
-      BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(
-          18,
+        borderRadius: BorderRadius.circular(
+          20,
         ),
-        border:
-        Border.all(
+        border: Border.all(
           color: isCheapest
               ? primaryGreen
               : const Color(
-            0xFFE2E8E5,
+            0xFFE0E7E3,
           ),
           width: isCheapest
-              ? 1.3
+              ? 1.5
               : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color:
-            Colors.black.withValues(
-              alpha: 0.025,
+            color: Colors.black.withValues(
+              alpha: 0.035,
             ),
             blurRadius: 10,
-            offset:
-            const Offset(
+            offset: const Offset(
               0,
               4,
             ),
@@ -638,48 +611,44 @@ class _FoodDetailsPageState
         ],
       ),
       child: Padding(
-        padding:
-        const EdgeInsets.all(
-          13,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 15,
+          vertical: 17,
         ),
         child: Row(
           children: [
             Container(
-              width: 47,
-              height: 47,
-              decoration:
-              BoxDecoration(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
                 color: isCheapest
                     ? primaryGreen
                     : lightGreen,
                 borderRadius:
                 BorderRadius.circular(
-                  14,
+                  16,
                 ),
               ),
-              alignment:
-              Alignment.center,
+              alignment: Alignment.center,
               child: Text(
                 '${index + 1}',
-                style:
-                TextStyle(
+                style: TextStyle(
                   color: isCheapest
                       ? Colors.white
                       : primaryGreen,
-                  fontSize: 16,
+                  fontSize: 19,
                   fontWeight:
-                  FontWeight.bold,
+                  FontWeight.w800,
                 ),
               ),
             ),
             const SizedBox(
-              width: 12,
+              width: 14,
             ),
             Expanded(
               child: Column(
                 crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
@@ -689,89 +658,77 @@ class _FoodDetailsPageState
                               .toString(),
                           maxLines: 2,
                           overflow:
-                          TextOverflow
-                              .ellipsis,
+                          TextOverflow.ellipsis,
                           style:
                           const TextStyle(
-                            fontSize: 12,
+                            fontSize: 15,
+                            height: 1.25,
                             fontWeight:
-                            FontWeight
-                                .w700,
-                            color:
-                            textColor,
+                            FontWeight.w700,
+                            color: textColor,
                           ),
                         ),
                       ),
-                      if (isCheapest)
+                      if (isCheapest) ...[
+                        const SizedBox(
+                          width: 6,
+                        ),
                         Container(
-                          margin:
-                          const EdgeInsets
-                              .only(
-                            left: 6,
-                          ),
                           padding:
-                          const EdgeInsets
-                              .symmetric(
-                            horizontal:
-                            8,
-                            vertical:
-                            4,
+                          const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 5,
                           ),
                           decoration:
                           BoxDecoration(
-                            color:
-                            lightGreen,
+                            color: lightGreen,
                             borderRadius:
-                            BorderRadius
-                                .circular(
+                            BorderRadius.circular(
                               20,
                             ),
                           ),
-                          child:
-                          const Text(
+                          child: const Text(
                             'BEST',
-                            style:
-                            TextStyle(
-                              fontSize:
-                              8,
+                            style: TextStyle(
+                              fontSize: 11,
                               color:
                               primaryGreen,
                               fontWeight:
-                              FontWeight
-                                  .bold,
+                              FontWeight.w800,
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                   const SizedBox(
-                    height: 6,
+                    height: 8,
                   ),
                   Row(
                     children: [
                       const Icon(
                         Icons
                             .location_on_outlined,
-                        size: 13,
+                        size: 18,
                         color:
-                        Colors.black45,
+                        secondaryText,
                       ),
                       const SizedBox(
-                        width: 3,
+                        width: 5,
                       ),
                       Expanded(
                         child: Text(
                           '${store['district']}, ${store['state']}',
                           maxLines: 1,
                           overflow:
-                          TextOverflow
-                              .ellipsis,
+                          TextOverflow.ellipsis,
                           style:
                           const TextStyle(
-                            fontSize: 9,
+                            fontSize: 13,
                             color:
-                            Colors
-                                .black45,
+                            secondaryText,
+                            fontWeight:
+                            FontWeight.w500,
                           ),
                         ),
                       ),
@@ -781,35 +738,35 @@ class _FoodDetailsPageState
               ),
             ),
             const SizedBox(
-              width: 8,
+              width: 10,
             ),
             Column(
               crossAxisAlignment:
-              CrossAxisAlignment
-                  .end,
+              CrossAxisAlignment.end,
               children: [
                 Text(
                   'RM ${price.toStringAsFixed(2)}',
-                  style:
-                  TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 19,
                     fontWeight:
-                    FontWeight.bold,
+                    FontWeight.w800,
                     color: isCheapest
                         ? primaryGreen
                         : textColor,
                   ),
                 ),
                 const SizedBox(
-                  height: 2,
+                  height: 4,
                 ),
                 Text(
                   'per ${widget.unit}',
                   style:
                   const TextStyle(
-                    fontSize: 8,
+                    fontSize: 12,
                     color:
-                    Colors.black45,
+                    secondaryText,
+                    fontWeight:
+                    FontWeight.w500,
                   ),
                 ),
               ],
@@ -829,18 +786,14 @@ class _FoodDetailsPageState
       backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor:
-        backgroundColor,
-        foregroundColor:
-        textColor,
-        title:
-        const Text(
+        toolbarHeight: 64,
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
+        title: const Text(
           'Food Details',
-          style:
-          TextStyle(
-            fontWeight:
-            FontWeight.w700,
-            fontSize: 18,
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
           ),
         ),
         centerTitle: false,
@@ -961,9 +914,7 @@ class _FoodDetailsPageState
                 [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(
-                      20,
-                    ),
+                    padding: const EdgeInsets.all(22,),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
@@ -1015,12 +966,9 @@ class _FoodDetailsPageState
                                 category,
                                 style:
                                 const TextStyle(
-                                  color:
-                                  Colors.white,
-                                  fontSize: 9,
-                                  fontWeight:
-                                  FontWeight
-                                      .w600,
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -1042,10 +990,8 @@ class _FoodDetailsPageState
                               ),
                               child:
                               const Icon(
-                                Icons
-                                    .restaurant_menu_rounded,
-                                color:
-                                Colors.white,
+                                Icons.restaurant_menu_rounded,
+                                color: Colors.white,
                                 size: 24,
                               ),
                             ),
@@ -1059,7 +1005,7 @@ class _FoodDetailsPageState
                           style:
                           const TextStyle(
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 25,
                             height: 1.2,
                             fontWeight:
                             FontWeight.bold,
@@ -1070,12 +1016,12 @@ class _FoodDetailsPageState
                         ),
                         Text(
                           'Price comparison per ${widget.unit}',
-                          style:
-                          const TextStyle(
+                          style: const TextStyle(
                             color: Color(
                               0xFFDCEDE6,
                             ),
-                            fontSize: 11,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(
@@ -1107,9 +1053,8 @@ class _FoodDetailsPageState
                                 child: Row(
                                   children: [
                                     const Icon(
-                                      Icons
-                                          .calendar_today_outlined,
-                                      size: 15,
+                                      Icons.calendar_today_outlined,
+                                      size: 16,
                                       color:
                                       Colors
                                           .white70,
@@ -1126,24 +1071,18 @@ class _FoodDetailsPageState
                                         children: [
                                           const Text(
                                             'Updated',
-                                            style:
-                                            TextStyle(
-                                              fontSize:
-                                              8,
-                                              color:
-                                              Colors.white60,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.white70,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                           Text(
                                             latestDate,
-                                            style:
-                                            const TextStyle(
-                                              fontSize:
-                                              10,
-                                              fontWeight:
-                                              FontWeight.w600,
-                                              color:
-                                              Colors.white,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ],
@@ -1180,12 +1119,9 @@ class _FoodDetailsPageState
                                 child: Row(
                                   children: [
                                     const Icon(
-                                      Icons
-                                          .store_outlined,
-                                      size: 16,
-                                      color:
-                                      Colors
-                                          .white70,
+                                      Icons.store_outlined,
+                                      size: 19,
+                                      color: Colors.white70,
                                     ),
                                     const SizedBox(
                                       width: 6,
@@ -1197,24 +1133,19 @@ class _FoodDetailsPageState
                                       children: [
                                         const Text(
                                           'Available at',
-                                          style:
-                                          TextStyle(
-                                            fontSize:
-                                            8,
-                                            color:
-                                            Colors.white60,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.white70,
+                                            fontWeight: FontWeight.w500,
                                           ),
                                         ),
                                         Text(
                                           '$totalStores stores',
                                           style:
                                           const TextStyle(
-                                            fontSize:
-                                            10,
-                                            fontWeight:
-                                            FontWeight.w600,
-                                            color:
-                                            Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ],
@@ -1234,24 +1165,26 @@ class _FoodDetailsPageState
                   const Text(
                     'Price Overview',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight:
-                      FontWeight.w700,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
                       color: textColor,
                     ),
                   ),
+
                   const SizedBox(
-                    height: 4,
+                    height: 5,
                   ),
+
                   const Text(
                     'Compare the latest prices from available stores',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 15,
                       color: secondaryText,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(
-                    height: 12,
+                    height: 15,
                   ),
                   Row(
                     children: [
@@ -1293,12 +1226,8 @@ class _FoodDetailsPageState
                     height: 24,
                   ),
                   Container(
-                    width:
-                    double.infinity,
-                    padding:
-                    const EdgeInsets.all(
-                      17,
-                    ),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
                     decoration:
                     BoxDecoration(
                       color:
@@ -1312,8 +1241,8 @@ class _FoodDetailsPageState
                     child: Row(
                       children: [
                         Container(
-                          width: 52,
-                          height: 52,
+                          width: 58,
+                          height: 58,
                           decoration:
                           BoxDecoration(
                             color: Colors
@@ -1330,11 +1259,9 @@ class _FoodDetailsPageState
                           ),
                           child:
                           const Icon(
-                            Icons
-                                .local_offer_outlined,
-                            color:
-                            Colors.white,
-                            size: 25,
+                            Icons.local_offer_outlined,
+                            color: Colors.white,
+                            size: 28,
                           ),
                         ),
                         const SizedBox(
@@ -1349,35 +1276,25 @@ class _FoodDetailsPageState
                             children: [
                               const Text(
                                 'Best Price Available',
-                                style:
-                                TextStyle(
-                                  color:
-                                  Colors.white70,
-                                  fontSize:
-                                  9,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               const SizedBox(
                                 height: 4,
                               ),
                               Text(
-                                comparisonList
-                                    .first[
-                                'premise']
+                                comparisonList.first['premise']
                                     .toString(),
                                 maxLines: 2,
-                                overflow:
-                                TextOverflow
-                                    .ellipsis,
-                                style:
-                                const TextStyle(
-                                  color:
-                                  Colors.white,
-                                  fontSize:
-                                  12,
-                                  fontWeight:
-                                  FontWeight
-                                      .w700,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  height: 1.25,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                               const SizedBox(
@@ -1385,12 +1302,12 @@ class _FoodDetailsPageState
                               ),
                               Text(
                                 '${comparisonList.first['district']}, ${comparisonList.first['state']}',
-                                style:
-                                const TextStyle(
-                                  fontSize:
-                                  9,
-                                  color:
-                                  Colors.white60,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white70,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -1406,15 +1323,10 @@ class _FoodDetailsPageState
                           children: [
                             const Text(
                               'LOWEST',
-                              style:
-                              TextStyle(
-                                color:
-                                Colors.white60,
-                                fontSize:
-                                8,
-                                fontWeight:
-                                FontWeight
-                                    .bold,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(
@@ -1422,25 +1334,18 @@ class _FoodDetailsPageState
                             ),
                             Text(
                               'RM ${lowestPrice.toStringAsFixed(2)}',
-                              style:
-                              const TextStyle(
-                                color:
-                                Colors.white,
-                                fontSize:
-                                18,
-                                fontWeight:
-                                FontWeight
-                                    .bold,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 21,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                             Text(
                               'per ${widget.unit}',
-                              style:
-                              const TextStyle(
-                                color:
-                                Colors.white60,
-                                fontSize:
-                                8,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -1461,61 +1366,45 @@ class _FoodDetailsPageState
                           children: [
                             Text(
                               'Store Comparison',
-                              style:
-                              TextStyle(
-                                fontSize:
-                                18,
-                                fontWeight:
-                                FontWeight
-                                    .w700,
-                                color:
-                                textColor,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                color: textColor,
                               ),
                             ),
+
                             SizedBox(
-                              height: 3,
+                              height: 4,
                             ),
+
                             Text(
                               'Ranked from lowest price',
-                              style:
-                              TextStyle(
-                                fontSize:
-                                10,
-                                color:
-                                secondaryText,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: secondaryText,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
                       Container(
-                        padding:
-                        const EdgeInsets
-                            .symmetric(
-                          horizontal:
-                          10,
-                          vertical: 6,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 13,
+                          vertical: 8,
                         ),
-                        decoration:
-                        BoxDecoration(
-                          color:
-                          lightGreen,
-                          borderRadius:
-                          BorderRadius
-                              .circular(
+                        decoration: BoxDecoration(
+                          color: lightGreen,
+                          borderRadius: BorderRadius.circular(
                             20,
                           ),
                         ),
                         child: Text(
                           '$totalStores stores',
-                          style:
-                          const TextStyle(
-                            fontSize: 9,
-                            fontWeight:
-                            FontWeight
-                                .w600,
-                            color:
-                            primaryGreen,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: primaryGreen,
                           ),
                         ),
                       ),
@@ -1559,22 +1448,14 @@ class _FoodDetailsPageState
           ),
         ],
       ),
-      bottomNavigationBar:
-      BottomNavigationBar(
-        type:
-        BottomNavigationBarType
-            .fixed,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: 1,
-        backgroundColor:
-        Colors.white,
-        selectedItemColor:
-        primaryGreen,
-        unselectedItemColor:
-        Colors.grey,
-        selectedFontSize:
-        11,
-        unselectedFontSize:
-        10,
+        backgroundColor: Colors.white,
+        selectedItemColor: primaryGreen,
+        unselectedItemColor: Colors.grey,
+        selectedFontSize: 11,
+        unselectedFontSize: 10,
         elevation: 8,
         onTap: (index) {
           goToMainPage(
@@ -1619,7 +1500,16 @@ class _FoodDetailsPageState
             activeIcon: Icon(
               Icons.favorite,
             ),
-            label: 'Saved',
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.shopping_cart_outlined,
+            ),
+            activeIcon: Icon(
+              Icons.shopping_cart_rounded,
+            ),
+            label: 'Cart',
           ),
           BottomNavigationBarItem(
             icon: Icon(
