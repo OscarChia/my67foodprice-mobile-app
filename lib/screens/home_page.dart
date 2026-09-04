@@ -130,6 +130,81 @@ class _HomePageState
     );
   }
 
+  IconData getFoodIcon(String? category) {
+    switch (category?.toUpperCase()) {
+      case 'ALL CATEGORIES':
+        return Icons.restaurant_menu_rounded;
+      case 'AYAM':
+        return Icons.kebab_dining_outlined;
+      case 'BAHAN LAUT':
+        return Icons.set_meal_rounded;
+      case 'BAHAN-BAHAN MINUMAN':
+        return Icons.local_cafe_rounded;
+      case 'BAWANG':
+        return Icons.grass_rounded;
+      case 'BERAS':
+        return Icons.rice_bowl_rounded;
+      case 'BIHUN':
+        return Icons.ramen_dining_rounded;
+      case 'BUAH-BUAHAN':
+        return Icons.apple_rounded;
+      case 'CILI KERING':
+        return Icons.whatshot_rounded;
+      case 'DAGING':
+        return Icons.kebab_dining_rounded;
+      case 'ESEN DAN RAGI':
+        return Icons.bakery_dining_rounded;
+      case 'GULA':
+        return Icons.grain_rounded;
+      case 'HASIL LAUT KERING':
+        return Icons.set_meal_outlined;
+      case 'IKAN DALAM TIN':
+        return Icons.inventory_2_rounded;
+      case 'IKAN DARAT':
+        return Icons.set_meal_rounded;
+      case 'KACANG':
+        return Icons.eco_rounded;
+      case 'KELAPA':
+        return Icons.park_rounded;
+      case 'KICAP DAN SOS':
+        return Icons.water_drop_rounded;
+      case 'KRIMER DAN SUSU TEPUNG':
+        return Icons.local_drink_rounded;
+      case 'MAKANAN BAYI':
+        return Icons.child_friendly_rounded;
+      case 'MEE/KUETIAU':
+        return Icons.ramen_dining_rounded;
+      case 'MENTEGA':
+        return Icons.breakfast_dining_rounded;
+      case 'MI SEGERA':
+        return Icons.ramen_dining_rounded;
+      case 'MINYAK DAN LEMAK':
+        return Icons.water_drop_outlined;
+      case 'REMPAH RATUS (BERBUNGKUS)':
+        return Icons.spa_rounded;
+      case 'REMPAH RATUS (TIDAK BERBUNGKUS)':
+        return Icons.spa_outlined;
+      case 'SANTAN (KOTAK)':
+        return Icons.local_drink_outlined;
+      case 'SAPUAN (SPREADS)':
+        return Icons.breakfast_dining_outlined;
+      case 'SAYUR-SAYURAN':
+        return Icons.eco_rounded;
+      case 'SUSU BAYI':
+        return Icons.baby_changing_station_rounded;
+      case 'TELUR':
+        return Icons.egg_rounded;
+      case 'TEPUNG':
+        return Icons.bakery_dining_outlined;
+      case 'TERSEDIA MINUM':
+        return Icons.local_drink_rounded;
+      case 'UBI KENTANG':
+        return Icons.eco_outlined;
+      default:
+        return Icons.restaurant_menu_rounded;
+    }
+  }
+
   Widget sectionHeader({
     required String title,
     String? actionText,
@@ -356,13 +431,14 @@ class _HomePageState
                 height: 54,
                 decoration: BoxDecoration(
                   color: lightGreen,
-                  borderRadius:
-                  BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(
                     15,
                   ),
                 ),
-                child: const Icon(
-                  Icons.shopping_basket_outlined,
+                child: Icon(
+                  getFoodIcon(
+                    food['category']?.toString(),
+                  ),
                   color: primaryGreen,
                   size: 25,
                 ),
@@ -486,13 +562,14 @@ class _HomePageState
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: lightGreen,
-                  borderRadius:
-                  BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(
                     15,
                   ),
                 ),
-                child: const Icon(
-                  Icons.restaurant_menu_rounded,
+                child: Icon(
+                  getFoodIcon(
+                    food['category']?.toString(),
+                  ),
                   size: 42,
                   color: primaryGreen,
                 ),
@@ -691,26 +768,18 @@ class _HomePageState
                       Row(
                         children: [
                           Container(
-                            width: 42,
-                            height: 42,
-                            decoration:
-                            BoxDecoration(
-                              color: Colors.white
-                                  .withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius:
-                              BorderRadius.circular(
-                                13,
+                            width: 50,
+                            height: 50,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                14,
                               ),
                             ),
-                            child:
-                            const Icon(
-                              Icons
-                                  .shopping_basket_rounded,
-                              color:
-                              Colors.white,
-                              size: 23,
+                            child: Image.asset(
+                              'assets/images/my67food_price_logo.png',
+                              fit: BoxFit.contain,
                             ),
                           ),
                           const SizedBox(
@@ -962,52 +1031,46 @@ class _HomePageState
                   SliverChildListDelegate(
                     [
                       categoryCard(
-                        title:
-                        'Sayur-sayuran',
-                        category:
-                        'SAYUR-SAYURAN',
-                        icon:
-                        Icons.eco_outlined,
+                        title: 'Sayur-sayuran',
+                        category: 'SAYUR-SAYURAN',
+                        icon: getFoodIcon(
+                          'SAYUR-SAYURAN',
+                        ),
                       ),
                       categoryCard(
-                        title:
-                        'Buah-buahan',
-                        category:
-                        'BUAH-BUAHAN',
-                        icon:
-                        Icons.apple,
+                        title: 'Buah-buahan',
+                        category: 'BUAH-BUAHAN',
+                        icon: getFoodIcon(
+                          'BUAH-BUAHAN',
+                        ),
                       ),
                       categoryCard(
-                        title:
-                        'Daging',
-                        category:
-                        'DAGING',
-                        icon: Icons
-                            .restaurant,
+                        title: 'Daging',
+                        category: 'DAGING',
+                        icon: getFoodIcon(
+                          'DAGING',
+                        ),
                       ),
                       categoryCard(
-                        title:
-                        'Bahan Laut',
-                        category:
-                        'BAHAN LAUT',
-                        icon:
-                        Icons.set_meal,
+                        title: 'Bahan Laut',
+                        category: 'BAHAN LAUT',
+                        icon: getFoodIcon(
+                          'BAHAN LAUT',
+                        ),
                       ),
                       categoryCard(
-                        title:
-                        'Minuman',
-                        category:
-                        'TERSEDIA MINUM',
-                        icon: Icons
-                            .local_drink_outlined,
+                        title: 'Minuman',
+                        category: 'TERSEDIA MINUM',
+                        icon: getFoodIcon(
+                          'TERSEDIA MINUM',
+                        ),
                       ),
                       categoryCard(
-                        title:
-                        'Beras',
-                        category:
-                        'BERAS',
-                        icon: Icons
-                            .rice_bowl_outlined,
+                        title: 'Beras',
+                        category: 'BERAS',
+                        icon: getFoodIcon(
+                          'BERAS',
+                        ),
                       ),
                     ],
                   ),

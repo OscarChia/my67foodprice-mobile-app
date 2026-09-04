@@ -560,6 +560,81 @@ class ShoppingListPageState
     );
   }
 
+  IconData getFoodIcon(String? category) {
+    switch (category?.toUpperCase()) {
+      case 'ALL CATEGORIES':
+        return Icons.restaurant_menu_rounded;
+      case 'AYAM':
+        return Icons.kebab_dining_outlined;
+      case 'BAHAN LAUT':
+        return Icons.set_meal_rounded;
+      case 'BAHAN-BAHAN MINUMAN':
+        return Icons.local_cafe_rounded;
+      case 'BAWANG':
+        return Icons.grass_rounded;
+      case 'BERAS':
+        return Icons.rice_bowl_rounded;
+      case 'BIHUN':
+        return Icons.ramen_dining_rounded;
+      case 'BUAH-BUAHAN':
+        return Icons.apple_rounded;
+      case 'CILI KERING':
+        return Icons.whatshot_rounded;
+      case 'DAGING':
+        return Icons.kebab_dining_rounded;
+      case 'ESEN DAN RAGI':
+        return Icons.bakery_dining_rounded;
+      case 'GULA':
+        return Icons.grain_rounded;
+      case 'HASIL LAUT KERING':
+        return Icons.set_meal_outlined;
+      case 'IKAN DALAM TIN':
+        return Icons.inventory_2_rounded;
+      case 'IKAN DARAT':
+        return Icons.set_meal_rounded;
+      case 'KACANG':
+        return Icons.eco_rounded;
+      case 'KELAPA':
+        return Icons.park_rounded;
+      case 'KICAP DAN SOS':
+        return Icons.water_drop_rounded;
+      case 'KRIMER DAN SUSU TEPUNG':
+        return Icons.local_drink_rounded;
+      case 'MAKANAN BAYI':
+        return Icons.child_friendly_rounded;
+      case 'MEE/KUETIAU':
+        return Icons.ramen_dining_rounded;
+      case 'MENTEGA':
+        return Icons.breakfast_dining_rounded;
+      case 'MI SEGERA':
+        return Icons.ramen_dining_rounded;
+      case 'MINYAK DAN LEMAK':
+        return Icons.water_drop_outlined;
+      case 'REMPAH RATUS (BERBUNGKUS)':
+        return Icons.spa_rounded;
+      case 'REMPAH RATUS (TIDAK BERBUNGKUS)':
+        return Icons.spa_outlined;
+      case 'SANTAN (KOTAK)':
+        return Icons.local_drink_outlined;
+      case 'SAPUAN (SPREADS)':
+        return Icons.breakfast_dining_outlined;
+      case 'SAYUR-SAYURAN':
+        return Icons.eco_rounded;
+      case 'SUSU BAYI':
+        return Icons.baby_changing_station_rounded;
+      case 'TELUR':
+        return Icons.egg_rounded;
+      case 'TEPUNG':
+        return Icons.bakery_dining_outlined;
+      case 'TERSEDIA MINUM':
+        return Icons.local_drink_rounded;
+      case 'UBI KENTANG':
+        return Icons.eco_outlined;
+      default:
+        return Icons.restaurant_menu_rounded;
+    }
+  }
+
   Widget buildShoppingCard(
       Map<String, dynamic> item,
       ) {
@@ -705,22 +780,17 @@ class ShoppingListPageState
                   Container(
                     width: 52,
                     height: 52,
-                    decoration:
-                    BoxDecoration(
-                      color:
-                      lightAccent,
-                      borderRadius:
-                      BorderRadius
-                          .circular(
+                    decoration: BoxDecoration(
+                      color: lightAccent,
+                      borderRadius: BorderRadius.circular(
                         15,
                       ),
                     ),
-                    child:
-                    const Icon(
-                      Icons
-                          .restaurant_menu_rounded,
-                      color:
-                      accentColor,
+                    child: Icon(
+                      getFoodIcon(
+                        item['category']?.toString(),
+                      ),
+                      color: accentColor,
                       size: 25,
                     ),
                   ),

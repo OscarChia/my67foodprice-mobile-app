@@ -269,43 +269,15 @@ class _LoginPageState
             child: Column(
               children: [
                 const SizedBox(
-                  height: 34,
+                  height: 30,
                 ),
 
-                Container(
-                  width: 78,
-                  height: 78,
-                  decoration:
-                  BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                    BorderRadius
-                        .circular(
-                      22,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors
-                            .black
-                            .withValues(
-                          alpha: 0.12,
-                        ),
-                        blurRadius: 18,
-                        offset:
-                        const Offset(
-                          0,
-                          8,
-                        ),
-                      ),
-                    ],
-                  ),
-                  child:
-                  const Icon(
-                    Icons
-                        .shopping_basket_rounded,
-                    size: 43,
-                    color:
-                    primaryGreen,
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Image.asset(
+                    'assets/images/my67food_price_logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
 
