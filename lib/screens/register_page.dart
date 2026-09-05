@@ -75,6 +75,9 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     setState(() {
       isLoading = true;
     });
@@ -89,8 +92,14 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (response.user == null) {
-        showMessage(
-          'Unable to create account.',
+        messenger.hideCurrentSnackBar();
+
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Unable to create account.',
+            ),
+          ),
         );
 
         setState(() {
@@ -101,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
       }
 
       await showDialog(
-        context: context,
+        context: navigator.context,
         barrierDismissible: false,
         builder: (dialogContext) {
           return AlertDialog(
@@ -129,12 +138,16 @@ class _RegisterPageState extends State<RegisterPage> {
         },
       );
 
-      Navigator.pop(
-        context,
-      );
+      navigator.pop();
     } catch (e) {
-      showMessage(
-        'Registration failed. Please try again.',
+      messenger.hideCurrentSnackBar();
+
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Registration failed. Please try again.',
+          ),
+        ),
       );
 
       setState(() {

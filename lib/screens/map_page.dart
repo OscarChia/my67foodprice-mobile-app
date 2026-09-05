@@ -149,8 +149,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   void updateLocation(LocationData data) {
-    final latitude = data.latitude;
-    final longitude = data.longitude;
+    final double latitude = data.latitude;
+    final double longitude = data.longitude;
 
     setState(() {
       userLatitude = latitude;
@@ -227,20 +227,13 @@ class _MapPageState extends State<MapPage> {
         trackingEnabled = true;
       });
 
-      final LocationData currentLocation =
-      await location.getLocation();
+      final LocationData currentLocation = await location.getLocation();
 
-      if (currentLocation.latitude != null &&
-          currentLocation.longitude != null) {
-        updateLocation(
-          currentLocation,
-        );
-      }
+      updateLocation(currentLocation);
 
       await locationSubscription?.cancel();
 
-      locationSubscription =
-          location.onLocationChanged.listen(
+      locationSubscription = location.onLocationChanged.listen(
                 (LocationData data) {
               updateLocation(data);
             },

@@ -31,7 +31,7 @@ class _LoginPageState
     if (isLoading) {
       return;
     }
-
+    final navigator = Navigator.of(context);
     setState(() {
       isLoading = true;
     });
@@ -39,8 +39,7 @@ class _LoginPageState
     try {
       final response = await databaseService.loginUser(
         email: emailController.text.trim(),
-        password:
-        passwordController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
       final user = response.user;
@@ -59,24 +58,19 @@ class _LoginPageState
 
       if (user.emailConfirmedAt == null) {
         await databaseService.logoutUser();
-
         setState(() {
           isLoading = false;
         });
-
         showMessage(
           'Please verify your email before logging in.',
         );
-
         return;
       }
-
       setState(() {
         isLoading = false;
       });
 
-      Navigator.pushAndRemoveUntil(
-        context,
+      navigator.pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) =>
           const MainNavigationPage(),

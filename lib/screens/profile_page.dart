@@ -236,34 +236,36 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> updateProfile() async {
-    if (!editFormKey.currentState!
-        .validate()) {
+    if (!editFormKey.currentState!.validate()) {
       return;
     }
-
-    final name =
-    editNameController.text.trim();
+    final messenger = ScaffoldMessenger.of(context);
+    final name = editNameController.text.trim();
 
     try {
-      await databaseService
-          .updateProfile(
+      await databaseService.updateProfile(
         name: name,
       );
-
       setState(() {
-        userName =
-            name;
-
-        showEditProfile =
-        false;
+        userName = name;
+        showEditProfile = false;
       });
-
-      showMessage(
-        'Profile updated successfully.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Profile updated successfully.',
+          ),
+        ),
       );
     } catch (e) {
-      showMessage(
-        'Unable to update profile.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to update profile.',
+          ),
+        ),
       );
     }
   }
@@ -273,27 +275,34 @@ class ProfilePageState extends State<ProfilePage> {
         .validate()) {
       return;
     }
+    final messenger = ScaffoldMessenger.of(context);
 
     try {
-      await databaseService
-          .updatePassword(
+      await databaseService.updatePassword(
         newPasswordController.text,
       );
-
       newPasswordController.clear();
       confirmPasswordController.clear();
 
       setState(() {
-        showChangePassword =
-        false;
+        showChangePassword = false;
       });
-
-      showMessage(
-        'Password updated successfully.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Password updated successfully.',
+          ),
+        ),
       );
     } catch (e) {
-      showMessage(
-        'Unable to update password.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to update password.',
+          ),
+        ),
       );
     }
   }
@@ -341,25 +350,33 @@ class ProfilePageState extends State<ProfilePage> {
   Future<void> updateAlertThreshold(
       double value,
       ) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       await databaseService.updateAlertThreshold(
         value,
       );
-
       setState(() {
         alertThreshold = value;
       });
-
-      Navigator.pop(
-        context,
-      );
-
-      showMessage(
-        'Alert threshold changed to ${value.toStringAsFixed(0)}%.',
+      navigator.pop();
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Alert threshold changed to ${value.toStringAsFixed(0)}%.',
+          ),
+        ),
       );
     } catch (e) {
-      showMessage(
-        'Unable to update alert threshold.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to update alert threshold.',
+          ),
+        ),
       );
     }
   }
@@ -592,6 +609,8 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> logout() async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final answer = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
@@ -625,9 +644,6 @@ class ProfilePageState extends State<ProfilePage> {
               },
               child: const Text(
                 'Cancel',
-                style: TextStyle(
-                  fontSize: 13,
-                ),
               ),
             ),
             TextButton(
@@ -637,13 +653,10 @@ class ProfilePageState extends State<ProfilePage> {
                   true,
                 );
               },
-              child:
-              const Text(
+              child: const Text(
                 'Logout',
                 style: TextStyle(
                   color: Colors.red,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -651,26 +664,27 @@ class ProfilePageState extends State<ProfilePage> {
         );
       },
     );
-
     if (answer != true) {
       return;
     }
 
     try {
       await databaseService.logoutUser();
-
-      Navigator.pushAndRemoveUntil(
-        context,
+      navigator.pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) =>
           const LoginPage(),
         ),
-            (route) =>
-        false,
+            (route) => false,
       );
     } catch (e) {
-      showMessage(
-        'Unable to logout.',
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to logout.',
+          ),
+        ),
       );
     }
   }
@@ -831,9 +845,7 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   void showRateApp() {
-    int selectedRating =
-    0;
-
+    int selectedRating = 0;
     final feedbackController = TextEditingController();
 
     showDialog(
@@ -900,8 +912,7 @@ class ProfilePageState extends State<ProfilePage> {
                         },
                       ),
                     ),
-                    if (selectedRating >
-                        0)
+                    if (selectedRating > 0)
                       Text(
                         '$selectedRating / 5',
                         style: const TextStyle(
@@ -953,8 +964,7 @@ class ProfilePageState extends State<ProfilePage> {
                       dialogContext,
                     );
                   },
-                  child:
-                  const Text(
+                  child: const Text(
                     'Cancel',
                     style: TextStyle(
                       fontSize: 14,
@@ -963,14 +973,14 @@ class ProfilePageState extends State<ProfilePage> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    if (selectedRating ==
-                        0) {
+                    if (selectedRating == 0) {
                       showMessage(
                         'Please select a rating.',
                       );
-
                       return;
                     }
+                    final navigator = Navigator.of(dialogContext);
+                    final messenger = ScaffoldMessenger.of(context);
 
                     try {
                       await databaseService.submitAppRating(
@@ -978,16 +988,23 @@ class ProfilePageState extends State<ProfilePage> {
                         feedback: feedbackController.text.trim(),
                       );
 
-                      Navigator.pop(
-                        dialogContext,
-                      );
-
-                      showMessage(
-                        'Thank you for your feedback!',
+                      navigator.pop();
+                      messenger.hideCurrentSnackBar();
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Thank you for your feedback!',
+                          ),
+                        ),
                       );
                     } catch (e) {
-                      showMessage(
-                        'Unable to submit rating.',
+                      messenger.hideCurrentSnackBar();
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Unable to submit rating.',
+                          ),
+                        ),
                       );
                     }
                   },
