@@ -7,31 +7,17 @@ class RegisterPage extends StatefulWidget {
   });
 
   @override
-  State<RegisterPage> createState() =>
-      _RegisterPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _formKey =
-  GlobalKey<FormState>();
-
-  final DatabaseService databaseService =
-  DatabaseService();
-
-  final nameController =
-  TextEditingController();
-
-  final dateOfBirthController =
-  TextEditingController();
-
-  final emailController =
-  TextEditingController();
-
-  final passwordController =
-  TextEditingController();
-
-  final confirmPasswordController =
-  TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final DatabaseService databaseService = DatabaseService();
+  final nameController = TextEditingController();
+  final dateOfBirthController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   String? selectedGender;
 
@@ -94,18 +80,12 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      final response =
-      await databaseService.registerUser(
-        name:
-        nameController.text.trim(),
-        gender:
-        selectedGender!,
-        dateOfBirth:
-        dateOfBirthController.text.trim(),
-        email:
-        emailController.text.trim(),
-        password:
-        passwordController.text,
+      final response = await databaseService.registerUser(
+        name: nameController.text.trim(),
+        gender: selectedGender!,
+        dateOfBirth: dateOfBirthController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text,
       );
 
       if (response.user == null) {
@@ -217,8 +197,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 'Create Account',
                 style: TextStyle(
                   fontSize: 28,
-                  fontWeight:
-                  FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
 
@@ -227,25 +206,17 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextFormField(
-                controller:
-                nameController,
-                textCapitalization:
-                TextCapitalization.words,
-                decoration:
-                const InputDecoration(
-                  labelText:
-                  'Name',
-                  prefixIcon:
-                  Icon(
+                controller: nameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  prefixIcon: Icon(
                     Icons.person,
                   ),
                 ),
                 validator: (value) {
                   if (
-                  value == null ||
-                      value
-                          .trim()
-                          .isEmpty
+                  value == null || value.trim().isEmpty
                   ) {
                     return 'Please enter your name';
                   }
@@ -259,13 +230,10 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               DropdownButtonFormField<String>(
-                value: selectedGender,
-                decoration:
-                const InputDecoration(
-                  labelText:
-                  'Gender',
-                  prefixIcon:
-                  Icon(
+                initialValue: selectedGender,
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                  prefixIcon: Icon(
                     Icons.wc,
                   ),
                 ),
@@ -313,32 +281,22 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextFormField(
-                controller:
-                dateOfBirthController,
+                controller: dateOfBirthController,
                 readOnly: true,
-                onTap:
-                selectDateOfBirth,
-                decoration:
-                const InputDecoration(
-                  labelText:
-                  'Date of Birth',
-                  hintText:
-                  'YYYY-MM-DD',
-                  prefixIcon:
-                  Icon(
+                onTap: selectDateOfBirth,
+                decoration: const InputDecoration(
+                  labelText: 'Date of Birth',
+                  hintText: 'YYYY-MM-DD',
+                  prefixIcon: Icon(
                     Icons.cake,
                   ),
-                  suffixIcon:
-                  Icon(
+                  suffixIcon: Icon(
                     Icons.calendar_month,
                   ),
                 ),
                 validator: (value) {
                   if (
-                  value == null ||
-                      value
-                          .trim()
-                          .isEmpty
+                  value == null || value.trim().isEmpty
                   ) {
                     return 'Please select your date of birth';
                   }
@@ -352,26 +310,17 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextFormField(
-                controller:
-                emailController,
-                keyboardType:
-                TextInputType
-                    .emailAddress,
-                decoration:
-                const InputDecoration(
-                  labelText:
-                  'Email',
-                  prefixIcon:
-                  Icon(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(
                     Icons.email,
                   ),
                 ),
                 validator: (value) {
                   if (
-                  value == null ||
-                      value
-                          .trim()
-                          .isEmpty
+                  value == null || value.trim().isEmpty
                   ) {
                     return 'Please enter your email';
                   }
@@ -393,20 +342,14 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextFormField(
-                controller:
-                passwordController,
-                obscureText:
-                hidePassword,
-                decoration:
-                InputDecoration(
-                  labelText:
-                  'Password',
-                  prefixIcon:
-                  const Icon(
+                controller: passwordController,
+                obscureText: hidePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  prefixIcon: const Icon(
                     Icons.lock,
                   ),
-                  suffixIcon:
-                  IconButton(
+                  suffixIcon: IconButton(
                     icon: Icon(
                       hidePassword
                           ? Icons.visibility_off
@@ -414,8 +357,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     onPressed: () {
                       setState(() {
-                        hidePassword =
-                        !hidePassword;
+                        hidePassword = !hidePassword;
                       });
                     },
                   ),
@@ -443,20 +385,14 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextFormField(
-                controller:
-                confirmPasswordController,
-                obscureText:
-                hideConfirmPassword,
-                decoration:
-                InputDecoration(
-                  labelText:
-                  'Confirm Password',
-                  prefixIcon:
-                  const Icon(
+                controller: confirmPasswordController,
+                obscureText: hideConfirmPassword,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  prefixIcon: const Icon(
                     Icons.lock_outline,
                   ),
-                  suffixIcon:
-                  IconButton(
+                  suffixIcon: IconButton(
                     icon: Icon(
                       hideConfirmPassword
                           ? Icons.visibility_off
@@ -479,9 +415,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   }
 
                   if (
-                  value !=
-                      passwordController
-                          .text
+                  value != passwordController.text
                   ) {
                     return 'Passwords do not match';
                   }
@@ -495,12 +429,9 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               SizedBox(
-                width:
-                double.infinity,
-                child:
-                ElevatedButton(
-                  onPressed:
-                  isLoading
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isLoading
                       ? null
                       : () {
                     if (
@@ -511,17 +442,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       registerUser();
                     }
                   },
-                  child:
-                  isLoading
+                  child: isLoading
                       ? const SizedBox(
                     width: 22,
                     height: 22,
-                    child:
-                    CircularProgressIndicator(
-                      strokeWidth:
-                      2.5,
-                      color:
-                      Colors.white,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
                     ),
                   )
                       : const Text(
@@ -535,16 +462,14 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
 
               TextButton(
-                onPressed:
-                isLoading
+                onPressed: isLoading
                     ? null
                     : () {
                   Navigator.pop(
                     context,
                   );
                 },
-                child:
-                const Text(
+                child: const Text(
                   'Already have an account? Login',
                 ),
               ),

@@ -16,53 +16,28 @@ class ShoppingListPage extends StatefulWidget {
 
 class ShoppingListPageState
     extends State<ShoppingListPage> {
-  static const Color backgroundColor =
-  Color(0xFFF8F6F3);
+  static const Color backgroundColor = Color(0xFFF8F6F3);
+  static const Color cardColor = Colors.white;
+  static const Color accentColor = Color(0xFF4B2C24);
+  static const Color lightAccent = Color(0xFFF3E7E1);
+  static const Color textColor = Color(0xFF17171C);
+  static const Color secondaryTextColor = Color(0xFF68707C);
+  static const Color borderColor = Color(0xFFE7E4E0);
+  static const Color softGrey = Color(0xFFF4F3F1);
+  static const Color buttonGrey = Color(0xFFF0EFED);
+  static const Color dangerColor = Color(0xFFE54242);
+  static const Color dangerBackground = Color(0xFFFFEEEE);
 
-  static const Color cardColor =
-      Colors.white;
-
-  static const Color accentColor =
-  Color(0xFF4B2C24);
-
-  static const Color lightAccent =
-  Color(0xFFF3E7E1);
-
-  static const Color textColor =
-  Color(0xFF17171C);
-
-  static const Color secondaryTextColor =
-  Color(0xFF68707C);
-
-  static const Color borderColor =
-  Color(0xFFE7E4E0);
-
-  static const Color softGrey =
-  Color(0xFFF4F3F1);
-
-  static const Color buttonGrey =
-  Color(0xFFF0EFED);
-
-  static const Color dangerColor =
-  Color(0xFFE54242);
-
-  static const Color dangerBackground =
-  Color(0xFFFFEEEE);
-
-  final DatabaseService databaseService =
-  DatabaseService();
+  final DatabaseService databaseService = DatabaseService();
 
   bool isLoading = true;
-
   int? updatingId;
 
-  List<Map<String, dynamic>>
-  shoppingItems = [];
+  List<Map<String, dynamic>>shoppingItems = [];
 
   @override
   void initState() {
     super.initState();
-
     loadShoppingList();
   }
 
@@ -492,25 +467,19 @@ class ShoppingListPageState
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        backgroundColor:
-        accentColor,
+        backgroundColor: accentColor,
         content: Text(
           message,
-          style:
-          const TextStyle(
+          style: const TextStyle(
             color: Colors.white,
           ),
         ),
-        behavior:
-        SnackBarBehavior.floating,
-        duration:
-        const Duration(
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(
           seconds: 2,
         ),
-        shape:
-        RoundedRectangleBorder(
-          borderRadius:
-          BorderRadius.circular(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
             12,
           ),
         ),
@@ -527,8 +496,7 @@ class ShoppingListPageState
 
     return InkWell(
       onTap: onTap,
-      borderRadius:
-      BorderRadius.circular(
+      borderRadius: BorderRadius.circular(
         10,
       ),
       child: Container(
@@ -537,8 +505,7 @@ class ShoppingListPageState
         decoration:
         BoxDecoration(
           color: buttonGrey,
-          borderRadius:
-          BorderRadius.circular(
+          borderRadius: BorderRadius.circular(
             10,
           ),
           border: Border.all(
@@ -548,8 +515,7 @@ class ShoppingListPageState
         child: Icon(
           icon,
           size: 18,
-          color: enabled
-              ? const Color(
+          color: enabled ? const Color(
             0xFF555555,
           )
               : const Color(
@@ -684,22 +650,17 @@ class ShoppingListPageState
             '';
 
     return AnimatedOpacity(
-      duration:
-      const Duration(
+      duration: const Duration(
         milliseconds: 200,
       ),
-      opacity:
-      isBought ? 0.58 : 1,
+      opacity: isBought ? 0.58 : 1,
       child: Container(
-        margin:
-        const EdgeInsets.only(
+        margin: const EdgeInsets.only(
           bottom: 12,
         ),
-        decoration:
-        BoxDecoration(
+        decoration: BoxDecoration(
           color: cardColor,
-          borderRadius:
-          BorderRadius.circular(
+          borderRadius: BorderRadius.circular(
             20,
           ),
           border: Border.all(
@@ -707,13 +668,11 @@ class ShoppingListPageState
           ),
           boxShadow: [
             BoxShadow(
-              color:
-              Colors.black.withValues(
+              color: Colors.black.withValues(
                 alpha: 0.035,
               ),
               blurRadius: 14,
-              offset:
-              const Offset(
+              offset: const Offset(
                 0,
                 5,
               ),
@@ -721,20 +680,16 @@ class ShoppingListPageState
           ],
         ),
         child: Padding(
-          padding:
-          const EdgeInsets.all(
+          padding: const EdgeInsets.all(
             14,
           ),
           child: Column(
             children: [
               Row(
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding:
-                    const EdgeInsets
+                    padding: const EdgeInsets
                         .only(
                       top: 5,
                     ),
@@ -742,29 +697,22 @@ class ShoppingListPageState
                       width: 26,
                       height: 26,
                       child: Checkbox(
-                        value:
-                        isBought,
-                        activeColor:
-                        accentColor,
-                        checkColor:
-                        Colors.white,
-                        side:
-                        const BorderSide(
+                        value: isBought,
+                        activeColor: accentColor,
+                        checkColor: Colors.white,
+                        side: const BorderSide(
                           color: Color(
                             0xFF969696,
                           ),
                           width: 1.4,
                         ),
-                        shape:
-                        RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius
                               .circular(
                             5,
                           ),
                         ),
-                        onChanged:
-                        isUpdating
+                        onChanged: isUpdating
                             ? null
                             : (value) {
                           toggleBought(
@@ -799,9 +747,7 @@ class ShoppingListPageState
                   ),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment
-                          .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           item['item']?.toString() ??
@@ -868,8 +814,7 @@ class ShoppingListPageState
                           height: 8,
                         ),
                         Row(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
                               Icons.storefront_outlined,
@@ -961,27 +906,20 @@ class ShoppingListPageState
                   SizedBox(
                     width: 86,
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment
-                          .end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         if (isUpdating)
                           const SizedBox(
                             width: 19,
                             height: 19,
-                            child:
-                            CircularProgressIndicator(
-                              strokeWidth:
-                              2,
-                              color:
-                              accentColor,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: accentColor,
                             ),
                           )
                         else
                           InkWell(
-                            borderRadius:
-                            BorderRadius
-                                .circular(
+                            borderRadius: BorderRadius.circular(
                               30,
                             ),
                             onTap: () {
@@ -991,18 +929,13 @@ class ShoppingListPageState
                             },
                             child:
                             const Padding(
-                              padding:
-                              EdgeInsets
-                                  .all(
+                              padding: EdgeInsets.all(
                                 2,
                               ),
                               child: Icon(
-                                Icons
-                                    .close_rounded,
-                                color:
-                                dangerColor,
-                                size:
-                                20,
+                                Icons.close_rounded,
+                                color: dangerColor,
+                                size: 20,
                               ),
                             ),
                           ),
@@ -1010,57 +943,40 @@ class ShoppingListPageState
                           height: 10,
                         ),
                         Container(
-                          width:
-                          double.infinity,
-                          padding:
-                          const EdgeInsets
-                              .symmetric(
-                            horizontal:
-                            7,
-                            vertical:
-                            9,
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 9,
                           ),
                           decoration:
                           BoxDecoration(
-                            color:
-                            const Color(
+                            color: const Color(
                               0xFFF8F2EE,
                             ),
-                            borderRadius:
-                            BorderRadius
+                            borderRadius: BorderRadius
                                 .circular(
                               13,
                             ),
                           ),
                           child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment
-                                .end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               FittedBox(
-                                fit:
-                                BoxFit
-                                    .scaleDown,
+                                fit: BoxFit.scaleDown,
                                 child:
                                 Text(
                                   price > 0
                                       ? 'RM ${price.toStringAsFixed(2)}'
                                       : 'N/A',
-                                  style:
-                                  const TextStyle(
-                                    fontSize:
-                                    15,
-                                    fontWeight:
-                                    FontWeight
-                                        .bold,
-                                    color:
-                                    accentColor,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: accentColor,
                                   ),
                                 ),
                               ),
                               const SizedBox(
-                                height:
-                                2,
+                                height: 2,
                               ),
                               Text(
                                 'per ${item['unit'] ?? ''}',
@@ -1104,8 +1020,7 @@ class ShoppingListPageState
                     width: 10,
                   ),
                   buildQuantityButton(
-                    icon:
-                    Icons.remove,
+                    icon: Icons.remove,
                     onTap:
                     isUpdating ||
                         quantity <=
@@ -1131,8 +1046,7 @@ class ShoppingListPageState
                     ),
                   ),
                   buildQuantityButton(
-                    icon:
-                    Icons.add,
+                    icon: Icons.add,
                     onTap:
                     isUpdating
                         ? null
@@ -1144,9 +1058,7 @@ class ShoppingListPageState
                   ),
                   const Spacer(),
                   Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment
-                        .end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       const Text(
                         'Subtotal',
@@ -1183,16 +1095,13 @@ class ShoppingListPageState
   Widget buildEmptyList() {
     return RefreshIndicator(
       color: accentColor,
-      onRefresh:
-      loadShoppingList,
+      onRefresh: loadShoppingList,
       child: CustomScrollView(
-        physics:
-        const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverToBoxAdapter(
             child: SizedBox(
-              height:
-              MediaQuery.of(
+              height: MediaQuery.of(
                 context,
               ).size.height *
                   0.16,
@@ -1204,19 +1113,14 @@ class ShoppingListPageState
                 Container(
                   width: 74,
                   height: 74,
-                  decoration:
-                  const BoxDecoration(
-                    color:
-                    lightAccent,
-                    shape:
-                    BoxShape.circle,
+                  decoration: const BoxDecoration(
+                    color: lightAccent,
+                    shape: BoxShape.circle,
                   ),
                   child:
                   const Icon(
-                    Icons
-                        .shopping_cart_outlined,
-                    color:
-                    accentColor,
+                    Icons.shopping_cart_outlined,
+                    color: accentColor,
                     size: 34,
                   ),
                 ),
@@ -1225,37 +1129,26 @@ class ShoppingListPageState
                 ),
                 const Text(
                   'Your list is empty',
-                  style:
-                  TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
-                    fontWeight:
-                    FontWeight
-                        .bold,
-                    color:
-                    textColor,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(
                   height: 7,
                 ),
                 const Padding(
-                  padding:
-                  EdgeInsets
-                      .symmetric(
-                    horizontal:
-                    38,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 38,
                   ),
                   child: Text(
                     'Add items from Search or Food Details to start your shopping list',
-                    textAlign:
-                    TextAlign
-                        .center,
-                    style:
-                    TextStyle(
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontSize: 11,
                       height: 1.45,
-                      color:
-                      secondaryTextColor,
+                      color: secondaryTextColor,
                     ),
                   ),
                 ),
@@ -1264,8 +1157,7 @@ class ShoppingListPageState
                 ),
                 SizedBox(
                   height: 43,
-                  child:
-                  FilledButton.icon(
+                  child: FilledButton.icon(
                     onPressed: widget.onBrowseFood,
                     icon: const Icon(
                       Icons.search_rounded,
@@ -1332,17 +1224,14 @@ class ShoppingListPageState
             ),
             Expanded(
               child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     value,
                     style: const TextStyle(
                       color: textColor,
-                      fontWeight:
-                      FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
                   ),
@@ -1352,14 +1241,11 @@ class ShoppingListPageState
                   Text(
                     label,
                     maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color:
-                      secondaryTextColor,
+                      color: secondaryTextColor,
                       fontSize: 11,
-                      fontWeight:
-                      FontWeight.w500,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -1372,29 +1258,23 @@ class ShoppingListPageState
   }
 
   Widget buildSummary() {
-    final estimatedTotal =
-    getEstimatedTotal();
+    final estimatedTotal = getEstimatedTotal();
 
     return Container(
-      margin:
-      const EdgeInsets.fromLTRB(
+      margin: const EdgeInsets.fromLTRB(
         14,
         0,
         14,
         10,
       ),
-      padding:
-      const EdgeInsets.all(
+      padding: const EdgeInsets.all(
         13,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        const Color(
+      decoration: BoxDecoration(
+        color: const Color(
           0xFFFBF7F3,
         ),
-        borderRadius:
-        BorderRadius.circular(
+        borderRadius: BorderRadius.circular(
           18,
         ),
         border: Border.all(
@@ -1402,13 +1282,11 @@ class ShoppingListPageState
         ),
         boxShadow: [
           BoxShadow(
-            color:
-            Colors.black.withValues(
+            color: Colors.black.withValues(
               alpha: 0.05,
             ),
             blurRadius: 14,
-            offset:
-            const Offset(
+            offset: const Offset(
               0,
               4,
             ),
@@ -1422,22 +1300,15 @@ class ShoppingListPageState
               Container(
                 width: 39,
                 height: 39,
-                decoration:
-                BoxDecoration(
-                  color:
-                  lightAccent,
-                  borderRadius:
-                  BorderRadius
-                      .circular(
+                decoration: BoxDecoration(
+                  color: lightAccent,
+                  borderRadius: BorderRadius.circular(
                     11,
                   ),
                 ),
-                child:
-                const Icon(
-                  Icons
-                      .calculate_outlined,
-                  color:
-                  accentColor,
+                child: const Icon(
+                  Icons.calculate_outlined,
+                  color: accentColor,
                   size: 21,
                 ),
               ),
@@ -1446,9 +1317,7 @@ class ShoppingListPageState
               ),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment
-                      .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Estimated Total',
@@ -1473,9 +1342,7 @@ class ShoppingListPageState
                 ),
               ),
               Column(
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     'RM ${estimatedTotal.toStringAsFixed(2)}',
@@ -1503,41 +1370,25 @@ class ShoppingListPageState
           Row(
             children: [
               summaryInfoBox(
-                icon:
-                Icons
-                    .shopping_bag_outlined,
-                value:
-                shoppingItems
-                    .length
-                    .toString(),
-                label:
-                'Item(s)',
+                icon: Icons.shopping_bag_outlined,
+                value: shoppingItems.length.toString(),
+                label: 'Item(s)',
               ),
               const SizedBox(
                 width: 7,
               ),
               summaryInfoBox(
-                icon:
-                Icons
-                    .inventory_2_outlined,
-                value:
-                getTotalQuantity()
-                    .toString(),
-                label:
-                'Quantity',
+                icon: Icons.inventory_2_outlined,
+                value: getTotalQuantity().toString(),
+                label: 'Quantity',
               ),
               const SizedBox(
                 width: 7,
               ),
               summaryInfoBox(
-                icon:
-                Icons
-                    .check_circle_outline,
-                value:
-                getBoughtCount()
-                    .toString(),
-                label:
-                'Bought',
+                icon: Icons.check_circle_outline,
+                value: getBoughtCount().toString(),
+                label: 'Bought',
               ),
             ],
           ),
@@ -1548,12 +1399,10 @@ class ShoppingListPageState
             children: [
               if (shoppingItems.any(
                     (item) =>
-                item['is_bought'] ==
-                    true,
+                item['is_bought'] == true,
               ))
                 TextButton.icon(
-                  onPressed:
-                  clearBoughtItems,
+                  onPressed: clearBoughtItems,
                   icon: const Icon(
                     Icons.check_circle_outline,
                     size: 18,
@@ -1565,35 +1414,23 @@ class ShoppingListPageState
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  style:
-                  TextButton
-                      .styleFrom(
-                    foregroundColor:
-                    accentColor,
-                    padding:
-                    const EdgeInsets
-                        .symmetric(
-                      horizontal:
-                      5,
+                  style: TextButton.styleFrom(
+                    foregroundColor: accentColor,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
                     ),
                   ),
                 ),
               const Spacer(),
               Container(
-                decoration:
-                BoxDecoration(
-                  color:
-                  dangerBackground,
-                  borderRadius:
-                  BorderRadius
-                      .circular(
+                decoration: BoxDecoration(
+                  color: dangerBackground,
+                  borderRadius: BorderRadius.circular(
                     11,
                   ),
                 ),
-                child:
-                TextButton.icon(
-                  onPressed:
-                  clearAllItems,
+                child: TextButton.icon(
+                  onPressed: clearAllItems,
                   icon: const Icon(
                     Icons.delete_outline,
                     size: 18,
@@ -1605,16 +1442,10 @@ class ShoppingListPageState
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  style:
-                  TextButton
-                      .styleFrom(
-                    foregroundColor:
-                    dangerColor,
-                    padding:
-                    const EdgeInsets
-                        .symmetric(
-                      horizontal:
-                      10,
+                  style: TextButton.styleFrom(
+                    foregroundColor: dangerColor,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
                     ),
                   ),
                 ),
@@ -1630,19 +1461,14 @@ class ShoppingListPageState
     final bought =
     getBoughtCount();
 
-    final total =
-        shoppingItems.length;
+    final total = shoppingItems.length;
 
     final progress =
-    total == 0
-        ? 0.0
-        : bought / total;
+    total == 0 ? 0.0 : bought / total;
 
     return Container(
-      width:
-      double.infinity,
-      padding:
-      const EdgeInsets.fromLTRB(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(
         16,
         12,
         16,
@@ -1650,13 +1476,10 @@ class ShoppingListPageState
       ),
       decoration:
       const BoxDecoration(
-        color:
-        Colors.white,
+        color: Colors.white,
         border: Border(
-          bottom:
-          BorderSide(
-            color:
-            borderColor,
+          bottom: BorderSide(
+            color: borderColor,
           ),
         ),
       ),
@@ -1667,20 +1490,14 @@ class ShoppingListPageState
             height: 44,
             decoration:
             BoxDecoration(
-              color:
-              lightAccent,
-              borderRadius:
-              BorderRadius
-                  .circular(
+              color: lightAccent,
+              borderRadius: BorderRadius.circular(
                 13,
               ),
             ),
-            child:
-            const Icon(
-              Icons
-                  .shopping_cart_outlined,
-              color:
-              accentColor,
+            child: const Icon(
+              Icons.shopping_cart_outlined,
+              color: accentColor,
               size: 23,
             ),
           ),
@@ -1689,26 +1506,16 @@ class ShoppingListPageState
           ),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment
-                  .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'My Shopping List',
-                  maxLines:
-                  1,
-                  overflow:
-                  TextOverflow
-                      .ellipsis,
-                  style:
-                  TextStyle(
-                    color:
-                    textColor,
-                    fontSize:
-                    18,
-                    fontWeight:
-                    FontWeight
-                        .bold,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(
@@ -1736,19 +1543,12 @@ class ShoppingListPageState
             Container(
               width: 91,
               height: 44,
-              padding:
-              const EdgeInsets
-                  .symmetric(
-                horizontal:
-                8,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
               ),
-              decoration:
-              BoxDecoration(
-                color:
-                softGrey,
-                borderRadius:
-                BorderRadius
-                    .circular(
+              decoration: BoxDecoration(
+                color: softGrey,
+                borderRadius: BorderRadius.circular(
                   13,
                 ),
               ),
@@ -1757,18 +1557,13 @@ class ShoppingListPageState
                   SizedBox(
                     width: 27,
                     height: 27,
-                    child:
-                    CircularProgressIndicator(
-                      value:
-                      progress,
-                      strokeWidth:
-                      4,
-                      backgroundColor:
-                      const Color(
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 4,
+                      backgroundColor: const Color(
                         0xFFE0DDD8,
                       ),
-                      valueColor:
-                      const AlwaysStoppedAnimation<
+                      valueColor: const AlwaysStoppedAnimation<
                           Color>(
                         accentColor,
                       ),
@@ -1779,12 +1574,8 @@ class ShoppingListPageState
                   ),
                   Expanded(
                     child: Column(
-                      mainAxisAlignment:
-                      MainAxisAlignment
-                          .center,
-                      crossAxisAlignment:
-                      CrossAxisAlignment
-                          .start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '$bought/$total',
@@ -1814,34 +1605,22 @@ class ShoppingListPageState
             Container(
               width: 42,
               height: 42,
-              decoration:
-              BoxDecoration(
-                color:
-                Colors.white,
-                borderRadius:
-                BorderRadius
-                    .circular(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(
                   12,
                 ),
-                border:
-                Border.all(
-                  color:
-                  borderColor,
+                border: Border.all(
+                  color: borderColor,
                 ),
               ),
               child: IconButton(
-                padding:
-                EdgeInsets.zero,
-                tooltip:
-                'Refresh',
-                onPressed:
-                loadShoppingList,
-                icon:
-                const Icon(
-                  Icons
-                      .refresh_rounded,
-                  color:
-                  accentColor,
+                padding: EdgeInsets.zero,
+                tooltip: 'Refresh',
+                onPressed: loadShoppingList,
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  color: accentColor,
                   size: 21,
                 ),
               ),
@@ -1857,47 +1636,32 @@ class ShoppingListPageState
       BuildContext context,
       ) {
     return Scaffold(
-      backgroundColor:
-      backgroundColor,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             buildHeader(),
             Expanded(
-              child: isLoading
-                  ? const Center(
-                child:
-                CircularProgressIndicator(
-                  color:
-                  accentColor,
+              child: isLoading ? const Center(
+                child: CircularProgressIndicator(
+                  color: accentColor,
                 ),
               )
-                  : shoppingItems
-                  .isEmpty
-                  ? buildEmptyList()
-                  : RefreshIndicator(
-                color:
-                accentColor,
-                onRefresh:
-                loadShoppingList,
-                child:
-                CustomScrollView(
-                  physics:
-                  const AlwaysScrollableScrollPhysics(),
+                  : shoppingItems.isEmpty ? buildEmptyList() : RefreshIndicator(
+                color: accentColor,
+                onRefresh: loadShoppingList,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
                     SliverPadding(
-                      padding:
-                      const EdgeInsets
-                          .fromLTRB(
+                      padding: const EdgeInsets.fromLTRB(
                         14,
                         14,
                         14,
                         14,
                       ),
-                      sliver:
-                      SliverList(
-                        delegate:
-                        SliverChildBuilderDelegate(
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
                               (
                               context,
                               index,
@@ -1907,17 +1671,13 @@ class ShoppingListPageState
                               index],
                             );
                           },
-                          childCount:
-                          shoppingItems
-                              .length,
+                          childCount: shoppingItems.length,
                         ),
                       ),
                     ),
                     const SliverToBoxAdapter(
-                      child:
-                      SizedBox(
-                        height:
-                        5,
+                      child: SizedBox(
+                        height: 5,
                       ),
                     ),
                   ],
