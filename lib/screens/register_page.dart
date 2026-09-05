@@ -77,6 +77,38 @@ class _RegisterPageState extends State<RegisterPage> {
 
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final name = nameController.text.trim();
+    final gender = selectedGender!;
+    final dateOfBirth = dateOfBirthController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    final verifyDialogRoute = DialogRoute<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'Verify Your Email',
+          ),
+          content: Text(
+            'A verification email has been sent to\n\n'
+                '$email\n\n'
+                'Please check your email and verify your account before logging in.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                navigator.pop();
+              },
+              child: const Text(
+                'Go to Login',
+              ),
+            ),
+          ],
+        );
+      },
+    );
 
     setState(() {
       isLoading = true;
@@ -84,11 +116,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     try {
       final response = await databaseService.registerUser(
-        name: nameController.text.trim(),
-        gender: selectedGender!,
-        dateOfBirth: dateOfBirthController.text.trim(),
-        email: emailController.text.trim(),
-        password: passwordController.text,
+        name: name,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        email: email,
+        password: password,
       );
 
       if (response.user == null) {
@@ -109,33 +141,8 @@ class _RegisterPageState extends State<RegisterPage> {
         return;
       }
 
-      await showDialog(
-        context: navigator.context,
-        barrierDismissible: false,
-        builder: (dialogContext) {
-          return AlertDialog(
-            title: const Text(
-              'Verify Your Email',
-            ),
-            content: Text(
-              'A verification email has been sent to\n\n'
-                  '${emailController.text.trim()}\n\n'
-                  'Please check your email and verify your account before logging in.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(
-                    dialogContext,
-                  );
-                },
-                child: const Text(
-                  'Go to Login',
-                ),
-              ),
-            ],
-          );
-        },
+      await navigator.push(
+        verifyDialogRoute,
       );
 
       navigator.pop();
