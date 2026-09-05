@@ -9,35 +9,20 @@ class LoginPage extends StatefulWidget {
   });
 
   @override
-  State<LoginPage> createState() =>
-      _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState
     extends State<LoginPage> {
-  static const Color primaryGreen =
-  Color(0xFF176B52);
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
+  static const Color textColor = Color(0xFF1F2924);
 
-  static const Color darkGreen =
-  Color(0xFF0F513D);
-
-  static const Color backgroundColor =
-  Color(0xFFF6F8F5);
-
-  static const Color textColor =
-  Color(0xFF1F2924);
-
-  final _formKey =
-  GlobalKey<FormState>();
-
-  final DatabaseService databaseService =
-  DatabaseService();
-
-  final emailController =
-  TextEditingController();
-
-  final passwordController =
-  TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final DatabaseService databaseService = DatabaseService();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   bool hidePassword = true;
   bool isLoading = false;
@@ -52,8 +37,7 @@ class _LoginPageState
     });
 
     try {
-      final response =
-      await databaseService.loginUser(
+      final response = await databaseService.loginUser(
         email: emailController.text.trim(),
         password:
         passwordController.text.trim(),
@@ -165,62 +149,48 @@ class _LoginPageState
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: backgroundColor,
-      contentPadding:
-      const EdgeInsets.symmetric(
+      contentPadding: const EdgeInsets.symmetric(
         horizontal: 15,
         vertical: 17,
       ),
       border: OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(
+        borderRadius: BorderRadius.circular(
           14,
         ),
         borderSide: BorderSide.none,
       ),
-      enabledBorder:
-      OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(
           14,
         ),
-        borderSide:
-        const BorderSide(
+        borderSide: const BorderSide(
           color: Color(
             0xFFE1E8E4,
           ),
         ),
       ),
-      focusedBorder:
-      OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(
           14,
         ),
-        borderSide:
-        const BorderSide(
+        borderSide: const BorderSide(
           color: primaryGreen,
           width: 1.5,
         ),
       ),
-      errorBorder:
-      OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(
           14,
         ),
-        borderSide:
-        const BorderSide(
+        borderSide: const BorderSide(
           color: Colors.redAccent,
         ),
       ),
-      focusedErrorBorder:
-      OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(
           14,
         ),
-        borderSide:
-        const BorderSide(
+        borderSide: const BorderSide(
           color: Colors.redAccent,
           width: 1.5,
         ),
@@ -233,18 +203,14 @@ class _LoginPageState
       BuildContext context,
       ) {
     return Scaffold(
-      backgroundColor:
-      backgroundColor,
+      backgroundColor: backgroundColor,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration:
-        const BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin:
-            Alignment.topCenter,
-            end:
-            Alignment.bottomCenter,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
               primaryGreen,
               darkGreen,
@@ -260,10 +226,8 @@ class _LoginPageState
           ),
         ),
         child: SafeArea(
-          child:
-          SingleChildScrollView(
-            padding:
-            const EdgeInsets.symmetric(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
               horizontal: 20,
             ),
             child: Column(
@@ -290,8 +254,7 @@ class _LoginPageState
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 27,
-                    fontWeight:
-                    FontWeight.w800,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
 
@@ -306,8 +269,7 @@ class _LoginPageState
                       0xFFE0F2EA,
                     ),
                     fontSize: 15,
-                    fontWeight:
-                    FontWeight.w500,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
 
@@ -316,34 +278,25 @@ class _LoginPageState
                 ),
 
                 Container(
-                  width:
-                  double.infinity,
-                  padding:
-                  const EdgeInsets
-                      .fromLTRB(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(
                     22,
                     24,
                     22,
                     24,
                   ),
-                  decoration:
-                  BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                    BorderRadius
-                        .circular(
+                    borderRadius: BorderRadius.circular(
                       25,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors
-                            .black
-                            .withValues(
+                        color: Colors.black.withValues(
                           alpha: 0.07,
                         ),
                         blurRadius: 24,
-                        offset:
-                        const Offset(
+                        offset: const Offset(
                           0,
                           10,
                         ),
@@ -353,20 +306,14 @@ class _LoginPageState
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment
-                          .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'Welcome Back',
-                          style:
-                          TextStyle(
+                          style: TextStyle(
                             fontSize: 25,
-                            fontWeight:
-                            FontWeight
-                                .w800,
-                            color:
-                            textColor,
+                            fontWeight: FontWeight.w800,
+                            color: textColor,
                           ),
                         ),
 
@@ -376,14 +323,10 @@ class _LoginPageState
 
                         const Text(
                           'Login to check and compare food prices.',
-                          style:
-                          TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: Colors
-                                .black54,
-                            fontWeight:
-                            FontWeight
-                                .w500,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
 
@@ -393,14 +336,10 @@ class _LoginPageState
 
                         const Text(
                           'Email Address',
-                          style:
-                          TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            fontWeight:
-                            FontWeight
-                                .w700,
-                            color:
-                            textColor,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
                           ),
                         ),
 
@@ -409,47 +348,27 @@ class _LoginPageState
                         ),
 
                         TextFormField(
-                          controller:
-                          emailController,
-                          keyboardType:
-                          TextInputType
-                              .emailAddress,
-                          textInputAction:
-                          TextInputAction
-                              .next,
-                          style:
-                          const TextStyle(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          style: const TextStyle(
                             fontSize: 15,
-                            fontWeight:
-                            FontWeight
-                                .w500,
-                            color:
-                            textColor,
+                            fontWeight: FontWeight.w500,
+                            color: textColor,
                           ),
-                          decoration:
-                          fieldDecoration(
-                            hintText:
-                            'Enter your email',
-                            icon: Icons
-                                .email_outlined,
+                          decoration: fieldDecoration(
+                            hintText: 'Enter your email',
+                            icon: Icons.email_outlined,
                           ),
-                          validator:
-                              (value) {
-                            if (value ==
-                                null ||
-                                value
-                                    .trim()
-                                    .isEmpty) {
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
                               return 'Please enter your email';
                             }
-
-                            if (!value
-                                .contains(
+                            if (!value.contains(
                               '@',
                             )) {
                               return 'Please enter a valid email';
                             }
-
                             return null;
                           },
                         ),
@@ -460,14 +379,10 @@ class _LoginPageState
 
                         const Text(
                           'Password',
-                          style:
-                          TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
-                            fontWeight:
-                            FontWeight
-                                .w700,
-                            color:
-                            textColor,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
                           ),
                         ),
 
@@ -542,15 +457,12 @@ class _LoginPageState
                                 ),
                               ),
                             ),
-                            onPressed: isLoading
-                                ? null
-                                : () {
+                            onPressed: isLoading ? null : () {
                               if (_formKey.currentState!.validate()) {
                                 loginUser();
                               }
                             },
-                            child: isLoading
-                                ? const SizedBox(
+                            child: isLoading ? const SizedBox(
                               width: 23,
                               height: 23,
                               child: CircularProgressIndicator(
@@ -575,35 +487,24 @@ class _LoginPageState
                         Row(
                           children: [
                             const Expanded(
-                              child:
-                              Divider(),
+                              child: Divider(),
                             ),
                             Padding(
-                              padding:
-                              const EdgeInsets
-                                  .symmetric(
-                                horizontal:
-                                12,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
                               ),
                               child:
                               Text(
                                 'New to My67Food?',
-                                style:
-                                TextStyle(
-                                  fontSize:
-                                  13,
-                                  color: Colors
-                                      .grey
-                                      .shade600,
-                                  fontWeight:
-                                  FontWeight
-                                      .w500,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
                             const Expanded(
-                              child:
-                              Divider(),
+                              child: Divider(),
                             ),
                           ],
                         ),
@@ -613,54 +514,34 @@ class _LoginPageState
                         ),
 
                         SizedBox(
-                          width: double
-                              .infinity,
+                          width: double.infinity,
                           height: 54,
-                          child:
-                          OutlinedButton(
-                            style:
-                            OutlinedButton
-                                .styleFrom(
-                              foregroundColor:
-                              primaryGreen,
-                              side:
-                              const BorderSide(
-                                color:
-                                primaryGreen,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: primaryGreen,
+                              side: const BorderSide(
+                                color: primaryGreen,
                                 width: 1.2,
                               ),
-                              shape:
-                              RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
                                   14,
                                 ),
                               ),
                             ),
-                            onPressed:
-                            isLoading
-                                ? null
-                                : () {
-                              Navigator
-                                  .push(
+                            onPressed: isLoading ? null : () {
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                  const RegisterPage(),
+                                  builder: (context) => const RegisterPage(),
                                 ),
                               );
                             },
-                            child:
-                            const Text(
+                            child: const Text(
                               'Create New Account',
-                              style:
-                              TextStyle(
+                              style: TextStyle(
                                 fontSize: 15,
-                                fontWeight:
-                                FontWeight
-                                    .w700,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
@@ -679,8 +560,7 @@ class _LoginPageState
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.black54,
-                    fontWeight:
-                    FontWeight.w500,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
 
@@ -699,7 +579,6 @@ class _LoginPageState
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-
     super.dispose();
   }
 }

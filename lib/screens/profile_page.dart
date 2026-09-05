@@ -17,36 +17,22 @@ class ProfilePage extends StatefulWidget {
 }
 
 class ProfilePageState extends State<ProfilePage> {
-  static const Color primaryGreen =
-  Color(0xFF176B52);
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
+  static const Color lightGreen = Color(0xFFEAF4EF);
+  static const Color textColor = Color(0xFF1F2924);
 
-  static const Color darkGreen =
-  Color(0xFF0F513D);
-
-  static const Color backgroundColor =
-  Color(0xFFF6F8F5);
-
-  static const Color lightGreen =
-  Color(0xFFEAF4EF);
-
-  static const Color textColor =
-  Color(0xFF1F2924);
-
-  final DatabaseService databaseService =
-  DatabaseService();
-
-  final ImagePicker picker =
-  ImagePicker();
+  final DatabaseService databaseService = DatabaseService();
+  final ImagePicker picker = ImagePicker();
 
   File? _image;
 
   bool isLoading = true;
   bool showEditProfile = false;
   bool showChangePassword = false;
-
   bool hideNewPassword = true;
   bool hideConfirmPassword = true;
-
   bool priceAlerts = true;
   bool savedItemAlert = true;
 
@@ -57,25 +43,15 @@ class ProfilePageState extends State<ProfilePage> {
   String gender = '';
   String dateOfBirth = '';
 
-  final editNameController =
-  TextEditingController();
-
-  final newPasswordController =
-  TextEditingController();
-
-  final confirmPasswordController =
-  TextEditingController();
-
-  final editFormKey =
-  GlobalKey<FormState>();
-
-  final passwordFormKey =
-  GlobalKey<FormState>();
+  final editNameController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final editFormKey = GlobalKey<FormState>();
+  final passwordFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-
     loadProfile();
     loadProfileImage();
   }
@@ -366,14 +342,12 @@ class ProfilePageState extends State<ProfilePage> {
       double value,
       ) async {
     try {
-      await databaseService
-          .updateAlertThreshold(
+      await databaseService.updateAlertThreshold(
         value,
       );
 
       setState(() {
-        alertThreshold =
-            value;
+        alertThreshold = value;
       });
 
       Navigator.pop(
@@ -413,45 +387,37 @@ class ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          shape:
-          RoundedRectangleBorder(
-            borderRadius:
-            BorderRadius.circular(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
               22,
             ),
           ),
-          titlePadding:
-          const EdgeInsets.fromLTRB(
+          titlePadding: const EdgeInsets.fromLTRB(
             20,
             20,
             20,
             0,
           ),
-          contentPadding:
-          const EdgeInsets.fromLTRB(
+          contentPadding: const EdgeInsets.fromLTRB(
             20,
             16,
             20,
             10,
           ),
-          actionsPadding:
-          const EdgeInsets.fromLTRB(
+          actionsPadding: const EdgeInsets.fromLTRB(
             20,
             0,
             20,
             16,
           ),
-          title:
-          const Row(
+          title: const Row(
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor:
-                lightGreen,
+                backgroundColor: lightGreen,
                 child: Icon(
                   Icons.percent,
-                  color:
-                  primaryGreen,
+                  color: primaryGreen,
                   size: 21,
                 ),
               ),
@@ -472,10 +438,8 @@ class ProfilePageState extends State<ProfilePage> {
           ),
           content:
           Column(
-            mainAxisSize:
-            MainAxisSize.min,
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Choose how much the price must change before an alert is triggered.',
@@ -519,16 +483,12 @@ class ProfilePageState extends State<ProfilePage> {
                   dialogContext,
                 );
               },
-              child:
-              const Text(
+              child: const Text(
                 'Cancel',
-                style:
-                TextStyle(
-                  color:
-                  Colors.black54,
+                style: TextStyle(
+                  color: Colors.black54,
                   fontSize: 13,
-                  fontWeight:
-                  FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -541,8 +501,7 @@ class ProfilePageState extends State<ProfilePage> {
   Widget thresholdOption(
       double value,
       ) {
-    final isSelected =
-        alertThreshold == value;
+    final isSelected = alertThreshold == value;
 
     return InkWell(
       onTap: () {
@@ -550,25 +509,20 @@ class ProfilePageState extends State<ProfilePage> {
           value,
         );
       },
-      borderRadius:
-      BorderRadius.circular(
+      borderRadius: BorderRadius.circular(
         14,
       ),
       child: Container(
-        width:
-        double.infinity,
-        padding:
-        const EdgeInsets.symmetric(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 13,
         ),
-        decoration:
-        BoxDecoration(
+        decoration: BoxDecoration(
           color: isSelected
               ? lightGreen
               : backgroundColor,
-          borderRadius:
-          BorderRadius.circular(
+          borderRadius: BorderRadius.circular(
             14,
           ),
           border:
@@ -589,10 +543,8 @@ class ProfilePageState extends State<ProfilePage> {
             Container(
               width: 42,
               height: 42,
-              alignment:
-              Alignment.center,
-              decoration:
-              BoxDecoration(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
                 color: isSelected
                     ? primaryGreen
                     : Colors.white,
@@ -630,8 +582,7 @@ class ProfilePageState extends State<ProfilePage> {
             if (isSelected)
               const Icon(
                 Icons.check_circle,
-                color:
-                primaryGreen,
+                color: primaryGreen,
                 size: 22,
               ),
           ],
@@ -641,33 +592,25 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> logout() async {
-    final answer =
-    await showDialog<bool>(
+    final answer = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          shape:
-          RoundedRectangleBorder(
-            borderRadius:
-            BorderRadius.circular(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
               20,
             ),
           ),
-          title:
-          const Text(
+          title: const Text(
             'Logout',
-            style:
-            TextStyle(
+            style: TextStyle(
               fontSize: 19,
-              fontWeight:
-              FontWeight.bold,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          content:
-          const Text(
+          content: const Text(
             'Are you sure you want to logout?',
-            style:
-            TextStyle(
+            style: TextStyle(
               fontSize: 14,
               height: 1.4,
             ),
@@ -680,11 +623,9 @@ class ProfilePageState extends State<ProfilePage> {
                   false,
                 );
               },
-              child:
-              const Text(
+              child: const Text(
                 'Cancel',
-                style:
-                TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                 ),
               ),
@@ -699,13 +640,10 @@ class ProfilePageState extends State<ProfilePage> {
               child:
               const Text(
                 'Logout',
-                style:
-                TextStyle(
-                  color:
-                  Colors.red,
+                style: TextStyle(
+                  color: Colors.red,
                   fontSize: 13,
-                  fontWeight:
-                  FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -719,8 +657,7 @@ class ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      await databaseService
-          .logoutUser();
+      await databaseService.logoutUser();
 
       Navigator.pushAndRemoveUntil(
         context,
@@ -747,11 +684,9 @@ class ProfilePageState extends State<ProfilePage> {
     ScaffoldMessenger.of(context)
         .showSnackBar(
       SnackBar(
-        content:
-        Text(
+        content: Text(
           message,
-          style:
-          const TextStyle(
+          style: const TextStyle(
             fontSize: 13,
           ),
         ),
@@ -765,8 +700,7 @@ class ProfilePageState extends State<ProfilePage> {
       builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius:
-            BorderRadius.circular(
+            borderRadius: BorderRadius.circular(
               20,
             ),
           ),
@@ -774,8 +708,7 @@ class ProfilePageState extends State<ProfilePage> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor:
-                lightGreen,
+                backgroundColor: lightGreen,
                 child: Icon(
                   Icons.security_outlined,
                   color: primaryGreen,
@@ -790,8 +723,7 @@ class ProfilePageState extends State<ProfilePage> {
                   'Privacy & Security',
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight:
-                    FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
                 ),
@@ -820,8 +752,7 @@ class ProfilePageState extends State<ProfilePage> {
                 'OK',
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight:
-                  FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -837,8 +768,7 @@ class ProfilePageState extends State<ProfilePage> {
       builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius:
-            BorderRadius.circular(
+            borderRadius: BorderRadius.circular(
               20,
             ),
           ),
@@ -846,8 +776,7 @@ class ProfilePageState extends State<ProfilePage> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor:
-                lightGreen,
+                backgroundColor: lightGreen,
                 child: Icon(
                   Icons.help_outline,
                   color: primaryGreen,
@@ -862,8 +791,7 @@ class ProfilePageState extends State<ProfilePage> {
                   'Help & Support',
                   style: TextStyle(
                     fontSize: 20,
-                    fontWeight:
-                    FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     color: textColor,
                   ),
                 ),
@@ -892,8 +820,7 @@ class ProfilePageState extends State<ProfilePage> {
                 'OK',
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight:
-                  FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -907,8 +834,7 @@ class ProfilePageState extends State<ProfilePage> {
     int selectedRating =
     0;
 
-    final feedbackController =
-    TextEditingController();
+    final feedbackController = TextEditingController();
 
     showDialog(
       context: context,
@@ -919,10 +845,8 @@ class ProfilePageState extends State<ProfilePage> {
               setDialogState,
               ) {
             return AlertDialog(
-              shape:
-              RoundedRectangleBorder(
-                borderRadius:
-                BorderRadius.circular(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
                   20,
                 ),
               ),
@@ -934,12 +858,10 @@ class ProfilePageState extends State<ProfilePage> {
                   color: textColor,
                 ),
               ),
-              content:
-              SingleChildScrollView(
+              content: SingleChildScrollView(
                 child:
                 Column(
-                  mainAxisSize:
-                  MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Text(
                       'How would you rate your experience?',
@@ -954,30 +876,24 @@ class ProfilePageState extends State<ProfilePage> {
                       height: 15,
                     ),
                     Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment.center,
-                      children:
-                      List.generate(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
                         5,
                             (index) {
                           return IconButton(
                             onPressed: () {
                               setDialogState(
                                     () {
-                                  selectedRating =
-                                      index +
-                                          1;
+                                  selectedRating = index + 1;
                                 },
                               );
                             },
                             icon:
                             Icon(
-                              index <
-                                  selectedRating
+                              index < selectedRating
                                   ? Icons.star
                                   : Icons.star_border,
-                              color:
-                              Colors.amber,
+                              color: Colors.amber,
                               size: 34,
                             ),
                           );
@@ -988,13 +904,10 @@ class ProfilePageState extends State<ProfilePage> {
                         0)
                       Text(
                         '$selectedRating / 5',
-                        style:
-                        const TextStyle(
-                          color:
-                          primaryGreen,
+                        style: const TextStyle(
+                          color: primaryGreen,
                           fontSize: 14,
-                          fontWeight:
-                          FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     const SizedBox(
@@ -1002,40 +915,28 @@ class ProfilePageState extends State<ProfilePage> {
                     ),
                     SizedBox(
                       height: 150,
-                      width:
-                      double.infinity,
-                      child:
-                      TextField(
-                        controller:
-                        feedbackController,
+                      width: double.infinity,
+                      child: TextField(
+                        controller: feedbackController,
                         expands: true,
                         minLines: null,
                         maxLines: null,
                         style: const TextStyle(
                           fontSize: 14,
                         ),
-                        textAlignVertical:
-                        TextAlignVertical.top,
-                        decoration:
-                        InputDecoration(
-                          labelText:
-                          'Feedback',
-                          hintText:
-                          'Tell us what you think...',
-                          alignLabelWithHint:
-                          true,
-                          labelStyle:
-                          const TextStyle(
+                        textAlignVertical: TextAlignVertical.top,
+                        decoration: InputDecoration(
+                          labelText: 'Feedback',
+                          hintText: 'Tell us what you think...',
+                          alignLabelWithHint: true,
+                          labelStyle: const TextStyle(
                             fontSize: 14,
                           ),
-                          hintStyle:
-                          const TextStyle(
+                          hintStyle: const TextStyle(
                             fontSize: 14,
                           ),
-                          border:
-                          OutlineInputBorder(
-                            borderRadius:
-                            BorderRadius.circular(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
                               12,
                             ),
                           ),
@@ -1055,8 +956,7 @@ class ProfilePageState extends State<ProfilePage> {
                   child:
                   const Text(
                     'Cancel',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                     ),
                   ),
@@ -1073,14 +973,9 @@ class ProfilePageState extends State<ProfilePage> {
                     }
 
                     try {
-                      await databaseService
-                          .submitAppRating(
-                        rating:
-                        selectedRating,
-                        feedback:
-                        feedbackController
-                            .text
-                            .trim(),
+                      await databaseService.submitAppRating(
+                        rating: selectedRating,
+                        feedback: feedbackController.text.trim(),
                       );
 
                       Navigator.pop(
@@ -1096,14 +991,11 @@ class ProfilePageState extends State<ProfilePage> {
                       );
                     }
                   },
-                  child:
-                  const Text(
+                  child: const Text(
                     'Submit',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      fontWeight:
-                      FontWeight.w600,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1143,8 +1035,7 @@ class ProfilePageState extends State<ProfilePage> {
                 height: 48,
                 decoration: BoxDecoration(
                   color: iconBackground,
-                  borderRadius:
-                  BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(
                     13,
                   ),
                 ),
@@ -1159,15 +1050,13 @@ class ProfilePageState extends State<ProfilePage> {
               ),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight:
-                        FontWeight.w700,
+                        fontWeight: FontWeight.w700,
                         color: textColor,
                       ),
                     ),
@@ -1177,11 +1066,9 @@ class ProfilePageState extends State<ProfilePage> {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        fontSize: 14,
-                        height: 1.4,
+                        fontSize: 14, height: 1.4,
                         color: Colors.black54,
-                        fontWeight:
-                        FontWeight.w400,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -1204,45 +1091,36 @@ class ProfilePageState extends State<ProfilePage> {
     required Widget child,
   }) {
     return Container(
-      width:
-      double.infinity,
-      padding:
-      const EdgeInsets.symmetric(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
         horizontal: 13,
         vertical: 3,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.white,
-        borderRadius:
-        BorderRadius.circular(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
           18,
         ),
         border:
         Border.all(
-          color:
-          const Color(
+          color: const Color(
             0xFFE3E9E6,
           ),
         ),
         boxShadow: [
           BoxShadow(
-            color:
-            Colors.black.withValues(
+            color: Colors.black.withValues(
               alpha: 0.035,
             ),
             blurRadius: 12,
-            offset:
-            const Offset(
+            offset: const Offset(
               0,
               4,
             ),
           ),
         ],
       ),
-      child:
-      child,
+      child: child,
     );
   }
 
@@ -1256,8 +1134,7 @@ class ProfilePageState extends State<ProfilePage> {
         bottom: 11,
       ),
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
@@ -1288,16 +1165,13 @@ class ProfilePageState extends State<ProfilePage> {
 
   Widget settingDivider() {
     return const Padding(
-      padding:
-      EdgeInsets.only(
+      padding: EdgeInsets.only(
         left: 60,
       ),
-      child:
-      Divider(
+      child: Divider(
         height: 1,
         thickness: 0.8,
-        color:
-        Color(
+        color: Color(
           0xFFEEF1EF,
         ),
       ),
@@ -1306,60 +1180,45 @@ class ProfilePageState extends State<ProfilePage> {
 
   Widget buildProfileHeader() {
     return Container(
-      width:
-      double.infinity,
-      padding:
-      const EdgeInsets.fromLTRB(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(
         20,
         16,
         20,
         20,
       ),
-      decoration:
-      const BoxDecoration(
-        gradient:
-        LinearGradient(
-          begin:
-          Alignment.topLeft,
-          end:
-          Alignment.bottomRight,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: [
             primaryGreen,
             darkGreen,
           ],
         ),
-        borderRadius:
-        BorderRadius.only(
-          bottomLeft:
-          Radius.circular(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(
             28,
           ),
-          bottomRight:
-          Radius.circular(
+          bottomRight: Radius.circular(
             28,
           ),
         ),
       ),
-      child:
-      Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
             children: [
               SizedBox(
                 width: 40,
                 height: 40,
-                child:
-                DecoratedBox(
-                  decoration:
-                  BoxDecoration(
-                    color:
-                    Color(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Color(
                       0x22FFFFFF,
                     ),
-                    borderRadius:
-                    BorderRadius.all(
+                    borderRadius: BorderRadius.all(
                       Radius.circular(
                         12,
                       ),
@@ -1368,8 +1227,7 @@ class ProfilePageState extends State<ProfilePage> {
                   child:
                   Icon(
                     Icons.person_outline,
-                    color:
-                    Colors.white,
+                    color: Colors.white,
                     size: 23,
                   ),
                 ),
@@ -1380,18 +1238,14 @@ class ProfilePageState extends State<ProfilePage> {
               Expanded(
                 child:
                 Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Profile',
-                      style:
-                      TextStyle(
-                        color:
-                        Colors.white,
+                      style: TextStyle(
+                        color: Colors.white,
                         fontSize: 22,
-                        fontWeight:
-                        FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(
@@ -1399,15 +1253,12 @@ class ProfilePageState extends State<ProfilePage> {
                     ),
                     Text(
                       'Manage your account and preferences',
-                      style:
-                      TextStyle(
-                        color:
-                        Color(
+                      style: TextStyle(
+                        color: Color(
                           0xFFDCEDE6,
                         ),
                         fontSize: 14,
-                        fontWeight:
-                        FontWeight.w400,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -1419,24 +1270,18 @@ class ProfilePageState extends State<ProfilePage> {
             height: 17,
           ),
           Container(
-            padding:
-            const EdgeInsets.all(
+            padding: const EdgeInsets.all(
               15,
             ),
-            decoration:
-            BoxDecoration(
-              color:
-              Colors.white.withValues(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(
                 alpha: 0.12,
               ),
-              borderRadius:
-              BorderRadius.circular(
+              borderRadius: BorderRadius.circular(
                 20,
               ),
-              border:
-              Border.all(
-                color:
-                Colors.white.withValues(
+              border: Border.all(
+                color: Colors.white.withValues(
                   alpha: 0.16,
                 ),
               ),
@@ -1445,26 +1290,20 @@ class ProfilePageState extends State<ProfilePage> {
             Row(
               children: [
                 Stack(
-                  clipBehavior:
-                  Clip.none,
+                  clipBehavior: Clip.none,
                   children: [
                     Container(
                       width: 80,
                       height: 80,
-                      padding:
-                      const EdgeInsets.all(
+                      padding: const EdgeInsets.all(
                         3,
                       ),
-                      decoration:
-                      BoxDecoration(
-                        color:
-                        Colors.white,
-                        shape:
-                        BoxShape.circle,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color:
-                            Colors.black.withValues(
+                            color: Colors.black.withValues(
                               alpha: 0.12,
                             ),
                             blurRadius: 10,
@@ -1473,61 +1312,43 @@ class ProfilePageState extends State<ProfilePage> {
                       ),
                       child:
                       ClipOval(
-                        child:
-                        _image == null
-                            ? Container(
-                          color:
-                          lightGreen,
-                          child:
-                          const Icon(
+                        child: _image == null ? Container(
+                          color: lightGreen,
+                          child: const Icon(
                             Icons.person,
-                            color:
-                            primaryGreen,
+                            color: primaryGreen,
                             size: 42,
                           ),
                         )
                             : Image.file(
                           _image!,
-                          fit:
-                          BoxFit.cover,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
                     Positioned(
                       right: -1,
                       bottom: -1,
-                      child:
-                      Material(
-                        color:
-                        Colors.transparent,
-                        child:
-                        InkWell(
-                          onTap:
-                          getImageFromGallery,
-                          customBorder:
-                          const CircleBorder(),
-                          child:
-                          Container(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: getImageFromGallery,
+                          customBorder: const CircleBorder(),
+                          child: Container(
                             width: 29,
                             height: 29,
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              Colors.white,
-                              shape:
-                              BoxShape.circle,
-                              border:
-                              Border.all(
-                                color:
-                                primaryGreen,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: primaryGreen,
                                 width: 1.5,
                               ),
                             ),
                             child:
                             const Icon(
                               Icons.photo_camera_outlined,
-                              color:
-                              primaryGreen,
+                              color: primaryGreen,
                               size: 16,
                             ),
                           ),
@@ -1540,15 +1361,11 @@ class ProfilePageState extends State<ProfilePage> {
                   width: 15,
                 ),
                 Expanded(
-                  child:
-                  Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        userName.isEmpty
-                            ? 'User'
-                            : userName,
+                        userName.isEmpty ? 'User' : userName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -1596,43 +1413,33 @@ class ProfilePageState extends State<ProfilePage> {
                 ),
                 InkWell(
                   onTap: () {
-                    editNameController.text =
-                        userName;
+                    editNameController.text = userName;
 
                     setState(() {
-                      showEditProfile =
-                      !showEditProfile;
+                      showEditProfile = !showEditProfile;
                     });
                   },
-                  borderRadius:
-                  BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(
                     12,
                   ),
-                  child:
-                  Container(
-                    padding:
-                    const EdgeInsets.symmetric(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 9,
                     ),
-                    decoration:
-                    BoxDecoration(
-                      color:
-                      Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(
                         12,
                       ),
                     ),
                     child:
                     Row(
-                      mainAxisSize:
-                      MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
                           Icons.edit_outlined,
-                          color:
-                          primaryGreen,
+                          color: primaryGreen,
                           size: 16,
                         ),
                         const SizedBox(
@@ -1662,43 +1469,31 @@ class ProfilePageState extends State<ProfilePage> {
 
   Widget buildEditProfile() {
     return Container(
-      width:
-      double.infinity,
-      padding:
-      const EdgeInsets.all(
+      width: double.infinity,
+      padding: const EdgeInsets.all(
         17,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.white,
-        borderRadius:
-        BorderRadius.circular(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
           18,
         ),
-        border:
-        Border.all(
-          color:
-          const Color(
+        border: Border.all(
+          color: const Color(
             0xFFDCE8E2,
           ),
         ),
       ),
-      child:
-      Form(
-        key:
-        editFormKey,
-        child:
-        Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+      child: Form(
+        key: editFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
               children: [
                 Icon(
                   Icons.edit_note_rounded,
-                  color:
-                  primaryGreen,
+                  color: primaryGreen,
                   size: 23,
                 ),
                 SizedBox(
@@ -1718,41 +1513,29 @@ class ProfilePageState extends State<ProfilePage> {
               height: 16,
             ),
             TextFormField(
-              controller:
-              editNameController,
+              controller: editNameController,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
               ),
-              decoration:
-              InputDecoration(
-                labelText:
-                'Full Name',
+              decoration: InputDecoration(
+                labelText: 'Full Name',
                 labelStyle: const TextStyle(
                   fontSize: 16,
                 ),
-                prefixIcon:
-                const Icon(
+                prefixIcon: const Icon(
                   Icons.person_outline,
-                  color:
-                  primaryGreen,
+                  color: primaryGreen,
                 ),
-                filled:
-                true,
-                fillColor:
-                backgroundColor,
-                border:
-                OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(
+                filled: true,
+                fillColor: backgroundColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(
                     13,
                   ),
                 ),
               ),
-              validator:
-                  (value) {
-                if (value == null ||
-                    value.trim().isEmpty) {
+              validator: (value) {if (value == null || value.trim().isEmpty) {
                   return 'Please enter your name';
                 }
 
@@ -1763,29 +1546,20 @@ class ProfilePageState extends State<ProfilePage> {
               height: 15,
             ),
             SizedBox(
-              width:
-              double.infinity,
+              width: double.infinity,
               height: 48,
-              child:
-              ElevatedButton.icon(
-                onPressed:
-                updateProfile,
-                style:
-                ElevatedButton.styleFrom(
-                  backgroundColor:
-                  primaryGreen,
-                  foregroundColor:
-                  Colors.white,
-                  shape:
-                  RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(
+              child: ElevatedButton.icon(
+                onPressed: updateProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
                       13,
                     ),
                   ),
                 ),
-                icon:
-                const Icon(
+                icon: const Icon(
                   Icons.check_circle_outline,
                   size: 19,
                 ),
@@ -1806,41 +1580,30 @@ class ProfilePageState extends State<ProfilePage> {
 
   Widget buildChangePassword() {
     return Container(
-      padding:
-      const EdgeInsets.all(
+      padding: const EdgeInsets.all(
         17,
       ),
-      decoration:
-      BoxDecoration(
-        color:
-        Colors.white,
-        borderRadius:
-        BorderRadius.circular(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
           18,
         ),
-        border:
-        Border.all(
-          color:
-          const Color(
+        border: Border.all(
+          color: const Color(
             0xFFDCE8E2,
           ),
         ),
       ),
-      child:
-      Form(
-        key:
-        passwordFormKey,
-        child:
-        Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+      child: Form(
+        key: passwordFormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Row(
               children: [
                 Icon(
                   Icons.lock_reset_rounded,
-                  color:
-                  primaryGreen,
+                  color: primaryGreen,
                   size: 22,
                 ),
                 SizedBox(

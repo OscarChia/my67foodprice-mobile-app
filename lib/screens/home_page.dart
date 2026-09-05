@@ -21,26 +21,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState
     extends State<HomePage> {
-  static const Color primaryGreen =
-  Color(0xFF176B52);
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF6F8F5);
+  static const Color lightGreen = Color(0xFFEAF4EF);
+  static const Color textColor = Color(0xFF1F2924);
+  static const Color secondaryText = Color(0xFF6B756F);
 
-  static const Color darkGreen =
-  Color(0xFF0F513D);
-
-  static const Color backgroundColor =
-  Color(0xFFF6F8F5);
-
-  static const Color lightGreen =
-  Color(0xFFEAF4EF);
-
-  static const Color textColor =
-  Color(0xFF1F2924);
-
-  static const Color secondaryText =
-  Color(0xFF6B756F);
-
-  final DatabaseService databaseService =
-  DatabaseService();
+  final DatabaseService databaseService = DatabaseService();
 
   bool isLoading = true;
 
@@ -52,7 +40,6 @@ class _HomePageState
   @override
   void initState() {
     super.initState();
-
     fetchHomeData();
   }
 
@@ -62,15 +49,11 @@ class _HomePageState
     });
 
     try {
-      final combinedList =
-      await databaseService
-          .getHomeFoodData();
+      final combinedList = await databaseService.getHomeFoodData();
 
       setState(() {
         if (combinedList.isNotEmpty) {
-          latestDate =
-              combinedList.first['date']
-                  .toString();
+          latestDate = combinedList.first['date'].toString();
         } else {
           latestDate = '';
         }
@@ -266,8 +249,7 @@ class _HomePageState
           ),
         ),
         child: Column(
-          mainAxisAlignment:
-          MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -336,8 +318,7 @@ class _HomePageState
           ),
         ),
         child: Column(
-          mainAxisAlignment:
-          MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 43,
@@ -379,14 +360,10 @@ class _HomePageState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            FoodDetailsPage(
-              itemCode:
-              food['item_code'],
-              itemName:
-              food['item'],
-              unit:
-              food['unit'],
+        builder: (context) => FoodDetailsPage(
+              itemCode: food['item_code'],
+              itemName: food['item'],
+              unit: food['unit'],
             ),
       ),
     );
@@ -448,8 +425,7 @@ class _HomePageState
               ),
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       food['item'].toString(),
@@ -470,14 +446,11 @@ class _HomePageState
                     Text(
                       '${food['category']} • ${food['unit']}',
                       maxLines: 1,
-                      overflow:
-                      TextOverflow.ellipsis,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 12,
-                        color:
-                        secondaryText,
-                        fontWeight:
-                        FontWeight.w500,
+                        color: secondaryText,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -487,15 +460,13 @@ class _HomePageState
                 width: 9,
               ),
               Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     'RM ${formatPrice(food['price'])}',
                     style: const TextStyle(
                       fontSize: 17,
-                      fontWeight:
-                      FontWeight.w800,
+                      fontWeight: FontWeight.w800,
                       color: primaryGreen,
                     ),
                   ),
@@ -506,10 +477,8 @@ class _HomePageState
                     'Latest',
                     style: TextStyle(
                       fontSize: 12,
-                      color:
-                      secondaryText,
-                      fontWeight:
-                      FontWeight.w500,
+                      color: secondaryText,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -554,8 +523,7 @@ class _HomePageState
             13,
           ),
           child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 height: 88,
@@ -580,13 +548,11 @@ class _HomePageState
               Text(
                 food['item'].toString(),
                 maxLines: 2,
-                overflow:
-                TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 14,
                   height: 1.25,
-                  fontWeight:
-                  FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                   color: textColor,
                 ),
               ),
@@ -596,8 +562,7 @@ class _HomePageState
                 style: const TextStyle(
                   fontSize: 18,
                   color: primaryGreen,
-                  fontWeight:
-                  FontWeight.w800,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(
@@ -606,13 +571,11 @@ class _HomePageState
               Text(
                 'per ${food['unit']}',
                 maxLines: 1,
-                overflow:
-                TextOverflow.ellipsis,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 14,
                   color: secondaryText,
-                  fontWeight:
-                  FontWeight.w500,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
