@@ -15,29 +15,17 @@ class FoodDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<FoodDetailsPage> createState() =>
-      _FoodDetailsPageState();
+  State<FoodDetailsPage> createState() => _FoodDetailsPageState();
 }
 
 class _FoodDetailsPageState
     extends State<FoodDetailsPage> {
-  static const Color primaryGreen =
-  Color(0xFF176B52);
-
-  static const Color darkGreen =
-  Color(0xFF0F513D);
-
-  static const Color backgroundColor =
-  Color(0xFFF5F7F4);
-
-  static const Color lightGreen =
-  Color(0xFFE8F3EE);
-
-  static const Color textColor =
-  Color(0xFF1D2923);
-
-  static const Color secondaryText =
-  Color(0xFF6B756F);
+  static const Color primaryGreen = Color(0xFF176B52);
+  static const Color darkGreen = Color(0xFF0F513D);
+  static const Color backgroundColor = Color(0xFFF5F7F4);
+  static const Color lightGreen = Color(0xFFE8F3EE);
+  static const Color textColor = Color(0xFF1D2923);
+  static const Color secondaryText = Color(0xFF6B756F);
 
   bool isLoading = true;
   bool isSaved = false;
@@ -57,22 +45,19 @@ class _FoodDetailsPageState
   @override
   void initState() {
     super.initState();
-
     fetchComparisonData();
     checkSavedItem();
   }
 
   Future<bool> getDefaultSavedItemAlert() async {
-    final user =
-        Supabase.instance.client.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) {
       return true;
     }
 
     try {
-      final profileData =
-      await Supabase.instance.client
+      final profileData = await Supabase.instance.client
           .from('profiles')
           .select('saved_item_alert')
           .eq(
@@ -105,8 +90,7 @@ class _FoodDetailsPageState
     }
 
     try {
-      final data =
-      await Supabase.instance.client
+      final data = await Supabase.instance.client
           .from('saved_items')
           .select('id')
           .eq(
@@ -134,8 +118,7 @@ class _FoodDetailsPageState
       return;
     }
 
-    final user =
-        Supabase.instance.client.auth.currentUser;
+    final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) {
       showMessage(
@@ -171,12 +154,8 @@ class _FoodDetailsPageState
           'Removed from favourites.',
         );
       } else {
-        final defaultAlert =
-        await getDefaultSavedItemAlert();
-
-        await Supabase.instance.client
-            .from('saved_items')
-            .insert({
+        final defaultAlert = await getDefaultSavedItemAlert();
+        await Supabase.instance.client.from('saved_items').insert({
           'user_id': user.id,
           'item_code': widget.itemCode,
           'alert_enabled': defaultAlert,
@@ -207,8 +186,7 @@ class _FoodDetailsPageState
     });
 
     try {
-      final foodData =
-      await Supabase.instance.client
+      final foodData = await Supabase.instance.client
           .from('food_items')
           .select(
         'item_code, item, item_category, unit',
@@ -220,14 +198,10 @@ class _FoodDetailsPageState
           .maybeSingle();
 
       if (foodData != null) {
-        category =
-            foodData['item_category']
-                ?.toString() ??
-                '';
+        category = foodData['item_category']?.toString() ?? '';
       }
 
-      final latestPriceData =
-      await Supabase.instance.client
+      final latestPriceData = await Supabase.instance.client
           .from('food_prices')
           .select('date')
           .eq(
@@ -249,12 +223,8 @@ class _FoodDetailsPageState
         return;
       }
 
-      final newestDate =
-      latestPriceData.first['date']
-          .toString();
-
-      final priceData =
-      await Supabase.instance.client
+      final newestDate = latestPriceData.first['date'].toString();
+      final priceData = await Supabase.instance.client
           .from('food_prices')
           .select(
         'item_code, premise_code, date, price',
@@ -277,8 +247,7 @@ class _FoodDetailsPageState
         return;
       }
 
-      final premiseCodes =
-      priceData
+      final premiseCodes = priceData
           .map(
             (price) =>
         price['premise_code'],
@@ -298,8 +267,7 @@ class _FoodDetailsPageState
         return;
       }
 
-      final premiseData =
-      await Supabase.instance.client
+      final premiseData = await Supabase.instance.client
           .from('premises')
           .select(
         'premise_code, premise, state, district',
@@ -309,57 +277,41 @@ class _FoodDetailsPageState
         premiseCodes,
       );
 
-      final premiseList =
-      List<Map<String, dynamic>>.from(
+      final premiseList = List<Map<String, dynamic>>.from(
         premiseData,
       );
 
       final Map<dynamic,
-          Map<String, dynamic>>
-      premiseMap = {};
+          Map<String, dynamic>>premiseMap = {};
 
       for (final premise in premiseList) {
-        premiseMap[
-        premise['premise_code']] =
-            premise;
+        premiseMap[premise['premise_code']] = premise;
       }
 
-      List<Map<String, dynamic>>
-      latestStorePrices = [];
+      List<Map<String, dynamic>>latestStorePrices = [];
 
       for (final price in priceData) {
-        final premise =
-        premiseMap[
-        price['premise_code']];
+        final premise = premiseMap[price['premise_code']];
 
         latestStorePrices.add({
           'date': price['date'],
           'price': price['price'],
-          'premise_code':
-          price['premise_code'],
-          'premise':
-          premise?['premise'] ??
-              'Unknown Premise',
-          'state':
-          premise?['state'] ?? '',
-          'district':
-          premise?['district'] ?? '',
+          'premise_code': price['premise_code'],
+          'premise': premise?['premise'] ?? 'Unknown Premise',
+          'state': premise?['state'] ?? '',
+          'district': premise?['district'] ?? '',
         });
       }
 
       latestStorePrices.sort(
             (a, b) {
-          final priceA =
-              double.tryParse(
-                a['price'].toString(),
-              ) ??
-                  0;
+          final priceA = double.tryParse(
+            a['price'].toString(),
+          ) ?? 0;
 
-          final priceB =
-              double.tryParse(
-                b['price'].toString(),
-              ) ??
-                  0;
+          final priceB = double.tryParse(
+            b['price'].toString(),
+          ) ?? 0;
 
           return priceA.compareTo(
             priceB,
@@ -367,15 +319,8 @@ class _FoodDetailsPageState
         },
       );
 
-      final priceValues =
-      latestStorePrices
-          .map(
-            (item) =>
-        double.tryParse(
-          item['price']
-              .toString(),
-        ) ??
-            0,
+      final priceValues = latestStorePrices.map(
+            (item) => double.tryParse(item['price'].toString(),) ?? 0,
       )
           .toList();
 
@@ -388,11 +333,8 @@ class _FoodDetailsPageState
         return;
       }
 
-      final lowest =
-          priceValues.first;
-
-      final highest =
-          priceValues.last;
+      final lowest = priceValues.first;
+      final highest = priceValues.last;
 
       double total = 0;
 
@@ -400,14 +342,10 @@ class _FoodDetailsPageState
         total += price;
       }
 
-      final average =
-          total / priceValues.length;
+      final average = total / priceValues.length;
 
-      final storeCount =
-          latestStorePrices
-              .map(
-                (item) =>
-            item['premise_code'],
+      final storeCount = latestStorePrices.map(
+                (item) => item['premise_code'],
           )
               .where(
                 (code) => code != null,
@@ -416,19 +354,12 @@ class _FoodDetailsPageState
               .length;
 
       setState(() {
-        comparisonList =
-            latestStorePrices;
-
+        comparisonList = latestStorePrices;
         lowestPrice = lowest;
-
         highestPrice = highest;
-
         averagePrice = average;
-
         latestDate = newestDate;
-
         totalStores = storeCount;
-
         isLoading = false;
       });
     } catch (e) {
@@ -455,8 +386,7 @@ class _FoodDetailsPageState
         content: Text(
           message,
         ),
-        duration:
-        const Duration(
+        duration: const Duration(
           seconds: 2,
         ),
       ),
@@ -469,8 +399,7 @@ class _FoodDetailsPageState
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            MainNavigationPage(
+        builder: (context) => MainNavigationPage(
               initialIndex: index,
             ),
       ),
@@ -645,11 +574,9 @@ class _FoodDetailsPageState
       Map<String, dynamic> store,
       int index,
       ) {
-    final price =
-        double.tryParse(
+    final price = double.tryParse(
           store['price'].toString(),
-        ) ??
-            0;
+    ) ?? 0;
 
     final isCheapest = index == 0;
 
@@ -699,8 +626,7 @@ class _FoodDetailsPageState
                 color: isCheapest
                     ? primaryGreen
                     : lightGreen,
-                borderRadius:
-                BorderRadius.circular(
+                borderRadius: BorderRadius.circular(
                   16,
                 ),
               ),
@@ -712,8 +638,7 @@ class _FoodDetailsPageState
                       ? Colors.white
                       : primaryGreen,
                   fontSize: 19,
-                  fontWeight:
-                  FontWeight.w800,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -722,20 +647,16 @@ class _FoodDetailsPageState
             ),
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Expanded(
                         child: Text(
-                          store['premise']
-                              .toString(),
+                          store['premise'].toString(),
                           maxLines: 2,
-                          overflow:
-                          TextOverflow.ellipsis,
-                          style:
-                          const TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
                             fontSize: 15,
                             height: 1.25,
                             fontWeight:
@@ -749,16 +670,13 @@ class _FoodDetailsPageState
                           width: 6,
                         ),
                         Container(
-                          padding:
-                          const EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 9,
                             vertical: 5,
                           ),
-                          decoration:
-                          BoxDecoration(
+                          decoration: BoxDecoration(
                             color: lightGreen,
-                            borderRadius:
-                            BorderRadius.circular(
+                            borderRadius: BorderRadius.circular(
                               20,
                             ),
                           ),
@@ -766,10 +684,8 @@ class _FoodDetailsPageState
                             'BEST',
                             style: TextStyle(
                               fontSize: 11,
-                              color:
-                              primaryGreen,
-                              fontWeight:
-                              FontWeight.w800,
+                              color: primaryGreen,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
@@ -782,11 +698,9 @@ class _FoodDetailsPageState
                   Row(
                     children: [
                       const Icon(
-                        Icons
-                            .location_on_outlined,
+                        Icons.location_on_outlined,
                         size: 18,
-                        color:
-                        secondaryText,
+                        color: secondaryText,
                       ),
                       const SizedBox(
                         width: 5,
@@ -795,15 +709,11 @@ class _FoodDetailsPageState
                         child: Text(
                           '${store['district']}, ${store['state']}',
                           maxLines: 1,
-                          overflow:
-                          TextOverflow.ellipsis,
-                          style:
-                          const TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
                             fontSize: 13,
-                            color:
-                            secondaryText,
-                            fontWeight:
-                            FontWeight.w500,
+                            color: secondaryText,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -816,15 +726,13 @@ class _FoodDetailsPageState
               width: 10,
             ),
             Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   'RM ${price.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 19,
-                    fontWeight:
-                    FontWeight.w800,
+                    fontWeight: FontWeight.w800,
                     color: isCheapest
                         ? primaryGreen
                         : textColor,
@@ -835,13 +743,10 @@ class _FoodDetailsPageState
                 ),
                 Text(
                   'per ${widget.unit}',
-                  style:
-                  const TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color:
-                    secondaryText,
-                    fontWeight:
-                    FontWeight.w500,
+                    color: secondaryText,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -857,8 +762,7 @@ class _FoodDetailsPageState
       BuildContext context,
       ) {
     return Scaffold(
-      backgroundColor:
-      backgroundColor,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         elevation: 0,
         toolbarHeight: 64,
@@ -874,63 +778,44 @@ class _FoodDetailsPageState
         centerTitle: false,
         actions: [
           Padding(
-            padding:
-            const EdgeInsets.only(
+            padding: const EdgeInsets.only(
               right: 10,
             ),
-            child: isSaving
-                ? const Padding(
+            child: isSaving ? const Padding(
               padding:
               EdgeInsets.all(
                 12,
               ),
-              child:
-              SizedBox(
+              child: SizedBox(
                 width: 22,
                 height: 22,
-                child:
-                CircularProgressIndicator(
-                  strokeWidth:
-                  2,
-                  color:
-                  primaryGreen,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: primaryGreen,
                 ),
               ),
             )
                 : Container(
-              margin:
-              const EdgeInsets
-                  .all(
+              margin: const EdgeInsets.all(
                 6,
               ),
-              decoration:
-              BoxDecoration(
-                color:
-                Colors.white,
-                shape:
-                BoxShape.circle,
-                border:
-                Border.all(
-                  color:
-                  const Color(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(
                     0xFFE2E8E5,
                   ),
                 ),
               ),
-              child:
-              IconButton(
-                onPressed:
-                toggleSavedItem,
-                icon:
-                Icon(
+              child: IconButton(
+                onPressed: toggleSavedItem,
+                icon: Icon(
                   isSaved
-                      ? Icons
-                      .favorite
-                      : Icons
-                      .favorite_border,
+                      ? Icons.favorite
+                      : Icons.favorite_border,
                   color: isSaved
-                      ? Colors
-                      .redAccent
+                      ? Colors.redAccent
                       : primaryGreen,
                 ),
               ),
@@ -938,14 +823,12 @@ class _FoodDetailsPageState
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(
+      body: isLoading ? const Center(
         child: CircularProgressIndicator(
           color: primaryGreen,
         ),
       )
-          : comparisonList.isEmpty
-          ? Center(
+          : comparisonList.isEmpty ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1016,31 +899,26 @@ class _FoodDetailsPageState
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              padding:
-                              const EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white
-                                    .withValues(
+                                color: Colors.white.withValues(
                                   alpha: 0.15,
                                 ),
-                                borderRadius:
-                                BorderRadius.circular(
+                                borderRadius: BorderRadius.circular(
                                   20,
                                 ),
                               ),
                               child: Text(
                                 category,
-                                style:
-                                const TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -1074,13 +952,11 @@ class _FoodDetailsPageState
                         ),
                         Text(
                           widget.itemName,
-                          style:
-                          const TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 25,
                             height: 1.2,
-                            fontWeight:
-                            FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(
@@ -1103,22 +979,14 @@ class _FoodDetailsPageState
                           children: [
                             Expanded(
                               child: Container(
-                                padding:
-                                const EdgeInsets
-                                    .all(
+                                padding: const EdgeInsets.all(
                                   11,
                                 ),
-                                decoration:
-                                BoxDecoration(
-                                  color: Colors
-                                      .white
-                                      .withValues(
-                                    alpha:
-                                    0.11,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(
+                                    alpha: 0.11,
                                   ),
-                                  borderRadius:
-                                  BorderRadius
-                                      .circular(
+                                  borderRadius: BorderRadius.circular(
                                     14,
                                   ),
                                 ),
@@ -1127,19 +995,14 @@ class _FoodDetailsPageState
                                     const Icon(
                                       Icons.calendar_today_outlined,
                                       size: 16,
-                                      color:
-                                      Colors
-                                          .white70,
+                                      color: Colors.white70,
                                     ),
                                     const SizedBox(
                                       width: 6,
                                     ),
                                     Expanded(
-                                      child:
-                                      Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .start,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Text(
                                             'Updated',
@@ -1169,22 +1032,14 @@ class _FoodDetailsPageState
                             ),
                             Expanded(
                               child: Container(
-                                padding:
-                                const EdgeInsets
-                                    .all(
+                                padding: const EdgeInsets.all(
                                   11,
                                 ),
-                                decoration:
-                                BoxDecoration(
-                                  color: Colors
-                                      .white
-                                      .withValues(
-                                    alpha:
-                                    0.11,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(
+                                    alpha: 0.11,
                                   ),
-                                  borderRadius:
-                                  BorderRadius
-                                      .circular(
+                                  borderRadius: BorderRadius.circular(
                                     14,
                                   ),
                                 ),
@@ -1199,9 +1054,7 @@ class _FoodDetailsPageState
                                       width: 6,
                                     ),
                                     Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'Available at',
@@ -1213,8 +1066,7 @@ class _FoodDetailsPageState
                                         ),
                                         Text(
                                           '$totalStores stores',
-                                          style:
-                                          const TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                             color: Colors.white,
@@ -1263,34 +1115,26 @@ class _FoodDetailsPageState
                       priceSummary(
                         title: 'Lowest',
                         price: lowestPrice,
-                        icon:
-                        Icons.south_rounded,
-                        subtitle:
-                        'Best deal',
+                        icon: Icons.south_rounded,
+                        subtitle: 'Best deal',
                       ),
                       const SizedBox(
                         width: 8,
                       ),
                       priceSummary(
                         title: 'Average',
-                        price:
-                        averagePrice,
-                        icon: Icons
-                            .horizontal_rule_rounded,
-                        subtitle:
-                        'Typical',
+                        price: averagePrice,
+                        icon: Icons.horizontal_rule_rounded,
+                        subtitle: 'Typical',
                       ),
                       const SizedBox(
                         width: 8,
                       ),
                       priceSummary(
                         title: 'Highest',
-                        price:
-                        highestPrice,
-                        icon:
-                        Icons.north_rounded,
-                        subtitle:
-                        'Top range',
+                        price: highestPrice,
+                        icon: Icons.north_rounded,
+                        subtitle: 'Top range',
                       ),
                     ],
                   ),
@@ -1300,13 +1144,9 @@ class _FoodDetailsPageState
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
-                    decoration:
-                    BoxDecoration(
-                      color:
-                      primaryGreen,
-                      borderRadius:
-                      BorderRadius
-                          .circular(
+                    decoration: BoxDecoration(
+                      color: primaryGreen,
+                      borderRadius: BorderRadius.circular(
                         20,
                       ),
                     ),
@@ -1315,17 +1155,11 @@ class _FoodDetailsPageState
                         Container(
                           width: 58,
                           height: 58,
-                          decoration:
-                          BoxDecoration(
-                            color: Colors
-                                .white
-                                .withValues(
-                              alpha:
-                              0.15,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(
+                              alpha: 0.15,
                             ),
-                            borderRadius:
-                            BorderRadius
-                                .circular(
+                            borderRadius: BorderRadius.circular(
                               15,
                             ),
                           ),
@@ -1340,11 +1174,8 @@ class _FoodDetailsPageState
                           width: 13,
                         ),
                         Expanded(
-                          child:
-                          Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment
-                                .start,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'Best Price Available',
@@ -1358,8 +1189,7 @@ class _FoodDetailsPageState
                                 height: 4,
                               ),
                               Text(
-                                comparisonList.first['premise']
-                                    .toString(),
+                                comparisonList.first['premise'].toString(),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -1389,9 +1219,7 @@ class _FoodDetailsPageState
                           width: 8,
                         ),
                         Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment
-                              .end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             const Text(
                               'LOWEST',
@@ -1432,9 +1260,7 @@ class _FoodDetailsPageState
                     children: [
                       const Expanded(
                         child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Store Comparison',
@@ -1497,24 +1323,19 @@ class _FoodDetailsPageState
               30,
             ),
             sliver: SliverList(
-              delegate:
-              SliverChildBuilderDelegate(
+              delegate: SliverChildBuilderDelegate(
                     (
                     context,
                     index,
                     ) {
                   return storeCard(
                     comparisonList[
-                    index],
+                      index],
                     index,
                   );
                 },
                 childCount:
-                comparisonList.length >
-                    10
-                    ? 10
-                    : comparisonList
-                    .length,
+                comparisonList.length > 10 ? 10 : comparisonList.length,
               ),
             ),
           ),

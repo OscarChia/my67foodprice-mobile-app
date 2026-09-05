@@ -109,7 +109,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       case 'CILI KERING':
         return Icons.whatshot_rounded;
       case 'DAGING':
-        return Icons.kebab_dining_rounded;;
+        return Icons.kebab_dining_rounded;
       case 'ESEN DAN RAGI':
         return Icons.bakery_dining_rounded;
       case 'GULA':
@@ -176,8 +176,7 @@ class FoodPricePageState extends State<FoodPricePage> {
   @override
   void initState() {
     super.initState();
-    selectedCategory =
-        widget.initialCategory ?? 'All Categories';
+    selectedCategory = widget.initialCategory ?? 'All Categories';
     loadInitialData();
   }
 
@@ -187,8 +186,7 @@ class FoodPricePageState extends State<FoodPricePage> {
     });
 
     try {
-      allFoodItems =
-      await databaseService.getFoodItems();
+      allFoodItems = await databaseService.getFoodItems();
 
       setState(() {
         foodPriceList = [];
@@ -211,8 +209,7 @@ class FoodPricePageState extends State<FoodPricePage> {
 
   Future<void> loadStates() async {
     try {
-      final stateList =
-      await databaseService.getStates();
+      final stateList = await databaseService.getStates();
 
       setState(() {
         states = stateList;
@@ -228,8 +225,7 @@ class FoodPricePageState extends State<FoodPricePage> {
 
   Future<void> loadSavedItems() async {
     try {
-      final codes =
-      await databaseService.getSavedItemCodes();
+      final codes = await databaseService.getSavedItemCodes();
 
       setState(() {
         savedItemCodes = codes;
@@ -243,19 +239,12 @@ class FoodPricePageState extends State<FoodPricePage> {
 
   Future<void> loadShoppingItems() async {
     try {
-      final data =
-      await databaseService.getShoppingList();
+      final data = await databaseService.getShoppingList();
+      final keys = data.map<String?>((row) {
+          final itemCode = row['item_code'];
+          final premiseCode = row['premise_code'];
 
-      final keys = data
-          .map<String?>(
-            (row) {
-          final itemCode =
-          row['item_code'];
-          final premiseCode =
-          row['premise_code'];
-
-          if (itemCode == null ||
-              premiseCode == null) {
+          if (itemCode == null || premiseCode == null) {
             return null;
           }
 
@@ -287,8 +276,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       String? category,
       ) {
     setState(() {
-      selectedCategory =
-          category ?? 'All Categories';
+      selectedCategory = category ?? 'All Categories';
       selectedState = 'All States';
       selectedSort = 'Default';
       searchController.clear();
@@ -304,8 +292,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       return;
     }
 
-    final user =
-    databaseService.getCurrentUser();
+    final user = databaseService.getCurrentUser();
 
     if (user == null) {
       showMessage(
@@ -325,8 +312,7 @@ class FoodPricePageState extends State<FoodPricePage> {
 
     try {
       if (isAlreadySaved) {
-        await databaseService
-            .removeSavedItemByCode(
+        await databaseService.removeSavedItemByCode(
           itemCode,
         );
 
@@ -340,9 +326,7 @@ class FoodPricePageState extends State<FoodPricePage> {
           'Removed from favourites.',
         );
       } else {
-        final defaultAlert =
-        await databaseService
-            .getDefaultSavedItemAlert();
+        final defaultAlert = await databaseService.getDefaultSavedItemAlert();
 
         await databaseService.addSavedItem(
           itemCode,
@@ -377,16 +361,13 @@ class FoodPricePageState extends State<FoodPricePage> {
       food['item_code'].toString(),
     );
 
-    final premiseCode =
-    food['premise_code'];
+    final premiseCode = food['premise_code'];
 
-    if (itemCode == null ||
-        premiseCode == null) {
+    if (itemCode == null || premiseCode == null) {
       return;
     }
 
-    final shoppingKey =
-    getShoppingKey(
+    final shoppingKey = getShoppingKey(
       itemCode,
       premiseCode,
     );
@@ -395,8 +376,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       return;
     }
 
-    final user =
-    databaseService.getCurrentUser();
+    final user = databaseService.getCurrentUser();
 
     if (user == null) {
       showMessage(
@@ -405,8 +385,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       return;
     }
 
-    final isAlreadyAdded =
-    shoppingItemKeys.contains(
+    final isAlreadyAdded = shoppingItemKeys.contains(
       shoppingKey,
     );
 
@@ -416,8 +395,7 @@ class FoodPricePageState extends State<FoodPricePage> {
 
     try {
       if (isAlreadyAdded) {
-        await databaseService
-            .removeFromShoppingList(
+        await databaseService.removeFromShoppingList(
           itemCode,
           premiseCode,
         );
@@ -432,8 +410,7 @@ class FoodPricePageState extends State<FoodPricePage> {
           'Removed from shopping list.',
         );
       } else {
-        await databaseService
-            .addToShoppingList(
+        await databaseService.addToShoppingList(
           itemCode,
           premiseCode,
         );
@@ -460,8 +437,7 @@ class FoodPricePageState extends State<FoodPricePage> {
   }
 
   Future<void> fetchFoodPrices() async {
-    final searchText =
-    searchController.text
+    final searchText = searchController.text
         .trim()
         .toLowerCase();
 
@@ -480,33 +456,22 @@ class FoodPricePageState extends State<FoodPricePage> {
     });
 
     try {
-      List<Map<String, dynamic>>
-      matchingItems =
-      List<Map<String, dynamic>>.from(
+      List<Map<String, dynamic>>matchingItems = List<Map<String, dynamic>>.from(
         allFoodItems,
       );
 
-      if (selectedCategory !=
-          'All Categories') {
-        matchingItems =
-            matchingItems.where(
+      if (selectedCategory != 'All Categories') {
+        matchingItems = matchingItems.where(
                   (item) {
-                return item['item_category']
-                    ?.toString() ==
-                    selectedCategory;
+                return item['item_category']?.toString() == selectedCategory;
               },
             ).toList();
       }
 
       if (searchText.isNotEmpty) {
-        matchingItems =
-            matchingItems.where(
+        matchingItems = matchingItems.where(
                   (item) {
-                final itemName =
-                    item['item']
-                        ?.toString()
-                        .toLowerCase() ??
-                        '';
+                final itemName = item['item']?.toString().toLowerCase() ?? '';
 
                 return itemName.contains(
                   searchText,
@@ -525,27 +490,20 @@ class FoodPricePageState extends State<FoodPricePage> {
         return;
       }
 
-      final itemCodes =
-      matchingItems
+      final itemCodes = matchingItems
           .map(
-            (item) =>
-        item['item_code'],
+            (item) => item['item_code'],
       )
           .where(
             (code) => code != null,
       )
           .toList();
 
-      List<Map<String, dynamic>>
-      selectedPremises = [];
-
+      List<Map<String, dynamic>>selectedPremises = [];
       List<dynamic> premiseCodes = [];
 
-      if (selectedState !=
-          'All States') {
-        selectedPremises =
-        await databaseService
-            .getPremisesByState(
+      if (selectedState != 'All States') {
+        selectedPremises = await databaseService.getPremisesByState(
           selectedState,
         );
 
@@ -559,29 +517,17 @@ class FoodPricePageState extends State<FoodPricePage> {
           return;
         }
 
-        premiseCodes =
-            selectedPremises
-                .map(
-                  (premise) =>
-              premise[
-              'premise_code'],
+        premiseCodes = selectedPremises.map(
+              (premise) => premise['premise_code'],
             )
-                .where(
-                  (code) =>
-              code != null,
+                .where((code) => code != null,
             )
                 .toList();
       }
 
-      final priceData =
-      await databaseService
-          .getFoodPrices(
+      final priceData = await databaseService.getFoodPrices(
         itemCodes: itemCodes,
-        premiseCodes:
-        selectedState ==
-            'All States'
-            ? null
-            : premiseCodes,
+        premiseCodes: selectedState == 'All States' ? null : premiseCodes,
       );
 
       if (priceData.isEmpty) {
@@ -595,11 +541,8 @@ class FoodPricePageState extends State<FoodPricePage> {
       }
 
       final usedPremiseCodes =
-      priceData
-          .map(
-            (price) =>
-        price[
-        'premise_code'],
+      priceData.map(
+            (price) => price['premise_code'],
       )
           .where(
             (code) => code != null,
@@ -607,29 +550,21 @@ class FoodPricePageState extends State<FoodPricePage> {
           .toSet()
           .toList();
 
-      List<Map<String, dynamic>>
-      premiseList;
+      List<Map<String, dynamic>>premiseList;
 
-      if (selectedState ==
-          'All States') {
-        premiseList =
-        await databaseService
-            .getPremisesByCodes(
+      if (selectedState == 'All States') {
+        premiseList = await databaseService.getPremisesByCodes(
           usedPremiseCodes,
         );
       } else {
-        premiseList =
-            selectedPremises;
+        premiseList = selectedPremises;
       }
 
       final Map<dynamic,
-          Map<String, dynamic>>
-      itemMap = {};
+          Map<String, dynamic>>itemMap = {};
 
-      for (final item
-      in matchingItems) {
-        itemMap[item['item_code']] =
-            item;
+      for (final item in matchingItems) {
+        itemMap[item['item_code']] = item;
       }
 
       final Map<dynamic,
@@ -638,17 +573,12 @@ class FoodPricePageState extends State<FoodPricePage> {
 
       for (final premise
       in premiseList) {
-        premiseMap[
-        premise[
-        'premise_code']] =
-            premise;
+        premiseMap[premise['premise_code']] = premise;
       }
 
-      List<Map<String, dynamic>>
-      combinedList = [];
+      List<Map<String, dynamic>>combinedList = [];
 
-      for (final price
-      in priceData) {
+      for (final price in priceData) {
         final item =
         itemMap[
         price['item_code']];
@@ -657,30 +587,20 @@ class FoodPricePageState extends State<FoodPricePage> {
           continue;
         }
 
-        final premise =
-        premiseMap[
-        price[
-        'premise_code']];
+        final premise = premiseMap[
+        price['premise_code']];
 
         combinedList.add({
           'date': price['date'],
           'price': price['price'],
-          'item_code':
-          price['item_code'],
-          'premise_code':
-          price['premise_code'],
+          'item_code': price['item_code'],
+          'premise_code': price['premise_code'],
           'item': item['item'],
           'unit': item['unit'],
-          'category':
-          item['item_category'],
-          'premise':
-          premise?['premise'] ??
-              'Unknown Premise',
-          'state':
-          premise?['state'] ?? '',
-          'district':
-          premise?['district'] ??
-              '',
+          'category': item['item_category'],
+          'premise': premise?['premise'] ?? 'Unknown Premise',
+          'state': premise?['state'] ?? '',
+          'district': premise?['district'] ?? '',
         });
       }
 
@@ -689,18 +609,14 @@ class FoodPricePageState extends State<FoodPricePage> {
       );
 
       setState(() {
-        foodPriceList =
-            combinedList;
-
+        foodPriceList = combinedList;
         currentPage = 0;
-
         isLoading = false;
       });
     } catch (e) {
       setState(() {
         isLoading = false;
       });
-
       showMessage(
         'Unable to load food prices.',
       );
@@ -710,23 +626,13 @@ class FoodPricePageState extends State<FoodPricePage> {
   void sortFoodPrices(
       List<Map<String, dynamic>> list,
       ) {
-    if (selectedSort ==
-        'Price: Low to High') {
+    if (selectedSort == 'Price: Low to High') {
       list.sort(
             (a, b) {
-          final priceA =
-              double.tryParse(
-                a['price']
-                    .toString(),
-              ) ??
-                  0;
-
-          final priceB =
-              double.tryParse(
-                b['price']
-                    .toString(),
-              ) ??
-                  0;
+          final priceA = double.tryParse(
+                a['price'].toString(),) ?? 0;
+          final priceB = double.tryParse(
+                b['price'].toString(),) ?? 0;
 
           return priceA.compareTo(
             priceB,
@@ -735,23 +641,14 @@ class FoodPricePageState extends State<FoodPricePage> {
       );
     }
 
-    if (selectedSort ==
-        'Price: High to Low') {
+    if (selectedSort == 'Price: High to Low') {
       list.sort(
             (a, b) {
-          final priceA =
-              double.tryParse(
-                a['price']
-                    .toString(),
-              ) ??
-                  0;
+          final priceA = double.tryParse(
+                a['price'].toString(),) ?? 0;
 
-          final priceB =
-              double.tryParse(
-                b['price']
-                    .toString(),
-              ) ??
-                  0;
+          final priceB = double.tryParse(
+                b['price'].toString(),) ?? 0;
 
           return priceB.compareTo(
             priceA,
@@ -764,17 +661,13 @@ class FoodPricePageState extends State<FoodPricePage> {
   void showMessage(
       String message,
       ) {
-    ScaffoldMessenger.of(context)
-        .hideCurrentSnackBar();
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
         ),
-        duration:
-        const Duration(
+        duration: const Duration(
           seconds: 2,
         ),
       ),
@@ -799,14 +692,12 @@ class FoodPricePageState extends State<FoodPricePage> {
       ),
       filled: true,
       fillColor: Colors.white,
-      contentPadding:
-      const EdgeInsets.symmetric(
+      contentPadding: const EdgeInsets.symmetric(
         horizontal: 15,
         vertical: 17,
       ),
       border: OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(
           color: Color(
             0xFFE2E8E5,
@@ -814,8 +705,7 @@ class FoodPricePageState extends State<FoodPricePage> {
         ),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(
           color: Color(
             0xFFE2E8E5,
@@ -823,8 +713,7 @@ class FoodPricePageState extends State<FoodPricePage> {
         ),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius:
-        BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(
           color: primaryGreen,
           width: 1.5,
@@ -843,8 +732,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
           color: const Color(
             0xFFE2E8E5,
@@ -852,8 +740,7 @@ class FoodPricePageState extends State<FoodPricePage> {
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Row(
             children: [
@@ -869,8 +756,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                 'Filter Food Prices',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                  FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                   color: textColor,
                 ),
               ),
@@ -886,8 +772,7 @@ class FoodPricePageState extends State<FoodPricePage> {
             selectedCategory,
             isExpanded: true,
             menuMaxHeight: 350,
-            decoration:
-            dropdownDecoration(
+            decoration: dropdownDecoration(
               label: 'Category',
               icon: Icons.category_outlined,
             ),
@@ -898,8 +783,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                   value: category,
                   child: Text(
                     category,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style:
                     const TextStyle(
                       fontSize: 15,
@@ -917,10 +801,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                   currentPage = 0;
                 });
 
-                if (searchController
-                    .text
-                    .trim()
-                    .isNotEmpty) {
+                if (searchController.text.trim().isNotEmpty) {
                   fetchFoodPrices();
                 }
               }
@@ -932,27 +813,21 @@ class FoodPricePageState extends State<FoodPricePage> {
           ),
 
           DropdownButtonFormField<String>(
-            initialValue:
-            selectedState,
+            initialValue: selectedState,
             isExpanded: true,
             menuMaxHeight: 350,
-            decoration:
-            dropdownDecoration(
+            decoration: dropdownDecoration(
               label: 'State',
-              icon: Icons
-                  .location_on_outlined,
+              icon: Icons.location_on_outlined,
             ),
             items: states.map(
                   (state) {
-                return DropdownMenuItem<
-                    String>(
+                return DropdownMenuItem<String>(
                   value: state,
                   child: Text(
                     state,
-                    overflow:
-                    TextOverflow.ellipsis,
-                    style:
-                    const TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: textColor,
@@ -978,23 +853,19 @@ class FoodPricePageState extends State<FoodPricePage> {
           ),
 
           DropdownButtonFormField<String>(
-            initialValue:
-            selectedSort,
+            initialValue: selectedSort,
             isExpanded: true,
-            decoration:
-            dropdownDecoration(
+            decoration: dropdownDecoration(
               label: 'Sort Price',
               icon: Icons.sort,
             ),
             items: sortOptions.map(
                   (sort) {
-                return DropdownMenuItem<
-                    String>(
+                return DropdownMenuItem<String>(
                   value: sort,
                   child: Text(
                     sort,
-                    style:
-                    const TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: textColor,
@@ -1028,21 +899,12 @@ class FoodPricePageState extends State<FoodPricePage> {
             child: OutlinedButton.icon(
               onPressed: () {
                 setState(() {
-                  selectedCategory =
-                  'All Categories';
-
-                  selectedState =
-                  'All States';
-
-                  selectedSort =
-                  'Default';
-
+                  selectedCategory = 'All Categories';
+                  selectedState = 'All States';
+                  selectedSort = 'Default';
                   searchController.clear();
-
                   foodPriceList = [];
-
                   currentPage = 0;
-
                   isLoading = false;
                 });
               },
@@ -1054,21 +916,18 @@ class FoodPricePageState extends State<FoodPricePage> {
                 'Reset Filters',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                  FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               style:
               OutlinedButton.styleFrom(
-                foregroundColor:
-                primaryGreen,
+                foregroundColor: primaryGreen,
                 side: const BorderSide(
                   color: primaryGreen,
                 ),
                 shape:
                 RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(
                     14,
                   ),
                 ),
@@ -1083,48 +942,29 @@ class FoodPricePageState extends State<FoodPricePage> {
   Widget foodCard(
       Map<String, dynamic> food,
       ) {
-    final itemCode =
-    int.tryParse(
+    final itemCode = int.tryParse(
       food['item_code'].toString(),
     );
 
-    final isSaved =
-        itemCode != null &&
-            savedItemCodes.contains(
+    final isSaved = itemCode != null && savedItemCodes.contains(
               itemCode,
             );
 
-    final isSaving =
-        savingItemCode == itemCode;
-
-    final premiseCode =
-    food['premise_code'];
-
-    final shoppingKey =
-    itemCode != null &&
-        premiseCode != null
-        ? getShoppingKey(
+    final isSaving = savingItemCode == itemCode;
+    final premiseCode = food['premise_code'];
+    final shoppingKey = itemCode != null && premiseCode != null ? getShoppingKey(
       itemCode,
       premiseCode,
-    )
-        : null;
+    ) : null;
 
-    final isInShoppingList =
-        shoppingKey != null &&
-            shoppingItemKeys.contains(
+    final isInShoppingList = shoppingKey != null && shoppingItemKeys.contains(
               shoppingKey,
             );
 
-    final isAddingCart =
-        shoppingKey != null &&
-            addingCartItemKey ==
-                shoppingKey;
-
-    final price =
-        double.tryParse(
+    final isAddingCart = shoppingKey != null && addingCartItemKey == shoppingKey;
+    final price = double.tryParse(
           food['price'].toString(),
-        ) ??
-            0;
+        ) ?? 0;
 
     return Container(
       margin: const EdgeInsets.only(
@@ -1133,8 +973,7 @@ class FoodPricePageState extends State<FoodPricePage> {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(19),
+        borderRadius: BorderRadius.circular(19),
         border: Border.all(
           color: const Color(
             0xFFE3E9E6,
@@ -1142,18 +981,15 @@ class FoodPricePageState extends State<FoodPricePage> {
         ),
       ),
       child: InkWell(
-        borderRadius:
-        BorderRadius.circular(19),
+        borderRadius: BorderRadius.circular(19),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) =>
                   FoodDetailsPage(
-                    itemCode:
-                    food['item_code'],
-                    itemName:
-                    food['item'],
+                    itemCode: food['item_code'],
+                    itemName: food['item'],
                     unit: food['unit'],
                   ),
             ),
@@ -1164,8 +1000,7 @@ class FoodPricePageState extends State<FoodPricePage> {
             15,
           ),
           child: Row(
-            crossAxisAlignment:
-            CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 width: 60,
@@ -1191,21 +1026,16 @@ class FoodPricePageState extends State<FoodPricePage> {
 
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      food['item']
-                          .toString(),
+                      food['item'].toString(),
                       maxLines: 2,
-                      overflow:
-                      TextOverflow.ellipsis,
-                      style:
-                      const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         fontSize: 15,
                         height: 1.25,
-                        fontWeight:
-                        FontWeight.w700,
+                        fontWeight: FontWeight.w700,
                         color: textColor,
                       ),
                     ),
@@ -1217,11 +1047,9 @@ class FoodPricePageState extends State<FoodPricePage> {
                     Row(
                       children: [
                         const Icon(
-                          Icons
-                              .category_outlined,
+                          Icons.category_outlined,
                           size: 16,
-                          color:
-                          secondaryText,
+                          color: secondaryText,
                         ),
                         const SizedBox(
                           width: 5,
@@ -1230,17 +1058,11 @@ class FoodPricePageState extends State<FoodPricePage> {
                           child: Text(
                             '${food['category']} • ${food['unit']}',
                             maxLines: 1,
-                            overflow:
-                            TextOverflow
-                                .ellipsis,
-                            style:
-                            const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               fontSize: 12,
-                              color:
-                              secondaryText,
-                              fontWeight:
-                              FontWeight
-                                  .w500,
+                              color: secondaryText,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -1256,28 +1078,20 @@ class FoodPricePageState extends State<FoodPricePage> {
                         const Icon(
                           Icons.store_outlined,
                           size: 16,
-                          color:
-                          secondaryText,
+                          color: secondaryText,
                         ),
                         const SizedBox(
                           width: 5,
                         ),
                         Expanded(
                           child: Text(
-                            food['premise']
-                                .toString(),
+                            food['premise'].toString(),
                             maxLines: 1,
-                            overflow:
-                            TextOverflow
-                                .ellipsis,
-                            style:
-                            const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               fontSize: 12,
-                              color:
-                              secondaryText,
-                              fontWeight:
-                              FontWeight
-                                  .w500,
+                              color: secondaryText,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -1291,11 +1105,9 @@ class FoodPricePageState extends State<FoodPricePage> {
                     Row(
                       children: [
                         const Icon(
-                          Icons
-                              .location_on_outlined,
+                          Icons.location_on_outlined,
                           size: 16,
-                          color:
-                          secondaryText,
+                          color: secondaryText,
                         ),
                         const SizedBox(
                           width: 5,
@@ -1304,17 +1116,11 @@ class FoodPricePageState extends State<FoodPricePage> {
                           child: Text(
                             '${food['district']}, ${food['state']}',
                             maxLines: 1,
-                            overflow:
-                            TextOverflow
-                                .ellipsis,
-                            style:
-                            const TextStyle(
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               fontSize: 12,
-                              color:
-                              secondaryText,
-                              fontWeight:
-                              FontWeight
-                                  .w500,
+                              color: secondaryText,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -1327,12 +1133,10 @@ class FoodPricePageState extends State<FoodPricePage> {
 
                     Text(
                       'Updated: ${food['date']}',
-                      style:
-                      const TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: secondaryText,
-                        fontWeight:
-                        FontWeight.w600,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -1344,18 +1148,14 @@ class FoodPricePageState extends State<FoodPricePage> {
               ),
 
               Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.end,
-                mainAxisAlignment:
-                MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'RM ${price.toStringAsFixed(2)}',
-                    style:
-                    const TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
-                      fontWeight:
-                      FontWeight.w800,
+                      fontWeight: FontWeight.w800,
                       color: primaryGreen,
                     ),
                   ),
@@ -1366,12 +1166,10 @@ class FoodPricePageState extends State<FoodPricePage> {
 
                   Text(
                     'per ${food['unit']}',
-                    style:
-                    const TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: secondaryText,
-                      fontWeight:
-                      FontWeight.w600,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -1396,23 +1194,19 @@ class FoodPricePageState extends State<FoodPricePage> {
               SizedBox(
                 width: 40,
                 child: Column(
-                  mainAxisSize:
-                  MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isSaving)
                       const SizedBox(
                         width: 36,
                         height: 36,
                         child: Padding(
-                          padding:
-                          EdgeInsets.all(
+                          padding: EdgeInsets.all(
                             8,
                           ),
-                          child:
-                          CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color:
-                            primaryGreen,
+                            color: primaryGreen,
                           ),
                         ),
                       )
@@ -1421,17 +1215,12 @@ class FoodPricePageState extends State<FoodPricePage> {
                         width: 36,
                         height: 36,
                         child: IconButton(
-                          padding:
-                          EdgeInsets.zero,
-                          constraints:
-                          const BoxConstraints(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
                             minWidth: 36,
                             minHeight: 36,
                           ),
-                          onPressed:
-                          itemCode == null
-                              ? null
-                              : () {
+                          onPressed: itemCode == null ? null : () {
                             toggleSavedItem(
                               itemCode,
                             );
@@ -1439,8 +1228,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                           icon: Icon(
                             isSaved
                                 ? Icons.favorite
-                                : Icons
-                                .favorite_border,
+                                : Icons.favorite_border,
                           ),
                           color: isSaved
                               ? Colors.red
@@ -1458,15 +1246,12 @@ class FoodPricePageState extends State<FoodPricePage> {
                         width: 36,
                         height: 36,
                         child: Padding(
-                          padding:
-                          EdgeInsets.all(
+                          padding: EdgeInsets.all(
                             8,
                           ),
-                          child:
-                          CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color:
-                            primaryGreen,
+                            color: primaryGreen,
                           ),
                         ),
                       )
@@ -1475,30 +1260,22 @@ class FoodPricePageState extends State<FoodPricePage> {
                         width: 36,
                         height: 36,
                         child: IconButton(
-                          padding:
-                          EdgeInsets.zero,
-                          constraints:
-                          const BoxConstraints(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
                             minWidth: 36,
                             minHeight: 36,
                           ),
-                          onPressed:
-                          itemCode == null
-                              ? null
-                              : () {
+                          onPressed: itemCode == null ? null : () {
                             toggleShoppingItem(
                               food,
                             );
                           },
                           icon: Icon(
                             isInShoppingList
-                                ? Icons
-                                .check_circle
-                                : Icons
-                                .shopping_cart_outlined,
+                                ? Icons.check_circle
+                                : Icons.shopping_cart_outlined,
                           ),
-                          color:
-                          isInShoppingList
+                          color: isInShoppingList
                               ? primaryGreen
                               : Colors.grey,
                           iconSize: 24,
@@ -1520,8 +1297,7 @@ class FoodPricePageState extends State<FoodPricePage> {
     }
 
     return (
-        foodPriceList.length /
-            itemsPerPage
+        foodPriceList.length / itemsPerPage
     ).ceil();
   }
 
@@ -1531,18 +1307,12 @@ class FoodPricePageState extends State<FoodPricePage> {
       return [];
     }
 
-    final startIndex =
-        currentPage *
-            itemsPerPage;
+    final startIndex = currentPage * itemsPerPage;
 
-    int endIndex =
-        startIndex +
-            itemsPerPage;
+    int endIndex = startIndex + itemsPerPage;
 
-    if (endIndex >
-        foodPriceList.length) {
-      endIndex =
-          foodPriceList.length;
+    if (endIndex > foodPriceList.length) {
+      endIndex = foodPriceList.length;
     }
 
     return foodPriceList.sublist(
@@ -1560,8 +1330,7 @@ class FoodPricePageState extends State<FoodPricePage> {
   }
 
   void goToNextPage() {
-    if (currentPage <
-        totalPages - 1) {
+    if (currentPage < totalPages - 1) {
       setState(() {
         currentPage++;
       });
@@ -1573,52 +1342,38 @@ class FoodPricePageState extends State<FoodPricePage> {
       BuildContext context,
       ) {
     return Scaffold(
-      backgroundColor:
-      backgroundColor,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             Container(
-              width:
-              double.infinity,
-              padding:
-              const EdgeInsets
-                  .fromLTRB(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(
                 20,
                 18,
                 20,
                 22,
               ),
-              decoration:
-              const BoxDecoration(
-                gradient:
-                LinearGradient(
-                  begin:
-                  Alignment.topLeft,
-                  end:
-                  Alignment
-                      .bottomRight,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
                     primaryGreen,
                     darkGreen,
                   ],
                 ),
-                borderRadius:
-                BorderRadius.only(
-                  bottomLeft:
-                  Radius.circular(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(
                     28,
                   ),
-                  bottomRight:
-                  Radius.circular(
+                  bottomRight: Radius.circular(
                     28,
                   ),
                 ),
               ),
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment
-                    .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     'Find Food Prices',
@@ -1633,8 +1388,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                   ),
                   const Text(
                     'Search and compare food prices across Malaysia',
-                    style:
-                    TextStyle(
+                    style: TextStyle(
                       color: Color(0xFFDCEDE6,),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -1645,8 +1399,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                   ),
                   TextField(
                     controller: searchController,
-                    textInputAction:
-                    TextInputAction.search,
+                    textInputAction: TextInputAction.search,
                     style: const TextStyle(
                       fontSize: 15,
                       color: textColor,
@@ -1684,10 +1437,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                           height: 40,
                           child: IconButton(
                             onPressed: () {
-                              if (searchController
-                                  .text
-                                  .trim()
-                                  .isEmpty) {
+                              if (searchController.text.trim().isEmpty) {
                                 setState(() {
                                   foodPriceList = [];
                                   currentPage = 0;
@@ -1700,12 +1450,9 @@ class FoodPricePageState extends State<FoodPricePage> {
                               fetchFoodPrices();
                             },
                             style: IconButton.styleFrom(
-                              backgroundColor:
-                              primaryGreen,
-                              shape:
-                              RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.circular(
+                              backgroundColor: primaryGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
                                   11,
                                 ),
                               ),
@@ -1720,20 +1467,16 @@ class FoodPricePageState extends State<FoodPricePage> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                      contentPadding:
-                      const EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 18,
                       ),
                       border: OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
-                      enabledBorder:
-                      OutlineInputBorder(
-                        borderRadius:
-                        BorderRadius.circular(16),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -1753,32 +1496,25 @@ class FoodPricePageState extends State<FoodPricePage> {
               ),
             ),
             Expanded(
-              child:
-              CustomScrollView(
+              child: CustomScrollView(
                 slivers: [
                   SliverPadding(
-                    padding:
-                    const EdgeInsets
-                        .fromLTRB(
+                    padding: const EdgeInsets.fromLTRB(
                       18,
                       17,
                       18,
                       25,
                     ),
-                    sliver:
-                    SliverList(
-                      delegate:
-                      SliverChildListDelegate(
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(
                         [
                           InkWell(
-                            borderRadius:
-                            BorderRadius.circular(
+                            borderRadius: BorderRadius.circular(
                               14,
                             ),
                             onTap: () {
                               setState(() {
-                                showFilters =
-                                !showFilters;
+                                showFilters = !showFilters;
                               });
                             },
                             child: Container(
@@ -1834,11 +1570,8 @@ class FoodPricePageState extends State<FoodPricePage> {
                           Row(
                             children: [
                               Expanded(
-                                child:
-                                Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
                                       'Search Results',
@@ -1849,14 +1582,10 @@ class FoodPricePageState extends State<FoodPricePage> {
                                       ),
                                     ),
                                     const SizedBox(
-                                      height:
-                                      3,
+                                      height: 3,
                                     ),
                                     Text(
-                                      searchController
-                                          .text
-                                          .trim()
-                                          .isEmpty
+                                      searchController.text.trim().isEmpty
                                           ? 'Enter a food name to begin searching'
                                           : '${foodPriceList.length} price record(s) found',
                                       style: const TextStyle(
@@ -1868,39 +1597,24 @@ class FoodPricePageState extends State<FoodPricePage> {
                                   ],
                                 ),
                               ),
-                              if (selectedState !=
-                                  'All States')
+                              if (selectedState != 'All States')
                                 Container(
-                                  padding:
-                                  const EdgeInsets
-                                      .symmetric(
-                                    horizontal:
-                                    9,
-                                    vertical:
-                                    5,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 9,
+                                    vertical: 5,
                                   ),
-                                  decoration:
-                                  BoxDecoration(
-                                    color:
-                                    lightGreen,
-                                    borderRadius:
-                                    BorderRadius
-                                        .circular(
+                                  decoration: BoxDecoration(
+                                    color: lightGreen,
+                                    borderRadius: BorderRadius.circular(
                                       20,
                                     ),
                                   ),
-                                  child:
-                                  Text(
+                                  child: Text(
                                     selectedState,
-                                    style:
-                                    const TextStyle(
-                                      fontSize:
-                                      9,
-                                      color:
-                                      primaryGreen,
-                                      fontWeight:
-                                      FontWeight
-                                          .w600,
+                                    style: const TextStyle(
+                                      fontSize: 9,
+                                      color: primaryGreen,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
@@ -1909,53 +1623,33 @@ class FoodPricePageState extends State<FoodPricePage> {
                           const SizedBox(
                             height: 12,
                           ),
-                          if (searchController
-                              .text
-                              .trim()
-                              .isEmpty)
+                          if (searchController.text.trim().isEmpty)
                             Container(
-                              width:
-                              double.infinity,
-                              margin:
-                              const EdgeInsets
-                                  .only(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(
                                 top: 55,
                               ),
-                              padding:
-                              const EdgeInsets
-                                  .symmetric(
-                                horizontal:
-                                30,
-                                vertical:
-                                35,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 35,
                               ),
-                              child:
-                              const Column(
+                              child: const Column(
                                 children: [
                                   CircleAvatar(
-                                    radius:
-                                    36,
-                                    backgroundColor:
-                                    lightGreen,
-                                    child:
-                                    Icon(
-                                      Icons
-                                          .search_rounded,
-                                      size:
-                                      34,
-                                      color:
-                                      primaryGreen,
+                                    radius: 36,
+                                    backgroundColor: lightGreen,
+                                    child: Icon(
+                                      Icons.search_rounded,
+                                      size: 34,
+                                      color: primaryGreen,
                                     ),
                                   ),
                                   SizedBox(
-                                    height:
-                                    18,
+                                    height: 18,
                                   ),
                                   Text(
                                     'Search for food prices',
-                                    textAlign:
-                                    TextAlign
-                                        .center,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 19,
                                       fontWeight: FontWeight.w700,
@@ -1963,14 +1657,11 @@ class FoodPricePageState extends State<FoodPricePage> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height:
-                                    7,
+                                    height: 7,
                                   ),
                                   Text(
                                     'Please enter a food name above to find\nand compare food prices.',
-                                    textAlign:
-                                    TextAlign
-                                        .center,
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 14,
                                       height: 1.5,
@@ -1982,95 +1673,61 @@ class FoodPricePageState extends State<FoodPricePage> {
                             )
                           else if (isLoading)
                             const Padding(
-                              padding:
-                              EdgeInsets
-                                  .all(
+                              padding: EdgeInsets.all(
                                 45,
                               ),
-                              child:
-                              Center(
-                                child:
-                                CircularProgressIndicator(
-                                  color:
-                                  primaryGreen,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: primaryGreen,
                                 ),
                               ),
                             )
-                          else if (foodPriceList
-                                .isEmpty)
+                          else if (foodPriceList.isEmpty)
                               Container(
-                                width:
-                                double.infinity,
-                                padding:
-                                const EdgeInsets
-                                    .symmetric(
-                                  vertical:
-                                  45,
-                                  horizontal:
-                                  20,
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 45,
+                                  horizontal: 20,
                                 ),
                                 decoration:
                                 BoxDecoration(
-                                  color:
-                                  Colors.white,
-                                  borderRadius:
-                                  BorderRadius
-                                      .circular(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(
                                     18,
                                   ),
-                                  border:
-                                  Border.all(
-                                    color:
-                                    const Color(
+                                  border: Border.all(
+                                    color: const Color(
                                       0xFFE3E9E6,
                                     ),
                                   ),
                                 ),
-                                child:
-                                const Column(
+                                child: const Column(
                                   children: [
                                     Icon(
-                                      Icons
-                                          .search_off_outlined,
-                                      size:
-                                      50,
-                                      color:
-                                      Colors
-                                          .black26,
+                                      Icons.search_off_outlined,
+                                      size: 50,
+                                      color: Colors.black26,
                                     ),
                                     SizedBox(
-                                      height:
-                                      12,
+                                      height: 12,
                                     ),
                                     Text(
                                       'No food price found',
-                                      style:
-                                      TextStyle(
-                                        fontSize:
-                                        15,
-                                        fontWeight:
-                                        FontWeight
-                                            .w600,
-                                        color:
-                                        textColor,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: textColor,
                                       ),
                                     ),
                                     SizedBox(
-                                      height:
-                                      5,
+                                      height: 5,
                                     ),
                                     Text(
                                       'Try another food name or change the filters.',
-                                      textAlign:
-                                      TextAlign
-                                          .center,
-                                      style:
-                                      TextStyle(
-                                        fontSize:
-                                        11,
-                                        color:
-                                        Colors
-                                            .black45,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.black45,
                                       ),
                                     ),
                                   ],
@@ -2080,24 +1737,16 @@ class FoodPricePageState extends State<FoodPricePage> {
                       ),
                     ),
                   ),
-                  if (searchController
-                      .text
-                      .trim()
-                      .isNotEmpty &&
-                      !isLoading &&
-                      foodPriceList.isNotEmpty)
+                  if (searchController.text.trim().isNotEmpty && !isLoading && foodPriceList.isNotEmpty)
                     SliverPadding(
-                      padding:
-                      const EdgeInsets.fromLTRB(
+                      padding: const EdgeInsets.fromLTRB(
                         18,
                         0,
                         18,
                         10,
                       ),
-                      sliver:
-                      SliverList(
-                        delegate:
-                        SliverChildBuilderDelegate(
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
                               (
                               context,
                               index,
@@ -2108,19 +1757,12 @@ class FoodPricePageState extends State<FoodPricePage> {
                               ],
                             );
                           },
-                          childCount:
-                          paginatedFoodPriceList
-                              .length,
+                          childCount: paginatedFoodPriceList.length,
                         ),
                       ),
                     ),
 
-                  if (searchController
-                      .text
-                      .trim()
-                      .isNotEmpty &&
-                      !isLoading &&
-                      foodPriceList.isNotEmpty)
+                  if (searchController.text.trim().isNotEmpty && !isLoading && foodPriceList.isNotEmpty)
                     SliverPadding(
                       padding:
                       const EdgeInsets.fromLTRB(
@@ -2129,8 +1771,7 @@ class FoodPricePageState extends State<FoodPricePage> {
                         18,
                         30,
                       ),
-                      sliver:
-                      SliverToBoxAdapter(
+                      sliver: SliverToBoxAdapter(
                         child: Column(
                           children: [
                             Text(
@@ -2140,13 +1781,10 @@ class FoodPricePageState extends State<FoodPricePage> {
                                   '${currentPage * itemsPerPage + paginatedFoodPriceList.length}'
                                   ' of '
                                   '${foodPriceList.length}',
-                              style:
-                              const TextStyle(
+                              style: const TextStyle(
                                 fontSize: 13,
-                                color:
-                                secondaryText,
-                                fontWeight:
-                                FontWeight.w600,
+                                color: secondaryText,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
 
@@ -2157,48 +1795,32 @@ class FoodPricePageState extends State<FoodPricePage> {
                             Row(
                               children: [
                                 Expanded(
-                                  child:
-                                  OutlinedButton.icon(
-                                    onPressed:
-                                    currentPage > 0
+                                  child: OutlinedButton.icon(
+                                    onPressed: currentPage > 0
                                         ? goToPreviousPage
                                         : null,
                                     icon:
                                     const Icon(
-                                      Icons
-                                          .arrow_back_rounded,
+                                      Icons.arrow_back_rounded,
                                       size: 19,
                                     ),
-                                    label:
-                                    const Text(
+                                    label: const Text(
                                       'Previous',
-                                      style:
-                                      TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight:
-                                        FontWeight.w700,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    style:
-                                    OutlinedButton
-                                        .styleFrom(
-                                      foregroundColor:
-                                      primaryGreen,
-                                      padding:
-                                      const EdgeInsets
-                                          .symmetric(
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: primaryGreen,
+                                      padding: const EdgeInsets.symmetric(
                                         vertical: 14,
                                       ),
-                                      side:
-                                      const BorderSide(
-                                        color:
-                                        primaryGreen,
+                                      side: const BorderSide(
+                                        color: primaryGreen,
                                       ),
-                                      shape:
-                                      RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius
-                                            .circular(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
                                           14,
                                         ),
                                       ),
@@ -2211,30 +1833,22 @@ class FoodPricePageState extends State<FoodPricePage> {
                                 ),
 
                                 Container(
-                                  padding:
-                                  const EdgeInsets
-                                      .symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                     horizontal: 14,
                                     vertical: 14,
                                   ),
-                                  decoration:
-                                  BoxDecoration(
+                                  decoration: BoxDecoration(
                                     color: lightGreen,
-                                    borderRadius:
-                                    BorderRadius.circular(
+                                    borderRadius: BorderRadius.circular(
                                       14,
                                     ),
                                   ),
-                                  child:
-                                  Text(
+                                  child: Text(
                                     '${currentPage + 1}/$totalPages',
-                                    style:
-                                    const TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 14,
-                                      color:
-                                      primaryGreen,
-                                      fontWeight:
-                                      FontWeight.w800,
+                                      color: primaryGreen,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
@@ -2244,46 +1858,27 @@ class FoodPricePageState extends State<FoodPricePage> {
                                 ),
 
                                 Expanded(
-                                  child:
-                                  ElevatedButton.icon(
-                                    onPressed:
-                                    currentPage <
-                                        totalPages - 1
-                                        ? goToNextPage
-                                        : null,
-                                    label:
-                                    const Text(
+                                  child: ElevatedButton.icon(
+                                    onPressed: currentPage < totalPages - 1 ? goToNextPage : null,
+                                    label: const Text(
                                       'Next',
-                                      style:
-                                      TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
-                                        fontWeight:
-                                        FontWeight.w700,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    icon:
-                                    const Icon(
-                                      Icons
-                                          .arrow_forward_rounded,
+                                    icon: const Icon(
+                                      Icons.arrow_forward_rounded,
                                       size: 19,
                                     ),
-                                    style:
-                                    ElevatedButton
-                                        .styleFrom(
-                                      backgroundColor:
-                                      primaryGreen,
-                                      foregroundColor:
-                                      Colors.white,
-                                      padding:
-                                      const EdgeInsets
-                                          .symmetric(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryGreen,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
                                         vertical: 14,
                                       ),
-                                      shape:
-                                      RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius
-                                            .circular(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
                                           14,
                                         ),
                                       ),

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -149,26 +148,19 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void updateLocation(
-      LocationData data,
-      ) {
-    if (data.latitude == null ||
-        data.longitude == null) {
-      return;
-    }
+  void updateLocation(LocationData data) {
+    final latitude = data.latitude;
+    final longitude = data.longitude;
 
     setState(() {
-      userLatitude = data.latitude;
-      userLongitude = data.longitude;
+      userLatitude = latitude;
+      userLongitude = longitude;
     });
 
     filterStoresByRadius();
 
     mapController.move(
-      LatLng(
-        userLatitude!,
-        userLongitude!,
-      ),
+      LatLng(latitude, longitude),
       15,
     );
   }

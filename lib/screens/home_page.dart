@@ -634,20 +634,16 @@ class _HomePageState
             ),
             Expanded(
               child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
                     maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                      FontWeight.w700,
+                      fontWeight: FontWeight.w700,
                       color: textColor,
                     ),
                   ),
@@ -657,13 +653,11 @@ class _HomePageState
                   Text(
                     subtitle,
                     maxLines: 1,
-                    overflow:
-                    TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.black54,
-                      fontWeight:
-                      FontWeight.w500,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -686,26 +680,20 @@ class _HomePageState
           color: primaryGreen,
           onRefresh: fetchHomeData,
           child: CustomScrollView(
-            physics:
-            const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverToBoxAdapter(
                 child: Container(
                   width: double.infinity,
-                  padding:
-                  const EdgeInsets.fromLTRB(
+                  padding: const EdgeInsets.fromLTRB(
                     20,
                     15,
                     20,
                     30,
                   ),
-                  decoration:
-                  const BoxDecoration(
-                    gradient:
-                    LinearGradient(
-                      begin:
-                      Alignment.topLeft,
-                      end:
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft, end:
                       Alignment.bottomRight,
                       colors: [
                         primaryGreen,
@@ -714,19 +702,16 @@ class _HomePageState
                     ),
                     borderRadius:
                     BorderRadius.only(
-                      bottomLeft:
-                      Radius.circular(
+                      bottomLeft: Radius.circular(
                         30,
                       ),
-                      bottomRight:
-                      Radius.circular(
+                      bottomRight: Radius.circular(
                         30,
                       ),
                     ),
                   ),
                   child: Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
@@ -736,8 +721,7 @@ class _HomePageState
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                14,
+                              borderRadius: BorderRadius.circular(14,
                               ),
                             ),
                             child: Image.asset(
@@ -750,20 +734,14 @@ class _HomePageState
                           ),
                           const Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'My67Food Price',
-                                  style:
-                                  TextStyle(
-                                    color:
-                                    Colors.white,
-                                    fontSize:
-                                    20,
-                                    fontWeight:
-                                    FontWeight.bold,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
@@ -784,23 +762,16 @@ class _HomePageState
                             height: 42,
                             decoration:
                             BoxDecoration(
-                              color: Colors.white
-                                  .withValues(
-                                alpha: 0.15,
+                              color: Colors.white.withValues(alpha: 0.15,
                               ),
-                              shape:
-                              BoxShape.circle,
+                              shape: BoxShape.circle,
                             ),
-                            child:
-                            IconButton(
-                              onPressed: widget
-                                  .onNotificationTap,
+                            child: IconButton(
+                              onPressed: widget.onNotificationTap,
                               icon:
                               const Icon(
-                                Icons
-                                    .notifications_none_rounded,
-                                color:
-                                Colors.white,
+                                Icons.notifications_none_rounded,
+                                color: Colors.white,
                                 size: 22,
                               ),
                             ),
@@ -812,13 +783,10 @@ class _HomePageState
                       ),
                       const Text(
                         'Find better food prices',
-                        style:
-                        TextStyle(
-                          color:
-                          Colors.white,
+                        style: TextStyle(
+                          color: Colors.white,
                           fontSize: 26,
-                          fontWeight:
-                          FontWeight.w700,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(
@@ -840,15 +808,12 @@ class _HomePageState
                         height: 20,
                       ),
                       Material(
-                        color:
-                        Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
                           17,
                         ),
                         child: InkWell(
-                          borderRadius:
-                          BorderRadius.circular(
+                          borderRadius: BorderRadius.circular(
                             17,
                           ),
                           onTap: () {
@@ -858,19 +823,14 @@ class _HomePageState
                           },
                           child: Container(
                             height: 55,
-                            padding:
-                            const EdgeInsets
-                                .symmetric(
-                              horizontal:
-                              16,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
                             ),
-                            child:
-                            const Row(
+                            child: const Row(
                               children: [
                                 Icon(
                                   Icons.search,
-                                  color:
-                                  primaryGreen,
+                                  color: primaryGreen,
                                 ),
                                 SizedBox(
                                   width: 11,
@@ -878,19 +838,15 @@ class _HomePageState
                                 Expanded(
                                   child: Text(
                                     'Search food prices...',
-                                    style:
-                                    TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.black45,
                                     ),
                                   ),
                                 ),
                                 Icon(
-                                  Icons
-                                      .tune_rounded,
-                                  color:
-                                  Colors
-                                      .black38,
+                                  Icons.tune_rounded,
+                                  color: Colors.black38,
                                   size: 20,
                                 ),
                               ],
@@ -910,40 +866,32 @@ class _HomePageState
               ),
 
               SliverPadding(
-                padding:
-                const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
-                sliver:
-                SliverToBoxAdapter(
+                sliver: SliverToBoxAdapter(
                   child: Row(
                     children: [
                       statisticCard(
                         value: '320+',
-                        title:
-                        'Food Items',
-                        icon: Icons
-                            .restaurant_menu_rounded,
+                        title: 'Food Items',
+                        icon: Icons.restaurant_menu_rounded,
                       ),
                       const SizedBox(
                         width: 9,
                       ),
                       statisticCard(
                         value: '16',
-                        title:
-                        'States',
-                        icon: Icons
-                            .location_on_outlined,
+                        title: 'States',
+                        icon: Icons.location_on_outlined,
                       ),
                       const SizedBox(
                         width: 9,
                       ),
                       statisticCard(
                         value: '463K+',
-                        title:
-                        'Price Records',
-                        icon: Icons
-                            .analytics_outlined,
+                        title: 'Price Records',
+                        icon: Icons.analytics_outlined,
                       ),
                     ],
                   ),
@@ -958,10 +906,8 @@ class _HomePageState
 
               SliverToBoxAdapter(
                 child: sectionHeader(
-                  title:
-                  'Food Categories',
-                  actionText:
-                  'See all',
+                  title: 'Food Categories',
+                  actionText: 'See all',
                   onPressed: () {
                     widget.onSearchTap(
                       null,
@@ -977,21 +923,18 @@ class _HomePageState
               ),
 
               SliverPadding(
-                padding:
-                const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
                 sliver: SliverGrid(
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                     childAspectRatio:
                     1.38,
                   ),
-                  delegate:
-                  SliverChildListDelegate(
+                  delegate: SliverChildListDelegate(
                     [
                       categoryCard(
                         title: 'Sayur-sayuran',
@@ -1047,12 +990,10 @@ class _HomePageState
               ),
 
               SliverPadding(
-                padding:
-                const EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                 ),
-                sliver:
-                SliverToBoxAdapter(
+                sliver: SliverToBoxAdapter(
                   child: Row(
                     children: [
                       const Text(
@@ -1060,27 +1001,20 @@ class _HomePageState
                         style:
                         TextStyle(
                           fontSize: 19,
-                          fontWeight:
-                          FontWeight.w700,
-                          color:
-                          textColor,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
                         ),
                       ),
                       const Spacer(),
-                      if (latestDate
-                          .isNotEmpty)
+                      if (latestDate.isNotEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 11,
                             vertical: 6,
                           ),
-                          decoration:
-                          BoxDecoration(
-                            color:
-                            lightGreen,
-                            borderRadius:
-                            BorderRadius
-                                .circular(
+                          decoration: BoxDecoration(
+                            color: lightGreen,
+                            borderRadius: BorderRadius.circular(
                               20,
                             ),
                           ),
@@ -1107,52 +1041,39 @@ class _HomePageState
               if (isLoading)
                 const SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                    EdgeInsets.all(
+                    padding: EdgeInsets.all(
                       30,
                     ),
                     child: Center(
-                      child:
-                      CircularProgressIndicator(
-                        color:
-                        primaryGreen,
+                      child: CircularProgressIndicator(
+                        color: primaryGreen,
                       ),
                     ),
                   ),
                 )
               else if (latestPrices.isEmpty)
                 SliverPadding(
-                  padding:
-                  const EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                   ),
-                  sliver:
-                  SliverToBoxAdapter(
+                  sliver: SliverToBoxAdapter(
                     child: Container(
-                      width:
-                      double.infinity,
-                      padding:
-                      const EdgeInsets.all(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(
                         25,
                       ),
                       decoration:
                       BoxDecoration(
-                        color:
-                        Colors.white,
-                        borderRadius:
-                        BorderRadius.circular(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
                           18,
                         ),
                       ),
-                      child:
-                      const Text(
+                      child: const Text(
                         'No latest price data found.',
-                        textAlign:
-                        TextAlign.center,
-                        style:
-                        TextStyle(
-                          color:
-                          Colors.black45,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black45,
                         ),
                       ),
                     ),
@@ -1160,13 +1081,11 @@ class _HomePageState
                 )
               else
                 SliverPadding(
-                  padding:
-                  const EdgeInsets.symmetric(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                   ),
                   sliver: SliverList(
-                    delegate:
-                    SliverChildBuilderDelegate(
+                    delegate: SliverChildBuilderDelegate(
                           (
                           context,
                           index,
@@ -1175,8 +1094,7 @@ class _HomePageState
                           latestPrices[index],
                         );
                       },
-                      childCount:
-                      latestPrices.length,
+                      childCount: latestPrices.length,
                     ),
                   ),
                 ),
@@ -1189,10 +1107,8 @@ class _HomePageState
 
               SliverToBoxAdapter(
                 child: sectionHeader(
-                  title:
-                  'Featured Items',
-                  actionText:
-                  'View all',
+                  title: 'Featured Items',
+                  actionText: 'View all',
                   onPressed: () {
                     widget.onSearchTap(
                       null,
@@ -1210,35 +1126,23 @@ class _HomePageState
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 220,
-                  child:
-                  featuredItems.isEmpty
-                      ? const Center(
+                  child: featuredItems.isEmpty ? const Center(
                     child: Text(
                       'No featured items',
-                      style:
-                      TextStyle(
-                        color:
-                        Colors.black45,
+                      style: TextStyle(
+                        color: Colors.black45,
                       ),
                     ),
                   )
                       : SingleChildScrollView(
-                    scrollDirection:
-                    Axis.horizontal,
-                    padding:
-                    const EdgeInsets
-                        .only(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(
                       left: 20,
                       right: 8,
                     ),
                     child: Row(
-                      children:
-                      featuredItems
-                          .map(
-                            (
-                            food,
-                            ) =>
-                            featuredItemCard(
+                      children: featuredItems.map(
+                            (food,) => featuredItemCard(
                               food,
                             ),
                       )
@@ -1256,8 +1160,7 @@ class _HomePageState
 
               SliverToBoxAdapter(
                 child: sectionHeader(
-                  title:
-                  'Quick Access',
+                  title: 'Quick Access',
                 ),
               ),
 
@@ -1272,8 +1175,7 @@ class _HomePageState
                   horizontal: 20,
                 ),
                 sliver: SliverGrid(
-                  gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,

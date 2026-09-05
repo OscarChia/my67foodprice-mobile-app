@@ -2,9 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'local_database_service.dart';
 
 class DatabaseService {
-  final SupabaseClient supabase =
-      Supabase.instance.client;
-
+  final SupabaseClient supabase = Supabase.instance.client;
   final LocalDatabaseService localDatabaseService =
   LocalDatabaseService();
 
