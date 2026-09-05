@@ -876,8 +876,7 @@ class _TrendPageState extends State<TrendPage> {
             'Select Food Item',
             style: TextStyle(
               fontSize: 14,
-              fontWeight:
-              FontWeight.w700,
+              fontWeight: FontWeight.w700,
               color: textColor,
             ),
           ),
@@ -895,8 +894,7 @@ class _TrendPageState extends State<TrendPage> {
               style:
               const TextStyle(
                 fontSize: 13,
-                color:
-                Colors.black45,
+                color: Colors.black45,
               ),
             ),
             decoration:
@@ -981,11 +979,8 @@ class _TrendPageState extends State<TrendPage> {
                     style:
                     const TextStyle(
                       fontSize: 13,
-                      color:
-                      textColor,
-                      fontWeight:
-                      FontWeight
-                          .w500,
+                      color: textColor,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 );
@@ -1085,14 +1080,9 @@ class _TrendPageState extends State<TrendPage> {
                   child: Text(
                     period,
                     style: TextStyle(
-                      color: selected
-                          ? Colors.white
-                          : Colors
-                          .black54,
+                      color: selected ? Colors.white : Colors.black54,
                       fontSize: 13,
-                      fontWeight:
-                      FontWeight
-                          .w600,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -1251,9 +1241,7 @@ class _TrendPageState extends State<TrendPage> {
                       style:
                       const TextStyle(
                         fontSize: 14,
-                        fontWeight:
-                        FontWeight
-                            .w600,
+                        fontWeight: FontWeight.w600,
                         color: textColor,
                       ),
                     ),
@@ -1266,9 +1254,7 @@ class _TrendPageState extends State<TrendPage> {
                       const TextStyle(
                         color: textColor,
                         fontSize: 27,
-                        fontWeight:
-                        FontWeight
-                            .bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(
@@ -1316,16 +1302,9 @@ class _TrendPageState extends State<TrendPage> {
                           '${percentage > 0 ? '+' : ''}'
                           '${percentage.toStringAsFixed(1)}%',
                       style: TextStyle(
-                        color: isUp
-                            ? Colors.red
-                            : isDown
-                            ? primaryGreen
-                            : Colors
-                            .grey,
+                        color: isUp ? Colors.red : isDown ? primaryGreen : Colors.grey,
                         fontSize: 13,
-                        fontWeight:
-                        FontWeight
-                            .bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -1336,14 +1315,9 @@ class _TrendPageState extends State<TrendPage> {
                     '${change > 0 ? '+' : change < 0 ? '-' : ''}'
                         'RM ${change.abs().toStringAsFixed(2)}',
                     style: TextStyle(
-                      color: isUp
-                          ? Colors.red
-                          : isDown
-                          ? primaryGreen
-                          : Colors.grey,
+                      color: isUp ? Colors.red : isDown ? primaryGreen : Colors.grey,
                       fontSize: 11,
-                      fontWeight:
-                      FontWeight.w600,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -1369,8 +1343,7 @@ class _TrendPageState extends State<TrendPage> {
                 'No trend data available',
                 style:
                 TextStyle(
-                  color:
-                  Colors.grey,
+                  color: Colors.grey,
                   fontSize: 13,
                 ),
               ),
@@ -1432,9 +1405,7 @@ class _TrendPageState extends State<TrendPage> {
                       style:
                       const TextStyle(
                         fontSize: 12,
-                        fontWeight:
-                        FontWeight
-                            .w600,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -1443,11 +1414,8 @@ class _TrendPageState extends State<TrendPage> {
                     style:
                     const TextStyle(
                       fontSize: 13,
-                      color:
-                      primaryGreen,
-                      fontWeight:
-                      FontWeight
-                          .bold,
+                      color: primaryGreen,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -1475,8 +1443,7 @@ class _TrendPageState extends State<TrendPage> {
             'Price Summary',
             style: TextStyle(
               fontSize: 18,
-              fontWeight:
-              FontWeight.w700,
+              fontWeight: FontWeight.w700,
               color: textColor,
             ),
           ),
@@ -1566,8 +1533,7 @@ class _TrendPageState extends State<TrendPage> {
             const TextStyle(
               color: Colors.black54,
               fontSize: 11,
-              fontWeight:
-              FontWeight.w500,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(
@@ -1578,8 +1544,7 @@ class _TrendPageState extends State<TrendPage> {
             style: TextStyle(
               color: valueColor,
               fontSize: 15,
-              fontWeight:
-              FontWeight.bold,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -1625,9 +1590,7 @@ class _TrendPageState extends State<TrendPage> {
                     color:
                     textColor,
                     fontSize: 17,
-                    fontWeight:
-                    FontWeight
-                        .w700,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -1674,8 +1637,7 @@ class _TrendPageState extends State<TrendPage> {
                   'No monthly item data available',
                   style:
                   TextStyle(
-                    color:
-                    Colors.grey,
+                    color: Colors.grey,
                     fontSize: 12,
                   ),
                 ),
@@ -2089,9 +2051,7 @@ class TrendChartPainter
               0xFF555555,
             ),
             fontSize: 10,
-            fontWeight:
-            FontWeight
-                .w500,
+            fontWeight: FontWeight.w500,
           ),
         ),
         textDirection:
@@ -2246,9 +2206,7 @@ class TrendChartPainter
                 0xFF555555,
               ),
               fontSize: 10,
-              fontWeight:
-              FontWeight
-                  .w500,
+              fontWeight: FontWeight.w500,
             ),
           ),
           textDirection:
@@ -2380,12 +2338,9 @@ class TrendChartPainter
         text: label,
         style:
         const TextStyle(
-          color:
-          _TrendPageState
-              .textColor,
+          color: _TrendPageState.textColor,
           fontSize: 11,
-          fontWeight:
-          FontWeight.bold,
+          fontWeight: FontWeight.bold,
         ),
       ),
       textDirection:
@@ -2411,8 +2366,7 @@ class TrendChartPainter
           _TrendPageState
               .primaryGreen,
           fontSize: 12,
-          fontWeight:
-          FontWeight.w700,
+          fontWeight: FontWeight.w700,
         ),
       ),
       textDirection:

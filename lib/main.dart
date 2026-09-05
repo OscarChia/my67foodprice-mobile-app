@@ -3,11 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/login_page.dart';
 import 'screens/splash_page.dart';
 
-const String supabaseUrl =
-    'https://dokqvrymoergmzitjadq.supabase.co';
+const String supabaseUrl = 'https://dokqvrymoergmzitjadq.supabase.co';
 
-const String supabaseKey =
-    'sb_publishable_mw3SPCRiHq0XQNCdalZ8ug_jKzNooHc';
+const String supabaseKey = 'sb_publishable_mw3SPCRiHq0XQNCdalZ8ug_jKzNooHc';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
