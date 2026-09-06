@@ -123,10 +123,8 @@ class SavedPageState extends State<SavedPage> {
         newPriceAlertsEnabled = profileData['price_alerts'] == true;
 
         newAlertThreshold = double.tryParse(
-              profileData['alert_threshold']
-                  .toString(),
-            ) ??
-                5;
+              profileData['alert_threshold'].toString(),
+            ) ?? 5;
       }
 
       final savedData = await databaseService.getUserSavedItems();
@@ -175,8 +173,7 @@ class SavedPageState extends State<SavedPage> {
         }
       }
 
-      final Map<int, Map<String, dynamic>>
-      priceMap = {};
+      final Map<int, Map<String, dynamic>>priceMap = {};
 
       for (final price in priceData) {
         final code = int.tryParse(

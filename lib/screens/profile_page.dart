@@ -12,8 +12,7 @@ class ProfilePage extends StatefulWidget {
   });
 
   @override
-  State<ProfilePage> createState() =>
-      ProfilePageState();
+  State<ProfilePage> createState() => ProfilePageState();
 }
 
 class ProfilePageState extends State<ProfilePage> {
@@ -62,8 +61,7 @@ class ProfilePageState extends State<ProfilePage> {
     });
 
     try {
-      final user =
-      databaseService.getCurrentUser();
+      final user = databaseService.getCurrentUser();
 
       if (user == null) {
         setState(() {
@@ -73,66 +71,29 @@ class ProfilePageState extends State<ProfilePage> {
         return;
       }
 
-      email =
-          user.email ?? '';
+      email = user.email ?? '';
 
-      final profileData =
-      await databaseService.getProfile();
+      final profileData = await databaseService.getProfile();
 
       if (profileData != null) {
-        userName =
-            profileData['name']
-                ?.toString() ??
-                '';
+        userName = profileData['name']?.toString() ?? '';
+        gender = profileData['gender']?.toString() ?? '';
+        dateOfBirth = profileData['date_of_birth']?.toString() ?? '';
+        priceAlerts = profileData['price_alerts'] == true;
 
-        gender =
-            profileData['gender']
-                ?.toString() ??
-                '';
+        alertThreshold = double.tryParse(
+          profileData['alert_threshold'].toString(),
+        ) ?? 5;
 
-        dateOfBirth =
-            profileData['date_of_birth']
-                ?.toString() ??
-                '';
-
-        priceAlerts =
-            profileData['price_alerts'] ==
-                true;
-
-        alertThreshold =
-            double.tryParse(
-              profileData[
-              'alert_threshold']
-                  .toString(),
-            ) ??
-                5;
-
-        savedItemAlert =
-            profileData[
-            'saved_item_alert'] ==
-                true;
+        savedItemAlert = profileData['saved_item_alert'] == true;
       } else {
-        final metadata =
-            user.userMetadata;
-
-        userName =
-            metadata?['name']
-                ?.toString() ??
-                '';
-
-        gender =
-            metadata?['gender']
-                ?.toString() ??
-                '';
-
-        dateOfBirth =
-            metadata?['date_of_birth']
-                ?.toString() ??
-                '';
+        final metadata = user.userMetadata;
+        userName = metadata?['name']?.toString() ?? '';
+        gender = metadata?['gender']?.toString() ?? '';
+        dateOfBirth = metadata?['date_of_birth']?.toString() ?? '';
       }
 
-      editNameController.text =
-          userName;
+      editNameController.text = userName;
 
       setState(() {
         isLoading = false;
@@ -149,8 +110,7 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> getImageFromGallery() async {
-    final pickedFile =
-    await picker.pickImage(
+    final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
     );
 
@@ -159,10 +119,9 @@ class ProfilePageState extends State<ProfilePage> {
     }
 
     setState(() {
-      _image =
-          File(
-            pickedFile.path,
-          );
+      _image = File(
+        pickedFile.path,
+      );
     });
 
     await savePicture();
@@ -174,28 +133,23 @@ class ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      final user =
-      databaseService.getCurrentUser();
+      final user = databaseService.getCurrentUser();
 
       if (user == null) {
         return;
       }
 
-      final appDocDir =
-      await getApplicationDocumentsDirectory();
-
-      final newImagePath =
-          '${appDocDir.path}/profile_${user.id}.png';
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final newImagePath = '${appDocDir.path}/profile_${user.id}.png';
 
       await _image!.copy(
         newImagePath,
       );
 
       setState(() {
-        _image =
-            File(
-              newImagePath,
-            );
+        _image = File(
+          newImagePath,
+        );
       });
 
       showMessage(
@@ -209,28 +163,22 @@ class ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> loadProfileImage() async {
-    final user =
-    databaseService.getCurrentUser();
+    final user = databaseService.getCurrentUser();
 
     if (user == null) {
       return;
     }
 
-    final appDocDir =
-    await getApplicationDocumentsDirectory();
+    final appDocDir = await getApplicationDocumentsDirectory();
+    final imagePath = '${appDocDir.path}/profile_${user.id}.png';
 
-    final imagePath =
-        '${appDocDir.path}/profile_${user.id}.png';
-
-    final file =
-    File(
+    final file = File(
       imagePath,
     );
 
     if (await file.exists()) {
       setState(() {
-        _image =
-            file;
+        _image = file;
       });
     }
   }
@@ -331,14 +279,12 @@ class ProfilePageState extends State<ProfilePage> {
       bool value,
       ) async {
     try {
-      await databaseService
-          .updateSavedItemAlert(
+      await databaseService.updateSavedItemAlert(
         value,
       );
 
       setState(() {
-        savedItemAlert =
-            value;
+        savedItemAlert = value;
       });
     } catch (e) {
       showMessage(
@@ -453,8 +399,7 @@ class ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
-          content:
-          Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -542,8 +487,7 @@ class ProfilePageState extends State<ProfilePage> {
           borderRadius: BorderRadius.circular(
             14,
           ),
-          border:
-          Border.all(
+          border: Border.all(
             color: isSelected
                 ? primaryGreen
                 : const Color(
@@ -554,8 +498,7 @@ class ProfilePageState extends State<ProfilePage> {
                 : 1,
           ),
         ),
-        child:
-        Row(
+        child: Row(
           children: [
             Container(
               width: 42,
@@ -672,8 +615,7 @@ class ProfilePageState extends State<ProfilePage> {
       await databaseService.logoutUser();
       navigator.pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) =>
-          const LoginPage(),
+          builder: (context) => const LoginPage(),
         ),
             (route) => false,
       );
@@ -692,11 +634,8 @@ class ProfilePageState extends State<ProfilePage> {
   void showMessage(
       String message,
       ) {
-    ScaffoldMessenger.of(context)
-        .hideCurrentSnackBar();
-
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
